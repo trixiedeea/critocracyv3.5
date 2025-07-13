@@ -11,26 +11,6 @@ const playerCountConfirmButton = document.getElementById('player-Count-Confirm-B
 
 // Function to update AI player options based on the number of human players selected
 function updateAIOptions() {
-    if (DEBUG_MODE) {
-        // In debug mode, allow 0-6 for both human and AI players independently
-        humanPlayerCount.innerHTML = '';
-        aiPlayerCount.innerHTML = '';
-        for (let i = 0; i <= 6; i++) {
-            const humanOption = document.createElement('option');
-            humanOption.value = i;
-            humanOption.textContent = `${i} Human`;
-            humanPlayerCount.appendChild(humanOption);
-
-            const aiOption = document.createElement('option');
-            aiOption.value = i;
-            aiOption.textContent = `${i} AI`;
-            aiPlayerCount.appendChild(aiOption);
-        }
-        // Set default values if not already set
-        if (!humanPlayerCount.value) humanPlayerCount.value = 1;
-        if (!aiPlayerCount.value) aiPlayerCount.value = 5;
-        return;
-    }
     const humanPlayers = parseInt(humanPlayerCount.value);
     
     // Clear existing AI options
