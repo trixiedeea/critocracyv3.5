@@ -899,6 +899,16 @@ export async function showCard(card, deckType, player, onComplete) {
 };
 
 // Hide card popover
+// Ensures the board redraws after card popover is hidden (for both AI and human turns)
+function redrawCanvas() {
+    // Dispatch the redrawCanvas event globally; listener in board.js will handle redraw
+    const canvas = document.getElementById('board-Canvas'); // Use the main board canvas
+    if (canvas) {
+        const event = new CustomEvent('redrawCanvas');
+        document.dispatchEvent(event);
+    }
+}
+
 export function hideCard() {
     console.log('---------hideCard---------')
     const { ui } = state;
@@ -939,17 +949,6 @@ export function hideCard() {
     
     // Stop any deck highlighting
     clearDeckHighlights();
-    
-    // Ensure canvas is redrawn
-    function redrawCanvas() {
-        const canvas = document.getElementById('gameCanvas');
-        if (canvas) {
-            const ctx = canvas.getContext('2d');
-            // Trigger a redraw by dispatching a custom event that the board will listen for
-            const event = new CustomEvent('redrawCanvas');
-            document.dispatchEvent(event);
-        }
-    }
 };
 
 /**

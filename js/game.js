@@ -71,28 +71,12 @@ const DEBUG_MODE = true;
  * @param {Array} playerConfigs - Array of player configurations
  * @param {Array} turnOrder - Array of player IDs in turn order
  * @param {Object} options - Additional options
- * @param {boolean} [options.debugMode=false] - Enable debug mode with a single AI player
+ * @param {boolean} [options.debugMode=false] - Enable debug mode
  */
 export function startGame(playerConfigs, turnOrder, { debugMode = false } = {}) {
     console.log('[Game] startGame called with:', { playerConfigs, turnOrder, debugMode });
     
-    if (debugMode || DEBUG_MODE) {
-        console.log('[Game] Debug mode enabled - using single AI player');
-        playerConfigs = [{
-            id: 'ai1',
-            name: 'AI Player',
-            isHuman: false,
-            color: 'red',
-            role: 'ai',
-            startingResources: {
-                money: 10,
-                knowledge: 5,
-                influence: 5,
-                resources: 10
-            }
-        }];
-        turnOrder = ['ai1'];
-    } else if (!playerConfigs || !turnOrder || playerConfigs.length === 0 || turnOrder.length === 0) {
+    if (!playerConfigs || !turnOrder || playerConfigs.length === 0 || turnOrder.length === 0) {
         console.error('[Game] startGame called with invalid arguments.');
         return;
     }

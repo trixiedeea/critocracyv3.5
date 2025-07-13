@@ -5,18 +5,7 @@ import { initializeUI } from './ui.js';
 import { state, updateGameState } from './state.js';
 
 // Import initialization screen modules
-import './startScreen.js';
-import './playerCountScreen.js';
-import './roleSelectScreen.js';
-import './turnOrderScreen.js';
-import './ui.js';
-import './state.js';
-import './players.js';
-import './board-data.js';
-import './board.js';
-import './cards.js';
-import './animations.js';
-import './game.js';
+
 
 export const DEBUG_MODE = false;
 
@@ -221,6 +210,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
+
+import './startScreen.js';
+import './playerCountScreen.js';
+import './roleSelectScreen.js';
+import './turnOrderScreen.js';
+import './ui.js';
+import './state.js';
+import './players.js';
+import './board-data.js';
+import './board.js';
+import './cards.js';
+import './animations.js';
+import './game.js';
 
 // Initialize UI state when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {

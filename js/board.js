@@ -1,4 +1,4 @@
-import { state, updateGameState, getCurrentPlayer } from './state.js';
+import { state, updateGameState } from './state.js';
 
 import { 
     ageOfExpansionPath, ageOfResistancePath, ageOfReckoningPath, ageOfLegacyPath, 
@@ -14,12 +14,17 @@ import { handleSpaceAction, handleEndTurn } from './game.js';
 
 // ===== Board Constants =====
 const BOARD_IMAGE_PATH = './assets/board.png';
-const TOKEN_DIR = './assets/tokens'; 
+const TOKEN_DIR = './critocracyv3.5/assets/tokens'; 
 const TOKEN_SIZE = 40; 
 // Removed SPACE_RADIUS, choicepoint_RADIUS as clicks/drawing might use different logic
 
 // ===== Debug Mode =====
 const DEBUG_MODE = false; // Set to true for debug visualization
+
+// Listen for redrawCanvas custom event and redraw the board when triggered
+// This ensures that any part of the game can trigger a board redraw by dispatching this event
+// (e.g., after closing a card popover)
+document.addEventListener('redrawCanvas', drawBoard);
 
 // ===== Board State =====
 export const boardState = {
