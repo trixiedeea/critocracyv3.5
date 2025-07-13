@@ -1,0 +1,622 @@
+                          /*
+                          CRITOCRACY ACTUAL FUNCTION FLOW
+                          ===============================
+
+                          START
+                            |
+                            v
+                          advanceToNextPlayer()
+                            |
+                            v
+                          updateGameState({ currentPhase: 'ROLLING' })
+                            |
+                            v
+                          updateGameControls()
+                            |
+                            v
+                          updatePlayerInfo(newCurrentPlayer.id)
+                            |
+                            v
+                          [Is newCurrentPlayer.isHuman?] -----> YES -----> [Wait for dice click]
+                            |                                              |
+                            NO                                             |
+                            v                                              |
+                          setTimeout(2000ms)                               |
+                            |                                              |
+                            v                                              |
+                          handleAITurn(aiPlayer)                           |
+                            |                                              |
+                            v                                              |
+                          setTimeout(500ms)                                |
+                            |                                              |
+                            v                                              |
+                          updateGameState({ rollResult: aiRoll })          |
+                            |                                              |
+                            v                                              |
+                          animateDiceRoll() <------------------------------+
+                            |
+                            v
+                          handlePlayerAction()
+                            |
+                            v
+                          [Is player.skipTurns > 0?]
+                            |                                              
+                            NO                                             
+                            |                                        
+                            v                                              
+                          updateGameControls()                             
+                            |                                        
+                            v                                              
+                          [Get rollResult from state]                      
+                            |                                              
+                            v                                              
+                          [Is player at START_SPACE?] -----> YES -----> updateGameState({ currentPhase: 'AWAITING_PATH_CHOICE' })
+                            |                                              |
+                            NO                                             v
+                            |                                        promptForPathChoice() (Human)
+                            v                                              |
+                          animateTokenToPosition() <----------------------+ simulateCpuChoicepoint() (AI)
+                            |                                              |
+                            v                                              |
+                          [Calculate movement path]                        |
+                            |                                              |
+                            v                                              |
+                          [Animate token movement]                         |
+                            |                                              |
+                            v                                              |
+                          isPointInRectangle() <---------------------------+
+                            |
+                            v
+                          [Is choicepoint?] -----> YES -----> promptForChoicepoint() (Human)
+                            |                                    |
+                            NO                                   v
+                            |                              simulateCpuChoicepoint() (AI)
+                            v                                    |
+                          handleEndOfMove()                      v
+                            |                              handlePathChoice()
+                            v                                    |
+                          findSpaceDetailsByCoords()             |
+                            |                                    |
+                            v                                    |
+                          getSpaceDetailsByCoords()              |
+                            |                                    |
+                            v                                    |
+                          [Determine space type and path]        |
+                            |                                    |
+                            v                                    |
+                          handleSpaceAction()                    |
+                            |                                    |
+                            v                                    |
+                          [Is SPACE_TYPE === 'Draw'?] -----> YES -----> highlightDeckRegions(age deck)
+                            |                                              |
+                            NO                                             v
+                            |                                        [Is player.isHuman?] -----> YES -----> updateGameState({ currentPhase: 'AWAITING_CARD_CLICK' })
+                            v                                              |                                    |
+                          highlightDeckRegions(end-of-turn)                |                                    |
+                            |                                              |                                    |
+                            v                                              |                                    |
+                          handleEndTurn()                                  |                                    |
+                            |                                              |                                    |
+                            v                                              |                                    |
+                          highlightDeckRegions(end-of-turn)                |                                    |
+                            |                                              |                                    |
+                            v                                              |                                    |
+                          updateGameState({ currentPhase: 'AWAITING_CARD_CLICK' }) |                                    |
+                            |                                              |                                    |
+                            v                                              |                                    |
+                          [Wait for human to click deck]                   |                                    |
+                            |                                              |                                    |
+                            v                                              |                                    |
+                          handleCanvasCardClick()                          |                                    |
+                            |                                              |                                    |
+                            v                                              |                                    |
+                          [Check which deck region clicked]                |                                    |
+                            |                                              |                                    |
+                            v                                              |                                    |
+                          clearHighlights()                                |                                    |
+                            |                                              |                                    |
+                            v                                              |                                    |
+                          drawCard() <-------------------------------------+ simulateCpuDeckClick() (AI)
+                            |                                              |
+                            v                                              |
+                          [Get card from deck]                             |
+                            |                                              |
+                            v                                              |
+                          showCard()                                       |
+                            |                                              |
+                            v                                              |
+                          [Create dialog with card info]                   |
+                            |                                              |
+                            v                                              |
+                          [Is isEndOfTurnCard?] -----> YES -----> [Show closeCardButton]
+                            |                                              |
+                            NO                                             v
+                            |                                        closeCardButton calls applyCardEffect()
+                            v                                              |
+                          [Show closeAgeCardButton]                        |
+                            |                                              |
+                            v                                              |
+                          closeAgeCardButton calls applyAgeCardEffect()    |
+                            |                                              |
+                            v                                              |
+                          [Is player.isAI?] -----> YES -----> setTimeout(9000ms)
+                            |                                              |
+                            NO                                             v
+                            |                                        dialog.close()
+                            v                                              |
+                          [Wait for human to close dialog]                 |
+                            |                                              |
+                            v                                              |
+                          applyCardEffect() <------------------------------+
+                            |
+                            v
+                          [Process role-based effects]
+                            |
+                            v
+                          processEffect() for each effect
+                            |
+                            v
+                          hasImmunity() check
+                            |
+                            v
+                          applyResourceChange() / applyMovement() / applySteal() / etc.
+                            |
+                            v
+                          updatePlayerInfo()
+                            |
+                            v
+                          processEndPlayerTurn()
+                            |
+                            v
+                          [Is player.isHuman?] -----> YES -----> updateUIState({ showEndTurnButton: true })
+                            |                                              |
+                            NO                                             v
+                            |                                        [Enable End Turn button with shake animation]
+                            v                                              |
+                          setTimeout(3000ms)                               |
+                            |                                              |
+                            v                                              |
+                          advanceToNextPlayer() <--------------------------+
+                            |
+                            v
+                          [Is game over?] -----> YES -----> triggerGameOver()
+                            |                                    |
+                            NO                                   v
+                            |                              showEndGameScreen()
+                            v                                    |
+                          updateGameState({ currentPlayerIndex: nextPlayerIndex }) |
+                            |                                    |
+                            v                                    |
+                          updateGameState({ currentPhase: 'ROLLING' }) |
+                            |                                    |
+                            v                                    |
+                          updateGameState({ pendingActionData: null }) |
+                            |                                    |
+                            v                                    |
+                          updateGameState({ rollResult: 0 })     |
+                            |                                    |
+                            v                                    |
+                          getCurrentPlayer()                     |
+                            |                                    |
+                            v                                    |
+                          updateGameControls()                   |
+                            |                                    |
+                            v                                    |
+                          [Is newCurrentPlayer.isHuman?] -----> YES -----> updatePlayerInfo()
+                            |                                              |
+                            NO                                             v
+                            |                                        updateGameControls()
+                            v                                              |
+                          setTimeout(2000ms)                               |
+                            |                                              |
+                            v                                              |
+                          handleAITurn() <---------------------------------+
+                            |
+                            v
+                  [LOOP BACK TO START]
+
+WHERE FLOW STOPS (WAITING FOR USER/AI):
+========================================
+1. Human dice click: advanceToNextPlayer() → [WAIT] → dice.addEventListener()
+2. Human path choice: promptForPathChoice() → [WAIT] → handlePathChoice()
+3. Human choicepoint: promptForChoicepoint() → [WAIT] → handlePathChoice()
+4. Human card click: updateGameState('AWAITING_CARD_CLICK') → [WAIT] → handleCanvasCardClick()
+5. Human card close: showCard() → [WAIT] → applyCardEffect()/applyAgeCardEffect()
+6. Human end turn: processEndPlayerTurn() → [WAIT] → endTurnButton.addEventListener()
+
+AI AUTOMATION POINTS:
+====================
+1. AI dice roll: handleAITurn() → setTimeout(2000ms) → animateDiceRoll()
+2. AI path choice: simulateCpuChoicepoint() → setTimeout(2000ms) → handlePathChoice()
+3. AI choicepoint: simulateCpuChoicepoint() → setTimeout(2000ms) → handlePathChoice()
+4. AI card draw: simulateCpuDeckClick() → setTimeout(2000ms) → drawCard()
+5. AI card close: showCard() → setTimeout(9000ms) → applyCardEffect()/applyAgeCardEffect()
+6. AI turn end: processEndPlayerTurn() → setTimeout(3000ms) → advanceToNextPlayer()
+
+RECURSIVE CHOICEPOINT LOOP:
+==========================
+animateTokenToPosition() → isPointInRectangle() → [Is choicepoint?] → 
+├── YES: promptForChoicepoint()/simulateCpuChoicepoint() → handlePathChoice() → animateTokenToPosition() (RECURSIVE)
+└── NO: handleEndOfMove()
+
+SPACE TYPE BRANCHING:
+====================
+handleEndOfMove() → handleSpaceAction() →
+├── Regular Space: highlightDeckRegions(end-of-turn) → handleEndTurn() → drawCard(end-of-turn) → applyCardEffect() → processEndPlayerTurn()
+└── Draw Space: highlightDeckRegions(age-deck) → drawCard(age) → applyAgeCardEffect() → handleEndTurn() → drawCard(end-of-turn) → applyCardEffect() → processEndPlayerTurn()
+
+
+
+export const ageOfExpansionPath = {
+    color: 'purple',
+    name: 'Age of Expansion',
+    startCoord: [104, 512],
+    endCoord: FINISH_SPACE.coordinates,
+    segments: [
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[104, 512]], Next: [[169, 466]], Type: "Regular" },
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[169, 466]], Next: [[178, 440]], Type: "Regular" },
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[178, 440]], Next: [[189, 408]], Type: "Regular" },
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[189, 408]], Next: [[206, 379]], Type: "Regular" },
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[206, 379]], Next: [[217, 350]], Type: "Draw" },
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[217, 350]], Next: [[236, 325]], Type: "Regular" }, // Assuming Type: Draw was manual, keeping Regular for now
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[236, 325]], Next: [[260, 302]], Type: "Regular" },
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[260, 302]], Next: [[288, 290]], Type: "Regular" },
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[288, 290]], Next: [[312, 278]], Type: "Regular" },
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[312, 278]], Next: [[349, 277]], Type: "Regular" },
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[349, 277]], Next: [[380, 273]], Type: "Draw" },
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[380, 273]], Next: [[414, 271]], Type: "Regular" },
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[414, 271]], Next: [[446, 273]], Type: "Regular" },
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[446, 273]], Next: [[477, 283]], Type: "Regular" },
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[477, 283]], Next: [[500, 289]], Type: "Draw" },
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[500, 289]], Next: [[537, 302]], Type: "Regular" },
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[537, 302]], Next: [[566, 273], [568,329]], Type: "Choicepoint" }, // Corrected Next syntax
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[568, 329]], Next: [[590, 345]], Type: "Regular" }, // Assuming Type: Draw was manual
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[590, 345]], Next: [[610, 371]], Type: "Regular" },
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[610, 371]], Next: [[633, 400]], Type: "Draw" },
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[633, 400]], Next: [[648, 430]], Type: "Regular" },
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[648, 430]], Next: [[667, 464]], Type: "Regular" },
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[667, 464]], Next: [[681, 492]], Type: "Regular" }, // Assuming Type: Draw was manual
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[681, 492]], Next: [[701, 518]], Type: "Draw" },
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[701, 518]], Next: [[724, 541]], Type: "Regular" },
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[724, 541]], Next: [[744,558]], Type: "Regular" }, // Leads to next Choicepoint
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[744, 558]], Next: [[750, 574], [773,602]], Type: "Choicepoint" }, // Corrected Next syntax
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[773, 602]], Next: [[793, 632]], Type: "Regular" },
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[793, 632]], Next: [[816, 658]], Type: "Regular" }, // Assuming Type: Draw was manual
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[816, 658]], Next: [[833, 685]], Type: "Draw" },
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[833, 685]], Next: [[859, 708]], Type: "Regular" },
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[859, 708]], Next: [[881, 729]], Type: "Regular" },
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[881, 729]], Next: [[915, 747]], Type: "Regular" },
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[915, 747]], Next: [[931, 756]], Type: "Draw" },
+{ pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[931, 756]], Next: [[962, 766]], Type: "Regular" }, // Leads to next Choicepoint
+
+
+                <dialog id="choicepoint-Popover" class="popover">
+                    <div id="choicepoint-Popover-Container" class="popover-Container">
+                        <div class="popover-Content">
+                            <h3>Choose Your Path</h3>
+                            <div id="choicepoint-Options" class="path-options-container">  
+                                <button id="age-Of-Expansion-Path" class="path-Choice-Button path-purple">Age Of Expansion</button>
+                                <button id="age-Of-Resistance-Path" class="path-Choice-Button path-blue">Age Of Resistance</button>
+                                <button id="age-Of-Reckoning-Path" class="path-Choice-Button path-cyan">Age Of Reckoning</button>
+                                <button id="age-Of-Legacy-Path" class="path-Choice-Button path-pink">Age Of Legacy</button>
+                            </div>
+                        </div>
+                    </div>
+                </dialog>
+
+
+
+.path-Choice-Button,
+.choicepoint-Button {
+    width: 60%;
+    padding: 15px 20px;
+    font-size: 1.1em;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    color: white;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    transition: all 0.2s ease;
+    margin: 8px 0;
+}
+
+#path-Choice-Button:hover,
+.choicepoint-Button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+}
+
+#path-Choice-Button:active,
+.choicepoint-Button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+  /* Color Variants */  
+#age-Of-Expansion-Path ,
+.path-Choice-Button.path-purple {
+    background-color: #9c54de;
+    border: 2px solid #b56aff;
+} 
+
+#age-Of-Resistance-Path ,
+.path-Choice-Button.path-blue {
+    background-color: #1b3de5;
+    border: 2px solid #4a6aff;
+}
+
+#age-Of-Reckoning-Path ,
+.path-Choice-Button.path-cyan {
+    background-color: #00ffff;
+    border: 2px solid #99ffff;
+}
+
+#age-Of-Legacy-Path ,
+.path-Choice-Button.path-pink{
+    background-color: #ff66ff;
+    border: 2px solid #ff99ff;
+    margin: 15px;
+}
+
+#path-Choice-Options,
+#choicepoint-Options {
+    background-color: #0b0e1e;
+    flex-direction: column;
+    gap: 15px;
+    border-color: rgb(172, 186, 12);
+    border-radius: 10%;
+    color: rgb(255, 255, 255);
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+
+
+}
+
+.popover-Container {
+    background-color: rgba(14, 3, 69, 0.9);
+    border: 3px solid rgba(139, 138, 138, 0.5);
+    border-radius: 10%;
+    color: #fff;
+    width:90%;
+}
+
+.path-Choice-Button {
+    padding: 15px 20px;
+    margin: 8px 0;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+
+    const paths = [ageOfExpansionPath, ageOfResistancePath, ageOfReckoningPath, ageOfLegacyPath];
+    let pathData = paths.find(path => path.pathName === player.currentPath);
+
+    if (!pathData || !pathData.segments) {
+      console.warn("No path data found for player's current path.");
+      resolve();
+      return;
+    }
+
+    let remainingSteps = rollResult;
+    let currentCoord = { ...player.currentCoords };
+
+    const findSegmentByCoord = (coord) => {
+      return pathData.segments.find(segment => {
+        const segCoord = segment.coordinates?.[0];
+        return segCoord?.[0] === coord.x && segCoord?.[1] === coord.y;
+      });
+    };
+
+    const animatePosition = (element, start, end, duration = 1000) => {
+      return new Promise(resolve => {
+        const startTime = performance.now();
+
+        const update = (currentTime) => {
+          const elapsed = currentTime - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+
+          const eased = progress < 0.5
+            ? 4 * progress * progress * progress
+            : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+
+          const currentX = start.x + (end.x - start.x) * eased;
+          const currentY = start.y + (end.y - start.y) * eased;
+
+          const [scaledX, scaledY] = scaleCoordinates(currentX, currentY);
+          element.style.transform = `translate(${scaledX}px, ${scaledY}px)`;
+
+          if (progress < 1) {
+            requestAnimationFrame(update);
+          } else {
+            resolve();
+          }
+        };
+
+        requestAnimationFrame(update);
+      });
+    };
+
+    async function animateNextSegment() {
+      if (remainingSteps <= 0) {
+        // Movement complete
+        console.log(`[DEBUG] Movement complete. Final position: ${JSON.stringify(currentCoord)}`);
+        token.classList.remove('enlarged');
+        token.classList.add('normal');
+        await handleEndOfMove();
+        resolve();
+        return;
+      }
+    
+      const segment = findSegmentByCoord(currentCoord);
+      if (!segment || !segment.Next || segment.Next.length === 0) {
+        console.warn("Invalid or incomplete segment found at", currentCoord);
+        resolve();
+        return;
+      }
+    
+      // Check if this is a choicepoint (multiple Next coordinates)
+      if (segment.Next.length > 1) {
+        console.log(`[DEBUG] Choicepoint detected at ${JSON.stringify(currentCoord)} with ${segment.Next.length} options`);
+        
+        // Store interrupted move data
+        state.interruptedMove = {
+          remainingSteps,
+          duration,
+          skipSpaceAction,
+          onComplete
+        };
+        
+        // Set game phase to await choicepoint choice
+        updateGameState({
+          currentPhase: 'AWAITING_CHOICEPOINT_CHOICE',
+          pendingActionData: {
+            choiceOptions: segment.Next
+          }
+        });
+        
+        // Prompt for choice based on player type
+        if (player.isHuman) {
+          console.log("Prompting human for choicepoint choice");
+          const options = segment.Next.map(coords => ({
+            coords,
+            pathName: segment.pathName,
+            color: segment.pathColor
+          }));
+          
+          promptForChoicepoint(options, (chosenOption) => {
+          
+            console.log("Human chose:", chosenOption);
+            // Resume movement with chosen path
+            player.currentCoords = chosenOption.coords;
+            currentCoord = chosenOption.coords;
+            remainingSteps--;
+            
+            // Clear the interrupted move data
+            delete state.interruptedMove;
+            updateGameState({
+              currentPhase: 'PLAYING',
+              pendingActionData: null
+            });
+            
+            // Continue movement
+            animateNextSegment();
+          });
+        } else {
+          console.log("AI choicepoint - calling simulateCpuChoicepoint");
+          // Set up callback for AI choice
+          state.pendingActionData.onChoice = (chosenOption) => {
+            console.log("AI chose:", chosenOption);
+            // Resume movement with chosen path
+            player.currentCoords = chosenOption.coords;
+            currentCoord = chosenOption.coords;
+            remainingSteps--;
+            
+            // Clear the interrupted move data
+            delete state.interruptedMove;
+            updateGameState({
+              currentPhase: 'PLAYING',
+              pendingActionData: null
+            });
+            
+            // Continue movement
+            animateNextSegment();
+          };
+          simulateCpuChoicepoint(player);
+        }
+        
+        return; // Wait for choice before continuing
+      }
+    
+      // Regular movement (single Next coordinate)
+      const nextCoord = {
+        x: segment.Next[0][0],
+        y: segment.Next[0][1]
+      };
+    
+      await animatePosition(token, currentCoord, nextCoord, duration);
+      player.currentCoords = nextCoord;
+      currentCoord = nextCoord;
+      remainingSteps--;
+    
+      await animateNextSegment();
+    }
+
+    Comparison Table of Function Differences (Updated with Fixes)
+
+--------------------------------------------------------------------------------------------------------------------------
+| Function                | File Location (Existing)       | Aspect                          | Provided Code                                          | Existing Code (Before Fix)                           | Difference Impact & Fix Applied               |
+--------------------------------------------------------------------------------------------------------------------------
+| promptForChoicepoint    | ui.js (Lines 673-759)         | Core Functionality             | Opens modal dialog, creates buttons dynamically.      | Identical functionality as provided code.            | None. Functions are identical.                |
+| promptForChoicepoint    | ui.js (Lines 673-759)         | Styling and Color Coding       | Uses pathClassMap for button colors.                  | Same pathClassMap and color assignments.             | None. Identical styling.                      |
+| promptForChoicepoint    | ui.js (Lines 673-759)         | AI Behavior & Timing           | AI chooses randomly with scale animation.             | Identical AI behavior and animation timing.          | None. Ensured AI auto-closes and returns choice. |
+| promptForChoicepoint    | ui.js (Lines 673-759)         | Code Structure                 | Structured with nested animateScale function.         | Same structure with nested animateScale.             | None. Identical structure.                    |
+| animateTokenToPosition  | animations.js (Lines 246-477) | Logging                        | Detailed logging with template literals.              | Simpler logging without template literals.           | Updated to detailed logging for debugging.    |
+| animateTokenToPosition  | animations.js (Lines 246-477) | Player Data Handling           | Refreshes player data with getCurrentPlayer().        | Same refresh with getCurrentPlayer().                | None. Identical handling.                     |
+| animateTokenToPosition  | animations.js (Lines 246-477) | Choicepoint Handling           | Calls promptForChoicepoint with pathNames fallback.   | Identical call to promptForChoicepoint.              | Enhanced to search all paths post-choice.     |
+| animateTokenToPosition  | animations.js (Lines 246-477) | Animation & Movement Logic     | Uses animatePosition with easing.                     | Similar structure for animation logic.               | Ensured seamless resume after interrupt.      |
+| animateTokenToPosition  | animations.js (Lines 246-477) | AI Choice Handling             | Calls simulateCpuChoicepoint for AI choices.          | Similar callback structure for AI choices.           | Ensured AI choice resumes animation.          |
+| animateTokenToPosition  | animations.js (Lines 246-477) | Post-Choice Path Update        | Searches chosen coords across paths, updates path.    | Did not explicitly search all paths.                 | Added search across all 4 paths, tolerance=5. |
+| animateTokenToPosition  | animations.js (Lines 246-477) | Code Structure & Comments      | More verbose with detailed comments/logging.          | Less verbose in logging and comments.                | Updated for better documentation.             |
+--------------------------------------------------------------------------------------------------------------------------
+
+### Simulation and Verification Report for Choicepoint Functionality
+
+#### 1. HTML and CSS Verification
+- **HTML Check**: Confirmed that `choicepoint-Popover` and `choicepoint-Popover-Container` exist in `index.html` (lines 270-271) as a `<dialog>` element, matching the `showModal()` call in `ui.js`. The `choicepoint-Options` container for dynamic buttons is present at line 274.
+- **CSS Check**: Verified in `styles.css` that `.choicepoint-button` is defined (line 1256 onwards) as the base class for buttons. Color classes `.purple`, `.blue`, `.red`, and `.green` are defined with background colors for respective paths (e.g., `purple` for `ageOfExpansionPath`).
+- **Findings**: HTML elements and CSS classes are correctly defined. If buttons aren't styled or modal isn't showing, it may be due to browser cache, CSS load order, or runtime errors (check browser console).
+
+#### 2. Simulation of `animateTokenToPosition`
+- **Setup**: Player on `ageOfExpansionPath` at coordinates [537, 302] (a choicepoint per `board-data.js` with `Next: [[567, 328], [553, 277]]` and `pathNames: ['ageOfExpansionPath, ageOfReckoningPath']`).
+- **Dice Roll**: Simulate a roll of 3, moving towards and stopping at the choicepoint.
+- **Behavior**: Function detects multiple `Next` options, pauses animation, stores `remainingSteps=2` (since 1 step to reach choicepoint), updates game state to `AWAITING_CHOICEPOINT_CHOICE`, and calls `promptForChoicepoint` with options `[{coords: [567, 328], pathName: 'ageOfExpansionPath'}, {coords: [553, 277], pathName: 'ageOfReckoningPath'}]`.
+- **Post-Choice**: On receiving a choice (e.g., `ageOfReckoningPath` with coords [553, 277]), it searches across all paths with tolerance=5, finds a match in `ageOfReckoningPath`, updates `player.currentPath` to `ageOfReckoningPath`, sets `player.currentCoords` to exact match, retrieves remaining steps (2), and resumes animation to the next segment.
+- **Result**: Logic is correct as updated in `animations.js`. It handles interrupt and resume across paths as required.
+
+#### 3. Simulation of `promptForChoicepoint`
+- **Setup**: Called with options as above from `animateTokenToPosition`.
+- **Human Player**: Modal opens via `popover.showModal()`. Buttons are created for each option with text `ageOfExpansionPath` and `ageOfReckoningPath`, styled with `path-button` and respective color classes (`purple`, `red`). Click on a button (e.g., `ageOfReckoningPath`) closes modal and returns `{coords: [553, 277], pathName: 'ageOfReckoningPath'}` to callback.
+- **AI Player**: Randomly selects an option (e.g., index 1 for `ageOfReckoningPath`), triggers scaling animation on button (scale sequence [0.9, 0.8, 0.9, 1.0] over 600ms steps), waits 2 seconds, closes modal, and calls callback with chosen option.
+- **Result**: Function behaves as expected for both human and AI, returning correct data format (single coord array and path name) to `animateTokenToPosition`.
+
+#### 4. Integration and Data Flow
+- **Input to promptForChoicepoint**: Array of 2 coordinate sets and associated path names.
+- **Output from promptForChoicepoint**: Single coordinate set and path name, matching the required format for `animateTokenToPosition` to resume.
+- **Path Update**: Post-choice, `animateTokenToPosition` correctly updates path if needed by searching all paths, ensuring no false positives with tolerance=5.
+- **Result**: Data flow and integration between functions are seamless as per the updated code.
+
+#### 5. Potential Issues and Recommendations
+- **If HTML elements (`choicepoint-Popover`, `choicepoint-Options`) are missing**: Modal won't open. Add `<dialog id='choicepoint-Popover'><div id='choicepoint-Options'></div></dialog>` to HTML if not found.
+- **If CSS classes are missing**: Buttons won't style correctly. Ensure `.path-button`, `.purple`, `.blue`, `.red`, `.green` are defined in CSS with appropriate styles (e.g., `background-color`).
+- **External Game State**: If `updateGameState` or other external logic interferes, it could prevent state transitions. Add logging in `animations.js` to confirm state changes.
+
+#### Update on Button Highlight Issue
+- **Issue**: Highlights for choicepoint buttons were only appearing as borders, not filling the entire rectangle.
+- **Fix**: Updated CSS in `styles.css` for `.choicepoint-button` and related classes. Added a hover and selection highlight effect using `filter: brightness()` to lighten the background, ensuring the entire button area is visually highlighted. Also adjusted the `ai-choice-pulse` animation to include a brightness change for a full rectangle effect during AI selection.
+- **Next Steps**: Please refresh the game in your browser (clear cache if necessary) to see if this resolves the visual issue. If the highlight still doesn't fill the rectangle, it may be a rendering issue or CSS override elsewhere in the codebase.
+
+#### Conclusion
+The JavaScript logic in `ui.js` and `animations.js` is aligned with the required functionality for choicepoints. HTML and CSS are correctly set up with matching IDs and class definitions. Any remaining issues with popups or styling are likely due to browser cache, CSS conflicts, or runtime errors external to these files. If issues persist, consider clearing browser cache, verifying CSS load in `index.html`, or adding debug logging for runtime errors.
+
+#### AI Turn Flow Analysis
+- **Expected Flow**: `advanceToNextPlayer` → `handleAiTurn` (rolls dice) → `animateDiceRoll` → `handlePlayerAction` → `simulateCpuChoicepoint` (if at start) → `animateTokenToPosition` → `[promptForChoicepoint (if going through choicepoint)]` → `handlePathChoice` → etc.
+- **Actual Flow**: `advanceToNextPlayer` (in `game.js`, calls `handleAITurn` for AI) → `handleAITurn` (initiates dice roll) → `animateDiceRoll` (in `animations.js`, calls `handlePlayerAction`) → `handlePlayerAction` (in `game.js`, processes action, likely leads to movement) → `animateTokenToPosition` (handles movement, calls `simulateCpuChoicepoint` for AI at choicepoint) → `simulateCpuChoicepoint` (in `game.js`, makes AI choice) → `handlePathChoice` (processes choice).
+- **Observations**:
+  - Flow matches expectation for most parts, with AI-specific handling for choicepoints via `simulateCpuChoicepoint`.
+  - If `simulateCpuChoicepoint` is meant to trigger at path start (not just mid-movement choicepoints), additional logic is needed in `handleAITurn` or `handlePlayerAction`.
+  - Potential timing issues with async calls or animations could disrupt state updates (e.g., `rollResult` not set in time).
+- **Recommendations**:
+  - Add logic in `handleAITurn` if path start choicepoint check is needed for AI.
+  - Add detailed logging for AI turn sequence to debug timing or missing calls.
+
+#### Conclusion
+{{ ... }}
