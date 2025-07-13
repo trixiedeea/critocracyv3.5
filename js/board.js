@@ -756,7 +756,7 @@ export function drawTokens() {
       //  console.log(`[drawTokens] ${player.name} scaled to [${scaledX}, ${scaledY}]`);
 
         const token = document.createElement('img');
-        token.src = `../assets/tokens/${roleInitial}.png`; // Ensure this path works
+        token.src = `./assets/tokens/${roleInitial}.png`; // Ensure this path works
         token.alt = `${player.name}'s token`;
         token.style.position = 'absolute';
         token.style.width = '40px';

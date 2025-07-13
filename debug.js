@@ -14,7 +14,7 @@ const DEBUG_CONFIG = {
     interceptEvents: true,       // Intercept and log custom events
     stackTraces: true,           // Include stack traces with errors
     breakOnErrors: false,        // Add debugger statement on errors
-    logToDOM: true,              // Also display debug info on screen
+    logToDOM: false,             // Also display debug info on screen (DISABLED)
     logTiming: true              // Log timing information
 };
 
@@ -81,16 +81,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // 2. Check for game state consistency
     if (DEBUG_CONFIG.logGameState) {
         logDebug('\nChecking GameState object:');
-        const gameState = window.GameState;
-        if (gameState) {
+        const state = window.gamestate;
+        if (state) {
             logDebug(`GameState object: EXISTS`, 'success');
-            logDebug(`- playerArray: ${JSON.stringify(gameState.playerArray)}`);
-            logDebug(`- humanPlayers: ${gameState.humanPlayers}`);
-            logDebug(`- aiPlayers: ${gameState.aiPlayers}`);
-            logDebug(`- totalPlayers: ${gameState.totalPlayers}`);
+            logDebug(`- playerArray: ${JSON.stringify(state.playerArray)}`);
+            logDebug(`- humanPlayers: ${state.humanPlayers}`);
+            logDebug(`- aiPlayers: ${state.aiPlayers}`);
+            logDebug(`- totalPlayers: ${state.totalPlayers}`);
             
             // Keep a snapshot of initial game state
-            gameStateSnapshot = JSON.parse(JSON.stringify(gameState));
+            gameStateSnapshot = JSON.parse(JSON.stringify(state));
         } else {
             logDebug(`GameState object: MISSING`, 'error');
         }
@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Log game state at time of error
         if (DEBUG_CONFIG.logGameState) {
             logDebug('\nGame state at time of error:', 'error');
-            logDebug(JSON.stringify(window.GameState || {}, null, 2), 'error');
+            logDebug(JSON.stringify(window.gamestate || {}, null, 2), 'error');
         }
         
         // Log last screen transition
@@ -403,6 +403,48 @@ function getEventListeners(element) {
     // This is a stub - browser security prevents accessing actual event listeners
     // In a real debug scenario, you'd use Chrome DevTools' getEventListeners() in console
     return { click: [{ listener: 'unknown' }] };
+}
+
+// Setup debug display for DOM logging
+function setupDebugDisplay() {
+    // Only add the debug container once
+    if (document.getElementById('debug-log-container')) return;
+
+    debugContainer = document.createElement('div');
+    debugContainer.id = 'debug-log-container';
+    debugContainer.style.position = 'fixed';
+    debugContainer.style.bottom = '0';
+    debugContainer.style.right = '0';
+    debugContainer.style.width = '400px';
+    debugContainer.style.maxHeight = '300px';
+    debugContainer.style.overflowY = 'auto';
+    debugContainer.style.background = 'rgba(34,34,34,0.95)';
+    debugContainer.style.color = '#fff';
+    debugContainer.style.fontSize = '12px';
+    debugContainer.style.zIndex = '9999';
+    debugContainer.style.border = '1px solid #444';
+    debugContainer.style.borderRadius = '8px 8px 0 0';
+    debugContainer.style.boxShadow = '0 0 8px #000';
+
+    // Add a header
+    const header = document.createElement('div');
+    header.textContent = 'Critocracy Debug Log';
+    header.style.background = '#222';
+    header.style.color = '#bada55';
+    header.style.padding = '4px 8px';
+    header.style.fontWeight = 'bold';
+    header.style.borderBottom = '1px solid #444';
+    debugContainer.appendChild(header);
+
+    // Content area for logs
+    const logContent = document.createElement('div');
+    logContent.id = 'debug-log-content';
+    logContent.style.padding = '8px';
+    logContent.style.maxHeight = '250px';
+    logContent.style.overflowY = 'auto';
+    debugContainer.appendChild(logContent);
+
+    document.body.appendChild(debugContainer);
 }
 
 // Export debugging utilities for console use
