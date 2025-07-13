@@ -13,8 +13,8 @@ import { handleSpaceAction, handleEndTurn } from './game.js';
 
 
 // ===== Board Constants =====
-const BOARD_IMAGE_PATH = '../assets/board.png';
-const TOKEN_DIR = '../assets/tokens'; 
+const BOARD_IMAGE_PATH = './assets/board.png';
+const TOKEN_DIR = './assets/tokens'; 
 const TOKEN_SIZE = 40; 
 // Removed SPACE_RADIUS, choicepoint_RADIUS as clicks/drawing might use different logic
 
