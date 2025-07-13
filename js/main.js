@@ -9,14 +9,14 @@ import './startScreen.js';
 import './playerCountScreen.js';
 import './roleSelectScreen.js';
 import './turnOrderScreen.js';
-import './animations.js';
-import './game.js';
+import './ui.js';
+import './state.js';
+import './players.js';
+import './board-data.js';
 import './board.js';
 import './cards.js';
-import './players.js';
-import './ui.js';
-import './board-data.js';
-import './state.js';
+import './animations.js';
+import './game.js';
 
 export const DEBUG_MODE = false;
 
