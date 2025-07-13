@@ -1,8 +1,8 @@
 // Main entry point for Critocracy game
-import { initGame, startGame } from 'game.js';
-import { drawBoard } from 'board.js';
-import { initializeUI } from 'ui.js';
-import { state, updateGameState } from 'state.js';
+import { initGame, startGame } from './game.js';
+import { drawBoard } from './board.js';
+import { initializeUI } from './ui.js';
+import { state, updateGameState } from './state.js';
 
 // Import initialization screen modules
 import './startScreen.js';
