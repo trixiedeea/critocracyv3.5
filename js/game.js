@@ -1129,6 +1129,8 @@ export async function advanceToNextPlayer() {
         updatePlayerInfo(newCurrentPlayer.id);
         updateGameControls();
         updateGameState({ currentPhase: 'ROLLING' });
+        // Start dice shake animation whenever entering the rolling phase
+        if (typeof startDiceShake === 'function') startDiceShake();
 
         // Additional UI feedback for human turn
         const message = `It's ${newCurrentPlayer.name}'s turn (${newCurrentPlayer.role})`;

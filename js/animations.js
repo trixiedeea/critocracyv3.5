@@ -107,7 +107,7 @@ export const animateValue = (start, end, duration, callback) => {
  * @param {number} duration - Duration in milliseconds
  * @returns {Promise} Resolves when animation completes
  */
-export const animateDiceRoll = async (diceElement, finalValue, duration = 1500) => {
+export const animateDiceRoll = async (duration = 2000) => {
   console.log('---------animateDiceRoll---------');
 
   const player = getCurrentPlayer();
@@ -127,7 +127,7 @@ export const animateDiceRoll = async (diceElement, finalValue, duration = 1500) 
   // Add rolling class to trigger animation
   dice.classList.add('rolling');
 
-  // Use the provided finalValue or generate a random roll if not provided
+     // Use the provided finalValue or generate a random roll if not provided
    const result = Math.ceil(Math.random() * 6);
    
    // Store the roll result in state
@@ -137,9 +137,9 @@ export const animateDiceRoll = async (diceElement, finalValue, duration = 1500) 
   setTimeout(() => {
       dice.classList.remove('rolling');
 
-      // Position the dice to show the result face
-      let transform = '';
-      switch(result) {
+             // Position the dice to show the result face
+       let transform = '';
+       switch(result) {
           case 1: transform = 'rotateX(0deg) rotateY(0deg)'; break;
           case 2: transform = 'rotateY(90deg) rotateX(0deg)'; break;
           case 3: transform = 'rotateX(90deg) rotateY(0deg)'; break;
@@ -153,13 +153,13 @@ export const animateDiceRoll = async (diceElement, finalValue, duration = 1500) 
 
       // Keep face visible for 1.5s before proceeding
       setTimeout(() => {
-          // Then enable interaction and trigger game logic
-          dice.style.pointerEvents = 'auto';
-          dice.classList.add('shake');
-          
-          // Set the roll result in state before calling handlePlayerAction
-          updateGameState({ rollResult: result });
-          handlePlayerAction();
+                     // Then enable interaction and trigger game logic
+           dice.style.pointerEvents = 'auto';
+           dice.classList.add('shake');
+           
+           // Set the roll result in state before calling handlePlayerAction
+           updateGameState({ rollResult: result });
+           handlePlayerAction();
       }, 1500);
 
   }, duration); // Match this with the CSS animation duration
@@ -404,9 +404,13 @@ export function animateTokenToPosition(player, newPosition, duration = 1000, ski
             currentCoord = { ...player.currentCoords };
           }
           
-          remainingSteps--;
-          // Persist updated step count immediately
-          updateGameState({ remainingSteps });
+          // Only decrement if spaceId changes at choicepoint
+          const currentSegment = findSegmentByCoord(currentCoord);
+          const chosenSegment = findSegmentByCoord({ x: chosenOption.coords[0], y: chosenOption.coords[1] });
+          if (currentSegment && chosenSegment && currentSegment.spaceId !== chosenSegment.spaceId) {
+            remainingSteps--;
+            updateGameState({ remainingSteps });
+          }
           
           // Clear the interrupted move data
           delete state.interruptedMove;
@@ -428,15 +432,18 @@ export function animateTokenToPosition(player, newPosition, duration = 1000, ski
         y: segment.Next[0][1]
       };
 
-      // Count step as we leave the currentCoord
-      remainingSteps--;
-            // Persist updated step count immediately
-            updateGameState({ remainingSteps });
-      
+      // Only decrement if spaceId changes (use a temp variable for step logic)
+      const currentSegmentForStep = findSegmentByCoord(currentCoord);
+      const nextSegmentForStep = findSegmentByCoord(nextCoord);
+      if (currentSegmentForStep && nextSegmentForStep && currentSegmentForStep.spaceId !== nextSegmentForStep.spaceId) {
+        remainingSteps--;
+        updateGameState({ remainingSteps });
+      }
+       
       // Animate visual movement
       await animatePosition(token, currentCoord, nextCoord, duration);
       
-      // Update to exact coordinates from the path segment
+      // Update to exact coordinates from the path segment (original logic)
       const nextSegment = findSegmentByCoord(nextCoord);
       if (nextSegment) {
         const exactCoord = nextSegment.coordinates[0];
