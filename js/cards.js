@@ -1072,7 +1072,7 @@ export function applyAgeCardEffect(effect, player, sourcePlayer) {
              break;
         default:
             console.warn(`Unknown card effect type: ${effect.type}`);
-            if (player.isAI) {
+            if (!player.isHuman) {
                 updatePlayerResources(effect, player);
                 handleEndTurn();
             } else {

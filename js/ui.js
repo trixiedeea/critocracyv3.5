@@ -694,8 +694,8 @@ export function promptForChoicepoint(options, onChoice) {
     const pathClassMap = {
         'ageOfExpansionPath': 'purple',
         'ageOfResistancePath': 'blue',
-        'ageOfReckoningPath': 'red',
-        'ageOfLegacyPath': 'green'
+        'ageOfReckoningPath': 'cyan',
+        'ageOfLegacyPath': 'pink'
     };
 
     options.forEach((option) => {
@@ -732,11 +732,11 @@ export function promptForChoicepoint(options, onChoice) {
         const aiIndex = Math.floor(Math.random() * options.length);
         const aiOption = options[aiIndex];
 
-        const button = Array.from(container.children).find(btn => btn.textContent === aiOption.pathName);
+        const button = Array.from(container.children).find(button => button.textContent === aiOption.pathName);
 
         if (button) {
             // Animate scale sequence: 1.0 -> 0.9 -> 0.8 -> 0.9 -> 1.0 with delays
-            const scaleSequence = [0.9, 0.8, 0.9, 1.0];
+            const scaleSequence = [0.9, 0.8, 0.7, 0.8, 0.9, 1.0];
             let step = 0;
 
             function animateScale() {

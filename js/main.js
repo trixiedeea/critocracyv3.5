@@ -39,10 +39,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Path coordinates from START_SPACE (these should match your board-data.js)
     const PATH_COORDINATES = {
-        ageOfExpansionPath: [169, 466],
-        ageOfResistancePath: [201, 498],
-        ageOfReckoningPath: [205, 548],
-        ageOfLegacyPath: [167, 579]
+        ageOfExpansionPath: [104, 512],
+        ageOfResistancePath: [104, 512],
+        ageOfReckoningPath: [104, 512],
+        ageOfLegacyPath: [104, 512]
     };
 
     // Add click handlers for path choice buttons

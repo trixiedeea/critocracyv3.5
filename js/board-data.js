@@ -308,7 +308,7 @@ export const ageOfReckoningPath = {
 
       { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[104, 512]], Next: [[205, 548]], Type: "Regular" ,	spaceId: "1C" },
       { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[205, 548]], Next: [[225, 572]], Type: "Regular" ,	spaceId: "2C" },
-      { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[225, 572]], Next: [[242, 598]], Type: "Draw",spaceId: "3C" },
+      { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[225, 572]], Next: [[242, 598]], Type: "Draw", spaceId: "3C" },
       { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[242, 598]], Next: [[263, 618]], Type: "Regular" ,	spaceId: "4C" },
       { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[263, 618]], Next: [[290, 639]], Type: "Regular" ,	spaceId: "5C" },
       { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[290, 639]], Next: [[320, 658]], Type: "Regular" ,	spaceId: "6C" },
@@ -371,7 +371,7 @@ export const ageOfReckoningPath = {
 export const ageOfLegacyPath = {
     color: 'pink',
     name: 'Age of Legacy',
-    startCoord: START_SPACE.nextCoordOptions.ageOfLegacyPath,
+    startCoord: [104, 512],
     endCoord: FINISH_SPACE.coordinates,
     segments: [
       { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[104, 512]], Next: [[167, 579]], Type: "Regular", spaceId: "1PK" },

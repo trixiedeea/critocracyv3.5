@@ -428,7 +428,7 @@ export async function handleSpaceAction(player, spaceType, pathName) {
   
       console.log(`Draw space → deckType: ${deckType}, positions:`, positions);
       
-      if (player.isAI) {
+      if (!player.isHuman) {
         // For AI players, wait 5 seconds then simulate deck click
         console.log(`AI player ${player.name} will draw a card in 5 seconds...`);
         await delay(5000);
@@ -444,7 +444,7 @@ export async function handleSpaceAction(player, spaceType, pathName) {
   
       console.log(`Regular space → deckType: ${deckType}, positions:`, positions);
       
-      if (player.isAI) {
+      if (!player.isHuman) {
         // For AI players, wait 5 seconds then simulate end of turn deck click
         console.log(`AI player ${player.name} will draw an end of turn card in 5 seconds...`);
         await delay(5000);
@@ -579,6 +579,11 @@ state.aiTurnInProgress = state.aiTurnInProgress || false;
  * @param {object} aiPlayer - The AI player object.
  */
 export async function handleAITurn(aiPlayer) {
+    // Debug guard: detect if player is both isHuman and isAI or has both properties
+    if (!aiPlayer.isHuman) {
+        console.error('[BUG] AI turn called with player having both isHuman and isAI or isAI property present:', aiPlayer);
+        throw new Error('AI turn called with player having both isHuman and isAI or isAI property present. This should never happen!');
+    }
     console.log(`[AI] ${aiPlayer.name} starting turn (simulating dice click)`);
     
     // Prevent overlapping AI turns
@@ -1038,7 +1043,7 @@ export async function advanceToNextPlayer() {
         console.log(`[DEBUG] AI Player's turn started (${currentPlayer.name})`);
         
         // Start the AI's turn after a short delay
-        setTimeout(() => handleAITurn(currentPlayer), 1000);
+        setTimeout(() => handleAITurn(currentPlayer), 5000);
         return;
     }
     
@@ -1109,7 +1114,12 @@ export async function advanceToNextPlayer() {
     updateGameControls(); // Update buttons based on player type etc.
     
     // If it's a human player's turn, ensure the dice is interactive
-    if (newCurrentPlayer.isHuman) {
+    // Debug guard: detect if player is both isHuman and isAI or has both properties
+if (typeof newCurrent(!player.isHuman) !== 'undefined') {
+    console.error('[BUG] Player has both isHuman and isAI properties or isAI property present:', newCurrentPlayer);
+    throw new Error('Player object has both isHuman and isAI properties or isAI property present. This should never happen!');
+}
+if (newCurrentPlayer.isHuman) {
         console.log(`[DEBUG] Human player ${newCurrentPlayer.name}'s turn started`);
         // Force update the UI controls to ensure the dice is enabled
         setTimeout(() => updateGameControls(), 100);

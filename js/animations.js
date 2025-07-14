@@ -253,7 +253,6 @@ export const ensurePlayerPath = (player) => {
  * @param {function|null} onComplete - Callback after animation finishes.
  */
 export function animateTokenToPosition(player, newPosition, duration = 1000, skipSpaceAction = false, onComplete = null) {
-  console.log(`----------animateTokenToPosition: ${player.name} moving ${state.rollResult} spaces -----------`);
   player = getCurrentPlayer();
   const rollResult = state.rollResult;
   console.log(`Moving ${rollResult} spaces for ${player.name}`);
@@ -348,6 +347,12 @@ export function animateTokenToPosition(player, newPosition, duration = 1000, ski
       }
     
       const segment = findSegmentByCoord(currentCoord);
+      console.log(
+        `=====Step ${rollResult - remainingSteps + 1}/${rollResult}:======= ` +
+        `======Space ID: ${segment.spaceId}======= ` +
+        `======Coords: [${segment.coordinates[0][0]}, ${segment.coordinates[0][1]}]======= ` +
+        `======Steps Remaining: ${remainingSteps - 1}=======`
+      );
       if (!segment || !segment.Next || segment.Next.length === 0) {
         console.warn("Invalid or incomplete segment found at", currentCoord);
         resolve();
@@ -567,7 +572,7 @@ export function animateCardDiscard(cardElement, onComplete) {
 /**
  * Highlight the deck region for a player to draw from
  * 
- * @param {object} player - The player (must include `isAI` boolean).
+ * @param {object} player - The player (must include `isHuman` boolean).
  * @param {string} deckType - The deck to highlight (e.g., 'ageOfResistanceDeck').
  * @param {Array} positions - The region(s) to highlight (only used for decks like endOfTurnDeck).
  */

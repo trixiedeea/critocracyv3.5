@@ -1267,19 +1267,19 @@ dialog.popover::backdrop {
   }
   
   /* Path-specific color classes (match these names exactly to your path names) */
-  .choicepoint-button.purple {
+  .path-button.purple {
     background-color: #7e07ed; /* ageOfExpansionPath */
   }
   
-  .choicepoint-button.blue {
+  .path-button.blue {
     background-color: #1738de; /* ageOfResistancePath */
   }
   
-  .choicepoint-button.red {
+  .path-button.cyan {
     background-color: #0eb8bd; /* ageOfReckoningPath */
   }
   
-  .choicepoint-button.green {
+  .path-button.pink {
     background-color: #d20fe7; /* ageOfLegacyPath */
   }
   
