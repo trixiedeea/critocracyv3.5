@@ -104,7 +104,7 @@ export const animateValue = (start, end, duration, callback) => {
  * @param {number} duration - Duration in milliseconds
  * @returns {Promise} Resolves when animation completes
  */
-export const animateDiceRoll = async (duration = 2000) => {
+export const animateDiceRoll = async (diceElement, finalValue, duration = 1500) => {
   console.log('---------animateDiceRoll---------');
 
   const player = getCurrentPlayer();
@@ -124,7 +124,7 @@ export const animateDiceRoll = async (duration = 2000) => {
   // Add rolling class to trigger animation
   dice.classList.add('rolling');
 
-     // Use the provided finalValue or generate a random roll if not provided
+  // Use the provided finalValue or generate a random roll if not provided
    const result = Math.ceil(Math.random() * 6);
    
    // Store the roll result in state
@@ -134,9 +134,9 @@ export const animateDiceRoll = async (duration = 2000) => {
   setTimeout(() => {
       dice.classList.remove('rolling');
 
-             // Position the dice to show the result face
-       let transform = '';
-       switch(result) {
+      // Position the dice to show the result face
+      let transform = '';
+      switch(result) {
           case 1: transform = 'rotateX(0deg) rotateY(0deg)'; break;
           case 2: transform = 'rotateY(90deg) rotateX(0deg)'; break;
           case 3: transform = 'rotateX(90deg) rotateY(0deg)'; break;
@@ -150,13 +150,13 @@ export const animateDiceRoll = async (duration = 2000) => {
 
       // Keep face visible for 1.5s before proceeding
       setTimeout(() => {
-                     // Then enable interaction and trigger game logic
-           dice.style.pointerEvents = 'auto';
-           dice.classList.add('shake');
-           
-           // Set the roll result in state before calling handlePlayerAction
-           updateGameState({ rollResult: result });
-           handlePlayerAction();
+          // Then enable interaction and trigger game logic
+          dice.style.pointerEvents = 'auto';
+          dice.classList.add('shake');
+          
+          // Set the roll result in state before calling handlePlayerAction
+          updateGameState({ rollResult: result });
+          handlePlayerAction();
       }, 1500);
 
   }, duration); // Match this with the CSS animation duration

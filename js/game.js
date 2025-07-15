@@ -64,7 +64,7 @@ import { state, updateGameState, updateUIState } from './state.js';
  * Initializes the core game modules (Board, Cards, Players).
  */
 // Debug mode flag - set to true to test with a single AI player
-const DEBUG_MODE = true;
+const DEBUG_MODE = false;
 
 /**
  * Initializes the core game modules (Board, Cards, Players).
@@ -236,11 +236,21 @@ export async function handlePlayerAction() {
     // Handle start space case with 10-pixel tolerance
     const startX = START_SPACE.coordinates[0];
     const startY = START_SPACE.coordinates[1];
-    const tolerance = 10; // pixels
+    const tolerance = 10; // Tolerance for coordinate comparison
+    
+    // Log the coordinates for debugging
+    console.log('Start space coordinates:', { startX, startY });
+    console.log('Player coordinates:', { 
+        x: player.currentCoords.x, 
+        y: player.currentCoords.y 
+    });
     
     const dx = Math.abs(player.currentCoords.x - startX);
     const dy = Math.abs(player.currentCoords.y - startY);
     const isAtStart = dx <= tolerance && dy <= tolerance;
+    
+    // Log the comparison results
+    console.log('Coordinate comparison:', { dx, dy, tolerance, isAtStart });
 
     console.log(`Checking start space - Player: (${player.currentCoords.x},${player.currentCoords.y}), Start: (${startX},${startY}), Within tolerance: ${isAtStart}`);
 
@@ -580,7 +590,7 @@ state.aiTurnInProgress = state.aiTurnInProgress || false;
  */
 export async function handleAITurn(aiPlayer) {
     // Debug guard: detect if player is both isHuman and isAI or has both properties
-    if (!aiPlayer.isHuman) {
+    if (aiPlayer.isHuman) {
         console.error('[BUG] AI turn called with player having both isHuman and isAI or isAI property present:', aiPlayer);
         throw new Error('AI turn called with player having both isHuman and isAI or isAI property present. This should never happen!');
     }
@@ -1014,6 +1024,7 @@ export function simulateCpuChoicepoint(player) {
         return;
     }
 };
+
 /**
  * Advances the game state to the next player in the turn order.
  * Handles skipping finished players and looping back.
@@ -1043,7 +1054,7 @@ export async function advanceToNextPlayer() {
         console.log(`[DEBUG] AI Player's turn started (${currentPlayer.name})`);
         
         // Start the AI's turn after a short delay
-        setTimeout(() => handleAITurn(currentPlayer), 5000);
+        setTimeout(() => handleAITurn(currentPlayer), 1000);
         return;
     }
     
@@ -1114,12 +1125,7 @@ export async function advanceToNextPlayer() {
     updateGameControls(); // Update buttons based on player type etc.
     
     // If it's a human player's turn, ensure the dice is interactive
-    // Debug guard: detect if player is both isHuman and isAI or has both properties
-if (typeof newCurrent(!player.isHuman) !== 'undefined') {
-    console.error('[BUG] Player has both isHuman and isAI properties or isAI property present:', newCurrentPlayer);
-    throw new Error('Player object has both isHuman and isAI properties or isAI property present. This should never happen!');
-}
-if (newCurrentPlayer.isHuman) {
+    if (newCurrentPlayer.isHuman) {
         console.log(`[DEBUG] Human player ${newCurrentPlayer.name}'s turn started`);
         // Force update the UI controls to ensure the dice is enabled
         setTimeout(() => updateGameControls(), 100);
@@ -1139,8 +1145,6 @@ if (newCurrentPlayer.isHuman) {
         updatePlayerInfo(newCurrentPlayer.id);
         updateGameControls();
         updateGameState({ currentPhase: 'ROLLING' });
-        // Start dice shake animation whenever entering the rolling phase
-        if (typeof startDiceShake === 'function') startDiceShake();
 
         // Additional UI feedback for human turn
         const message = `It's ${newCurrentPlayer.name}'s turn (${newCurrentPlayer.role})`;
