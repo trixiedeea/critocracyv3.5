@@ -2,6 +2,10 @@
 import { START_SPACE } from './board-data.js';
 import { updatePlayerInfo } from './ui.js'; // Corrected import name
 
+// ===== Resource & Player Constants =====
+// List of all valid resource keys used throughout the game.
+export const RESOURCES = ['knowledge', 'money', 'influence'];
+
 // ===== Player Constants =====
 export const PLAYER_ROLES = {
     HISTORIAN: { 
@@ -12,6 +16,7 @@ export const PLAYER_ROLES = {
         abilityIdentifier: 'knowledgeTheftImmunity',
         token: 'H.png',
         abilityDescription: 'Immune to Knowledge Theft',
+        playerResourcePanel: null,
     },
     REVOLUTIONARY: {
         name: 'Audre Lorde the Revolutionary',
@@ -21,6 +26,7 @@ export const PLAYER_ROLES = {
         abilityIdentifier: 'influenceMultiplier',
         token: 'R.png',
         abilityDescription: 'Gains Influence Faster',
+        playerResourcePanel: null,
     },
     COLONIALIST: { 
         name: 'Jacques Cartier the Colonialist', 
@@ -30,6 +36,7 @@ export const PLAYER_ROLES = {
         abilityIdentifier: 'influenceTheftImmunity',
         token: 'C.png',
         abilityDescription: 'Immune to Influence Theft',
+        playerResourcePanel: null,
     },
     ENTREPRENEUR: { 
         name: 'Regina Basilier the Entrepreneur', 
@@ -39,7 +46,7 @@ export const PLAYER_ROLES = {
         abilityIdentifier: 'moneyMultiplier',
         token: 'E.png',
         abilityDescription: 'Gains Money Faster',
-
+        playerResourcePanel: null,
     },
     POLITICIAN: { 
         name: 'Winston Churchill the Politician', 
@@ -49,6 +56,7 @@ export const PLAYER_ROLES = {
         abilityIdentifier: 'moneyTheftImmunity',
         token: 'P.png',
         abilityDescription: 'Immune To Money Theft',
+        playerResourcePanel: null,
     },
     ARTIST: { 
         name: 'Salvador Dali the Artist', 
@@ -58,6 +66,7 @@ export const PLAYER_ROLES = {
         abilityIdentifier: 'knowledgeMultiplier',
         token: 'A.png',
         abilityDescription: 'Gains Knowledge Faster',
+        playerResourcePanel: null,
     }
 };
 
@@ -258,6 +267,7 @@ export function updatePlayerResources(player, changes) {
     console.log(`Resources updated for ${player.name}:`, player.resources);
     
     // Trigger UI update
-    updatePlayerInfo();
+    // Update UI for this specific player
+    updatePlayerInfo(player.id);
     return true;
 }

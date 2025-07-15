@@ -6,7 +6,7 @@ export const ageOfReckoningDeck = [
         description: "Reflects Barthes' Death of the Author, allowing narrative shifts that increase Influence and progress.",
         effects: [
             { type: 'MOVEMENT', target: 'SELF', spaces: 6 },
-            { type: 'RESOURCE_CHANGE', changes: { influence: 6 } }
+            { type: 'RESOURCE_CHANGE', changes: { influence: 6, money: -5 } }
         ]
     },
     {
@@ -14,7 +14,7 @@ export const ageOfReckoningDeck = [
         name: "Museum Artifact Repatriation",
         description: "Embodies Tuck and Yang's insistence on real restitution, enabling resource exchange.",
         effects: [
-            { type: 'RESOURCE_CHANGE', changes: { money: -5, influence: 6 } } 
+            { type: 'RESOURCE_CHANGE', changes: { money: -6, influence: 5, knowledge: 1 } } 
         ]
     },
     {
@@ -23,7 +23,7 @@ export const ageOfReckoningDeck = [
         description: "Inspired by Barthes' work, challenging authorship and enabling Knowledge gain.",
         effects: [
             { type: 'MOVEMENT', target: 'SELF', spaces: -2 },
-            { type: 'RESOURCE_CHANGE', changes: { knowledge: 5 } }
+            { type: 'RESOURCE_CHANGE', changes: { knowledge: 5, money: -5 } }
         ]
     },
     {
@@ -41,7 +41,7 @@ export const ageOfReckoningDeck = [
         description: "Reflects Tuck and Yang's demand for action, enabling sabotage to ensure real change.",
         effects: [
             { type: 'STEAL', target: 'OTHER', resource: 'MONEY', amount:6, },
-            { type: 'RESOURCE_CHANGE', changes: { money: -4 } }
+            { type: 'RESOURCE_CHANGE', changes: { money: -4, influence: 5 } }
         ]
     },
     {
@@ -65,7 +65,7 @@ export const ageOfReckoningDeck = [
         name: "Visual Pleasure and Narrative",
         description: "Inspired by Mulvey's critique of cinematic narratives, advancing players while disrupting knowledge structures.",
         effects: [
-            { type: 'RESOURCE_CHANGE', changes: { knowledge: 6 } },
+            { type: 'RESOURCE_CHANGE', changes: { knowledge: 6, money: -5 } },
             { type: 'MOVEMENT', target: 'SELF', spaces: -6 }
         ]
     },
@@ -75,7 +75,7 @@ export const ageOfReckoningDeck = [
         description: "Highlights alliances formed during decolonization, fostering collaboration.",
         effects: [
             { type: 'STEAL', target: 'OTHER', resource: 'INFLUENCE', amount:5, },
-            { type: 'RESOURCE_CHANGE', changes: { influence: -5 } }
+            { type: 'RESOURCE_CHANGE', changes: { influence: -5, money: 5 } }
         ]
     },
     {
@@ -84,7 +84,7 @@ export const ageOfReckoningDeck = [
         description: "Demands material reparations for historical injustices, allowing resource transfer.",
         effects: [
             { type: 'STEAL_FROM_ALL', resource: 'MONEY', amount: 3 },
-            { type: 'RESOURCE_CHANGE', changes: { money: -3 } }
+            { type: 'RESOURCE_CHANGE', changes: { money: -3, influence: 5 } }
         ]
     },
     {
@@ -92,7 +92,7 @@ export const ageOfReckoningDeck = [
         name: "Critical Historiography",
         description: "Challenges dominant historical narratives, rewarding critical Knowledge.",
         effects: [
-            { type: 'RESOURCE_CHANGE', changes: { knowledge: 7 } },
+            { type: 'RESOURCE_CHANGE', changes: { knowledge: 7, money: -5 } },
             { type: 'STEAL', target: 'OTHER', resource: 'KNOWLEDGE', amount:2, }
         ]
     },
@@ -102,7 +102,7 @@ export const ageOfReckoningDeck = [
         description: "Focuses on taking back physical and symbolic spaces, enabling movement.",
         effects: [
             { type: 'MOVEMENT', target: 'SELF', spaces: 3 },
-            { type: 'RESOURCE_CHANGE', changes: { influence: 3 } }
+            { type: 'RESOURCE_CHANGE', changes: { influence: 3, knowledge: -5 } }
         ]
     }
 ];

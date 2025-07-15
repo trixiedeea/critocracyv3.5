@@ -5,12 +5,12 @@ export const endOfTurnDeck = [
         name: "The Reclamation of Historical Spaces",
         description: "Césaire urges a reexamination of the spaces that uphold colonial memory, calling for the reclamation of monuments and land. The battle for who controls these spaces remains central to decolonization.",
         effects: {
-            Colonialist:   { type: 'RESOURCE_CHANGE', changes: { money: -5, knowledge: -3, influence: -4 }, explanation: "Reclamation efforts disrupt your holdings and narratives." },
-            Revolutionary: { type: 'RESOURCE_CHANGE', changes: { money: 3, knowledge: 2, influence: 5 }, explanation: "Successful actions boost morale and resources." },
-            Historian:     { type: 'RESOURCE_CHANGE', changes: { money: 1, knowledge: 4, influence: 2 }, explanation: "Documenting change requires funding but yields knowledge." },
-            Entrepreneur:  { type: 'RESOURCE_CHANGE', changes: { money: -4, knowledge: 0, influence: -2 }, explanation: "Market uncertainty impacts funds, but opportunities arise." },
-            Politician:    { type: 'RESOURCE_CHANGE', changes: { money: 2, knowledge: -1, influence: 3 }, explanation: "Navigating the issue brings political gains and costs." },
-            Artist:        { type: 'RESOURCE_CHANGE', changes: { money: 2, knowledge: 3, influence: 4 }, explanation: "Your art reflects the moment, gaining influence." }
+            Colonialist:   { type: 'RESOURCE_CHANGE', changes: { money: 5, knowledge: 5, influence: 5 }, explanation: "Reclamation efforts disrupt your holdings and narratives." },
+            Revolutionary: { type: 'RESOURCE_CHANGE', changes: { money: 5, knowledge: 5, influence: 5 }, explanation: "Successful actions boost morale and resources." },
+            Historian:     { type: 'RESOURCE_CHANGE', changes: { money: 5, knowledge: 5, influence: 5 }, explanation: "Documenting change requires funding but yields knowledge." },
+            Entrepreneur:  { type: 'RESOURCE_CHANGE', changes: { money: 5, knowledge: 5, influence: 5 }, explanation: "Market uncertainty impacts funds, but opportunities arise." },
+            Politician:    { type: 'RESOURCE_CHANGE', changes: { money: 5, knowledge: 5, influence: 5 }, explanation: "Navigating the issue brings political gains and costs." },
+            Artist:        { type: 'RESOURCE_CHANGE', changes: { money: 5, knowledge: 5, influence: 5 }, explanation: "Your art reflects the moment, gaining influence." }
         }
     },
     {
@@ -18,12 +18,12 @@ export const endOfTurnDeck = [
         name: "The Rise of Historical Revisionism",
         description: "Historical revisionism emerges as a dominant force in shaping current ideologies. Barthes suggests that all texts are open to reinterpretation, while Césaire emphasizes the revision of colonial narratives.",
         effects: {
-            Colonialist:   { type: 'RESOURCE_CHANGE', changes: { money: 5, knowledge: 2, influence: -3 }, explanation: "Revisionism bolsters your finances but costs influence." },
-            Revolutionary: { type: 'RESOURCE_CHANGE', changes: { money: -2, knowledge: -3, influence: 1 }, explanation: "Fighting revisionism is costly and difficult." },
-            Historian:     { type: 'RESOURCE_CHANGE', changes: { money: 1, knowledge: 5, influence: -2 }, explanation: "Intense study yields knowledge but attracts criticism." },
-            Entrepreneur:  { type: 'RESOURCE_CHANGE', changes: { money: 4, knowledge: 1, influence: -1 }, explanation: "Capitalizing on revisionism has financial rewards and risks." },
-            Politician:    { type: 'RESOURCE_CHANGE', changes: { money: -1, knowledge: -3, influence: 6 }, explanation: "Manipulating narratives boosts influence significantly." },
-            Artist:        { type: 'RESOURCE_CHANGE', changes: { money: -2, knowledge: 3, influence: -4 }, explanation: "Your critical art struggles against revisionist trends." }
+            Colonialist:   { type: 'RESOURCE_CHANGE', changes: { money: 5, knowledge: 5, influence: 5 }, explanation: "Revisionism bolsters your finances but costs influence." },
+            Revolutionary: { type: 'RESOURCE_CHANGE', changes: { money: 5, knowledge: 5, influence: 5 }, explanation: "Fighting revisionism is costly and difficult." },
+            Historian:     { type: 'RESOURCE_CHANGE', changes: { money: 5, knowledge: 5, influence: 5 }, explanation: "Intense study yields knowledge but attracts criticism." },
+            Entrepreneur:  { type: 'RESOURCE_CHANGE', changes: { money: 5, knowledge: 5, influence: 5 }, explanation: "Capitalizing on revisionism has financial rewards and risks." },
+            Politician:    { type: 'RESOURCE_CHANGE', changes: { money: 5, knowledge: 5, influence: 5 }, explanation: "Manipulating narratives boosts influence significantly." },
+            Artist:        { type: 'RESOURCE_CHANGE', changes: { money: 5, knowledge: 5, influence: 5 }, explanation: "Your critical art struggles against revisionist trends." }
         }
     },
     {
@@ -31,12 +31,12 @@ export const endOfTurnDeck = [
         name: "Digital Archives and the Battle for History",
         description: "Digital archives democratize access to history, but also raise questions about who controls these records. Benjamin's theory on technological reproducibility highlights the impact of mass media in reshaping art and history.",
         effects: {
-            Colonialist:   { type: 'RESOURCE_CHANGE', changes: { money: -3, knowledge: 1, influence: -4 }, explanation: "Loss of narrative control impacts influence and finances." },
-            Revolutionary: { type: 'RESOURCE_CHANGE', changes: { money: 1, knowledge: 3, influence: 3 }, explanation: "Digital tools aid organization and spread knowledge." },
-            Historian:     { type: 'RESOURCE_CHANGE', changes: { money: 2, knowledge: 4, influence: 1 }, explanation: "Curating digital archives brings recognition and some funding." },
-            Entrepreneur:  { type: 'RESOURCE_CHANGE', changes: { money: -4, knowledge: -1, influence: 3 }, explanation: "Competition forces adaptation, offering new influence avenues." },
-            Politician:    { type: 'RESOURCE_CHANGE', changes: { money: -2, knowledge: -2, influence: -2 }, explanation: "Lack of control over digital records proves challenging." },
-            Artist:        { type: 'RESOURCE_CHANGE', changes: { money: 1, knowledge: 2, influence: 5 }, explanation: "Digital platforms amplify your artistic reach." }
+            Colonialist:   { type: 'RESOURCE_CHANGE', changes: { money: 5, knowledge: 5, influence: 5 }, explanation: "Loss of narrative control impacts influence and finances." },
+            Revolutionary: { type: 'RESOURCE_CHANGE', changes: { money: 5, knowledge: 5, influence: 5 }, explanation: "Digital tools aid organization and spread knowledge." },
+            Historian:     { type: 'RESOURCE_CHANGE', changes: { money: 5, knowledge: 5, influence: 5 }, explanation: "Curating digital archives brings recognition and some funding." },
+            Entrepreneur:  { type: 'RESOURCE_CHANGE', changes: { money: 5, knowledge: 5, influence: 5 }, explanation: "Competition forces adaptation, offering new influence avenues." },
+            Politician:    { type: 'RESOURCE_CHANGE', changes: { money: 5, knowledge: 5, influence: 5 }, explanation: "Lack of control over digital records proves challenging." },
+            Artist:        { type: 'RESOURCE_CHANGE', changes: { money: 5, knowledge: 5, influence: 5 }, explanation: "Digital platforms amplify your artistic reach." }
         }
     },
     {
@@ -44,12 +44,12 @@ export const endOfTurnDeck = [
         name: "Colonial Monuments and the Battle for Public Memory",
         description: "The debate around the removal or preservation of colonial monuments escalates. Césaire calls for the rejection of symbols that perpetuate colonial dominance.",
         effects: {
-            Colonialist:    { type: 'RESOURCE_CHANGE', changes: { money: -6, knowledge: -2, influence: -2 }, explanation: "You are forced to protect colonial monuments at great expense." },
-            Revolutionary:  { type: 'RESOURCE_CHANGE', changes: { money: 2, knowledge: 1, influence: 6 }, explanation: "You lead protests that demand the removal of colonial symbols." },
-            Historian:      { type: 'RESOURCE_CHANGE', changes: { money: 0, knowledge: 5, influence: 1 }, explanation: "You research the history of colonial monuments." },
-            Entrepreneur:   { type: 'RESOURCE_CHANGE', changes: { money: -5, knowledge: -1, influence: -2 }, explanation: "You face financial fallout from your association with colonial symbols." },
-            Politician:     { type: 'RESOURCE_CHANGE', changes: { money: 2, knowledge: 0, influence: 5 }, explanation: "You pass legislation to protect colonial monuments." },
-            Artist:         { type: 'RESOURCE_CHANGE', changes: { money: 1, knowledge: 2, influence: 6 }, explanation: "Your work advocates for the removal of colonial monuments." }
+            Colonialist:    { type: 'RESOURCE_CHANGE', changes: { money: 5, knowledge: 5, influence: 5 }, explanation: "You are forced to protect colonial monuments at great expense." },
+            Revolutionary:  { type: 'RESOURCE_CHANGE', changes: { money: 5, knowledge: 5, influence: 5 }, explanation: "You lead protests that demand the removal of colonial symbols." },
+            Historian:      { type: 'RESOURCE_CHANGE', changes: { money: 5, knowledge: 5, influence: 5 }, explanation: "You research the history of colonial monuments." },
+            Entrepreneur:   { type: 'RESOURCE_CHANGE', changes: { money: 5, knowledge: 5, influence: 5 }, explanation: "You face financial fallout from your association with colonial symbols." },
+            Politician:     { type: 'RESOURCE_CHANGE', changes: { money: 5, knowledge: 5, influence: 5 }, explanation: "You pass legislation to protect colonial monuments." },
+            Artist:         { type: 'RESOURCE_CHANGE', changes: { money: 5, knowledge: 5, influence: 5 }, explanation: "Your work advocates for the removal of colonial monuments." }
         }
     },
     {
@@ -57,12 +57,12 @@ export const endOfTurnDeck = [
         name: "Social Media Debates on Colonial Legacies",
         description: "Social media becomes a battleground for debates about colonialism and its legacies. Benjamin's critique of historical narrative and Barthes' notion of authorship become central to the conversation.",
         effects: {
-            Colonialist:   { type: 'RESOURCE_CHANGE', changes: { money: -3, knowledge: -3, influence: -5 }, explanation: "Public backlash against your role in colonial history spreads on social media." },
-            Revolutionary: { type: 'RESOURCE_CHANGE', changes: { money: 3, knowledge: 2, influence: 5 }, explanation: "Your voice is amplified on digital platforms." },
-            Historian:     { type: 'RESOURCE_CHANGE', changes: { money: 1, knowledge: 5, influence: 1 }, explanation: "You document the heated debates around colonial legacies." },
-            Entrepreneur:  { type: 'RESOURCE_CHANGE', changes: { money: -4, knowledge: 0, influence: -2 }, explanation: "Your business faces a boycott due to its association with colonial history." },
-            Politician:    { type: 'RESOURCE_CHANGE', changes: { money: 2, knowledge: -2, influence: 4 }, explanation: "You take advantage of social media to promote your policies." },
-            Artist:        { type: 'RESOURCE_CHANGE', changes: { money: 2, knowledge: 3, influence: 5 }, explanation: "Your work provokes thought on colonial legacies on social media." }
+            Colonialist:   { type: 'RESOURCE_CHANGE', changes: { money: 5, knowledge: 5, influence: 5 }, explanation: "Public backlash against your role in colonial history spreads on social media." },
+            Revolutionary: { type: 'RESOURCE_CHANGE', changes: { money: 5, knowledge: 5, influence: 5 }, explanation: "Your voice is amplified on digital platforms." },
+            Historian:     { type: 'RESOURCE_CHANGE', changes: { money: 5, knowledge: 5, influence: 5 }, explanation: "You document the heated debates around colonial legacies." },
+            Entrepreneur:  { type: 'RESOURCE_CHANGE', changes: { money: 5, knowledge: 5, influence: 5 }, explanation: "Your business faces a boycott due to its association with colonial history." },
+            Politician:    { type: 'RESOURCE_CHANGE', changes: { money: 5, knowledge: 5, influence: 5 }, explanation: "You take advantage of social media to promote your policies." },
+            Artist:        { type: 'RESOURCE_CHANGE', changes: { money: 5, knowledge: 5, influence: 5 }, explanation: "Your work provokes thought on colonial legacies on social media." }
         }
     },
     {

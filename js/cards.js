@@ -528,13 +528,6 @@ function applySkipTurn(effect, player) {
          return;
     }
     
-    // Check target's immunity (source is the player who drew the card)
-    // Pass the original initiator (player) as source for immunity check
-    if (hasImmunity(target, 'SKIP_TURN', player)) { 
-         console.log(` Target ${target.name} is immune to SKIP_TURN.`);
-         return;
-    }
-    
     console.log(` Player ${target.name} will skip their next turn.`);
     setPlayerSkipTurn(target, true); 
 };
@@ -871,14 +864,6 @@ export function applyAgeCardEffect(effect, player, sourcePlayer) {
     else if (!effect.target) {
          targetPlayer = sourcePlayer;
     } 
-    // Note: Some functions below might re-determine the target internally based on convention
-
-    // Check for immunity BEFORE applying effect
-    // Always check immunity of the ACTUAL target player against the source player
-    if (hasImmunity(targetPlayer, effect.type, sourcePlayer)) { 
-        console.log(` Player ${targetPlayer.name} is immune to ${effect.type} from ${sourcePlayer.name}.`);
-        return; // Skip this effect
-    }
     
     // Apply the effect based on its type
     switch (effect.type) {

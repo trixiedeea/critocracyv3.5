@@ -125,6 +125,9 @@ function initializeElementReferences() {
                     pathChoicePopover: document.getElementById('path-Choice-Popover'),
                     cardPopover: document.getElementById('card-Popover'),
                     cardTitle: document.getElementById('card-Title'),
+                    stealPopover: document.getElementById('steal-Popover'),
+                    stealPopoverContainer: document.getElementById('steal-Popover-Container'),
+                    playerPopover: document.getElementById('player-Popover'),
                     cardDescription: document.getElementById('card-Description'),
                     ageOfExpansionDeck: document.getElementById('age-Of-Expansion-Deck'),
                     ageOfResistanceDeck: document.getElementById('age-Of-Resistance-Deck'),
@@ -815,16 +818,36 @@ export function updateGameControls() {
  */
 export function updateResourcePanel(player) {
     console.log('---------updateResourcePanel---------');
+    // Try to find (or freshly create) the panel again
     const panel = document.getElementById(`player-resource-panel-${player.id}`);
     if (!panel) {
+      // If panel doesn't exist yet, create it dynamically
+      const container = document.getElementById('resource-Display-Container');
+      if (container) {
+        const newPanel = document.createElement('div');
+        newPanel.id = `player-resource-panel-${player.id}`;
+        newPanel.classList.add('player-resource-panel');
+        newPanel.innerHTML = `
+          <span class="player-name"></span>
+          <span class="money"></span>
+          <span class="knowledge"></span>
+          <span class="influence"></span>
+          <div class="resource-feedback"></div>
+        `;
+        container.appendChild(newPanel);
+      }
+    }
+
+    const panelUpdated = document.getElementById(`player-resource-panel-${player.id}`);
+    if (!panelUpdated) {
       console.error(`No resource panel found for player ID: ${player.id}`);
       return;
     }
   
-    panel.querySelector('.player-name').textContent = player.name;
-    panel.querySelector('.money').textContent = `💰 ${player.resources.money}`;
-    panel.querySelector('.knowledge').textContent = `📚 ${player.resources.knowledge}`;
-    panel.querySelector('.influence').textContent = `🗳️ ${player.resources.influence}`;
+    panelUpdated.querySelector('.player-name').textContent = player.name;
+    panelUpdated.querySelector('.money').textContent = `💰 ${player.resources.money}`;
+    panelUpdated.querySelector('.knowledge').textContent = `📚 ${player.resources.knowledge}`;
+    panelUpdated.querySelector('.influence').textContent = `🗳️ ${player.resources.influence}`;
 };
   
   /**

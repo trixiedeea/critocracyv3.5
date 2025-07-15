@@ -6,7 +6,7 @@ export const ageOfResistanceDeck = [
         description: "Reflects Benjamin's Angel of History by showcasing the reversal of colonial power, rewarding Influence and progress.",
         effects: [
             { type: 'MOVEMENT', target: 'SELF', spaces: 7 },
-            { type: 'RESOURCE_CHANGE', changes: { influence: 5 } }
+            { type: 'RESOURCE_CHANGE', changes: { influence: 3, knowledge: -5, money: -5 } }
         ]
     },
     {
@@ -15,7 +15,7 @@ export const ageOfResistanceDeck = [
         description: "Embodies nonviolent resistance, advancing the cause but risking political fallout.",
         effects: [
             { type: 'STEAL', target: 'OTHER', resource: 'INFLUENCE', amount:5, }, 
-            { type: 'RESOURCE_CHANGE', changes: { influence: -5 } }
+            { type: 'RESOURCE_CHANGE', changes: { influence: -5, money: 5 } }
         ]
     },
     {
@@ -23,7 +23,7 @@ export const ageOfResistanceDeck = [
         name: "Print to Power",
         description: "Echoes Benjamin's belief in media's role in empowering resistance, allowing Knowledge gain and strategic movement.",
         effects: [
-            { type: 'RESOURCE_CHANGE', changes: { knowledge: 6 } },
+            { type: 'RESOURCE_CHANGE', changes: { knowledge: 6, influence: -5 } },
             { type: 'MOVEMENT', target: 'SELF', spaces: 6 }
         ]
     },
@@ -51,7 +51,7 @@ export const ageOfResistanceDeck = [
         description: "Embodies Benjamin's idea that progress is built on past suffering, pushing players backward while rewarding reflection.",
         effects: [
             { type: 'MOVEMENT', target: 'SELF', spaces: -3 },
-            { type: 'RESOURCE_CHANGE', changes: { influence: 6 } }
+            { type: 'RESOURCE_CHANGE', changes: { influence: 6, knowledge: -5 } }
         ]
     },
     {
@@ -68,7 +68,7 @@ export const ageOfResistanceDeck = [
         name: "Disrupting Power Structures",
         description: "Mirrors Barthes' Death of the Author, shifting control by trading Influence for Knowledge.",
         effects: [
-            { type: 'RESOURCE_CHANGE', changes: { influence: -5, knowledge: 6 } }
+            { type: 'RESOURCE_CHANGE', changes: { influence: -5, knowledge: 6, money: -5 } }
         ]
     },
     {

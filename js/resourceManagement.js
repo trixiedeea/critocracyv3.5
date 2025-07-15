@@ -44,8 +44,6 @@ function applyResourceChange(player, resourceType, amount, source = 'cardEffect'
   updateResourcePanel(player);
 }
 
-// resourceManagement.js
-
 import { updateResourcePanel } from './ui.js';
 
 // ========== //constants ==========
@@ -99,7 +97,6 @@ export function getResistanceRate(targetPlayer, resource) {
 // Full change history log
 const resourceLog = [];
 
-
 // ========== Utility Functions ==========
 
 function isValidResource(resource) {
@@ -113,7 +110,7 @@ function canStealBetween(fromRole, toRole) {
   );
 }
 
-function getMultiplier(player, resource, isGain) {
+export function getMultiplier(player, resource, isGain) {
   const role = player.role;
   if (isGain && roleMultipliers.gain[role]?.[resource]) {
     return roleMultipliers.gain[role][resource];
@@ -124,13 +121,12 @@ function getMultiplier(player, resource, isGain) {
   return 1;
 }
 
-
 // ========== Core Handlers ==========
 
 /**
  * Log every change with full metadata
  */
-function logChange({ player, resourceType, baseAmount, adjustedAmount, source, actionType }) {
+export function logChange({ player, resourceType, baseAmount, adjustedAmount, source, actionType }) {
   const entry = {
     playerId: player.id,
     playerName: player.name,
@@ -207,7 +203,7 @@ export function getResourceLog() {
   return JSON.parse(JSON.stringify(resourceLog));
 }
 
-function showStealPopover(effect, currentPlayer, allPlayers) {
+export function showStealPopover(effect, currentPlayer, allPlayers) {
   const validTargets = getValidStealTargets(currentPlayer, allPlayers, effect);
   const popover = document.createElement('div');
   popover.classList.add('steal-popover');
@@ -260,7 +256,7 @@ function applyStealEffect(effect, targetPlayer, sourcePlayer, adjustedAmount) {
 }
 
 
-function handleStealFromAll(effect, sourcePlayer, allPlayers) {
+export function handleStealFromAll(effect, sourcePlayer, allPlayers) {
   const validTargets = allPlayers.filter(p => 
     p.id !== sourcePlayer.id &&
     canStealFrom(sourcePlayer.role, p.role)

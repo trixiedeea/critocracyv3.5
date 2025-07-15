@@ -8,8 +8,7 @@ export const ageOfExpansionDeck = [
         name: "Scramble for Africa",
         description: "Reflects Discourse on Colonialism by highlighting the violent race for African resources, rewarding Money but costing Influence due to growing resistance.",
         effects: [
-            { type: 'RESOURCE_CHANGE', changes: { money: 6 } },
-            { type: 'RESOURCE_CHANGE', changes: { influence: -5 } }
+            { type: 'RESOURCE_CHANGE', changes: { money: -5, influence: 6, knowledge: -5 } }
         ]
     },
     {
@@ -34,7 +33,7 @@ export const ageOfExpansionDeck = [
         name: "Colonial Enterprise",
         description: "Reflects Césaire's critique of colonial economic ventures that prioritized profit over justice, allowing financial gain but risking alliances.",
         effects: [
-            { type: 'RESOURCE_CHANGE', changes: { money: -6, knowledge: 5 } } 
+            { type: 'RESOURCE_CHANGE', changes: { influence: -5, knowledge: 5, money: -5 } } 
         ]
     },
     {
@@ -43,7 +42,7 @@ export const ageOfExpansionDeck = [
         description: "Represents Césaire's view of ideological domination through religion, granting Influence but reinforcing colonial authority.",
         effects: [
             { type: 'MOVEMENT', target: 'SELF', spaces: 6 },
-            { type: 'RESOURCE_CHANGE', changes: { influence: 5 } }
+            { type: 'RESOURCE_CHANGE', changes: { influence: 6, money: -5 } }
         ]
     },
     {
@@ -59,7 +58,7 @@ export const ageOfExpansionDeck = [
         name: "Commodification of Labor",
         description: "Reflects Césaire's analysis of forced labor systems, allowing Money gain at the expense of future opportunities.",
         effects: [
-            { type: 'RESOURCE_CHANGE', changes: { money: 7 } },
+            { type: 'RESOURCE_CHANGE', changes: { money: 7, influence: -5 } },
             { type: 'SKIP_TURN', target: 'SELF' }
         ]
     },
@@ -69,7 +68,7 @@ export const ageOfExpansionDeck = [
         description: "Reflects Césaire's warning about the violence of land dispossession, advancing progress but reducing moral standing.",
         effects: [
             { type: 'MOVEMENT', target: 'SELF', moveToAge: "The Age of Resistance" }, 
-            { type: 'RESOURCE_CHANGE', changes: { influence: -6 } }
+            { type: 'RESOURCE_CHANGE', changes: { influence: -6, money: 6 } }
         ]
     },
     {
@@ -77,7 +76,7 @@ export const ageOfExpansionDeck = [
         name: "Control the Narrative",
         description: "Embodies colonial propaganda described by Césaire, increasing Knowledge while reinforcing power.",
         effects: [
-            { type: 'RESOURCE_CHANGE', changes: { knowledge: 5 } },
+            { type: 'RESOURCE_CHANGE', changes: { knowledge: 5, influence: -5 } },
             { type: 'MOVEMENT', target: 'SELF', spaces: 5 }
         ]
     },
@@ -95,7 +94,7 @@ export const ageOfExpansionDeck = [
         description: "Reflects Césaire's critique of exploitative plantation economies, rewarding Money but hindering intellectual growth.",
         effects: [
             { type: 'RESOURCE_CHANGE', changes: { knowledge: -5 } },
-            { type: 'RESOURCE_CHANGE', changes: { money: 6 } }
+            { type: 'RESOURCE_CHANGE', changes: { money: -6, influence: 5 } }
         ]
     },
     {

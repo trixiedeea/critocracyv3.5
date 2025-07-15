@@ -1313,3 +1313,30 @@ dialog.popover::backdrop {
     75% { transform: scale(0.9); filter: brightness(1.5); }
     100% { transform: scale(1); background-color: inherit; }
 }
+
+#player-Popover-Button {
+    color: white;
+    margin: 10px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    transform-origin: center center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+#player-Popover-Button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+}
+
+#player-Popover-Button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+
+
+    
