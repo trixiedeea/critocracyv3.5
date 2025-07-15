@@ -50,7 +50,7 @@ export const ageOfResistanceDeck = [
         name: "Angel of History",
         description: "Embodies Benjamin's idea that progress is built on past suffering, pushing players backward while rewarding reflection.",
         effects: [
-            { type: 'MOVEMENT', target: 'SELF', spaces: -6 },
+            { type: 'MOVEMENT', target: 'SELF', spaces: -3 },
             { type: 'RESOURCE_CHANGE', changes: { influence: 6 } }
         ]
     },
@@ -76,7 +76,7 @@ export const ageOfResistanceDeck = [
         name: "Narrative Shift",
         description: "Reflects Benjamin's idea of history's reversals, allowing players to reshape their paths.",
         effects: [
-            { type: 'MOVEMENT', target: 'SELF', spaces: 5 },
+            { type: 'MOVEMENT', target: 'SELF', spaces: 3 },
             { type: 'DRAW_CARD', deckType: 'END_OF_TURN' } 
         ]
     },
@@ -85,7 +85,7 @@ export const ageOfResistanceDeck = [
         name: "Revolutionary Momentum",
         description: "Embodies Benjamin's recognition of historical upheaval, enabling sabotage of opponents.",
         effects: [
-            { type: 'MOVEMENT', target: 'OTHER', spaces: -7 } 
+            { type: 'MOVEMENT', target: 'OTHER', spaces: -3 } 
         ]
     },
  
@@ -95,7 +95,7 @@ export const ageOfResistanceDeck = [
         description: "Reflects Benjamin's call for critical engagement with history, giving players the power to strategically reposition.",
         effects: [
             { type: 'RESOURCE_CHANGE', changes: { knowledge: 5 } },
-            { type: 'MOVEMENT', target: 'SELF', spaces: 4 }
+            { type: 'MOVEMENT', target: 'SELF', spaces: 2 }
         ]
     }
 ];

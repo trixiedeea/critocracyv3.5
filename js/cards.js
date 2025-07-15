@@ -454,25 +454,30 @@ function processEffect(effect, player, sourcePlayer) {
             applyMovement(effect, sourcePlayer); 
             break;
         case 'STEAL':
-             // Source player steals from the target player
-             applySteal(effect, targetPlayer, sourcePlayer);
-             break;           // Source player sabotages the target player
+            case 'STEAL':
+                // delay steal for player interaction
+                if (sourcePlayer.isAI) {
+                  const validTargets = getValidStealTargets(sourcePlayer, getPlayers(), effect);
+                  const target = getRandom(validTargets);
+                  const rate = getResistanceRate(target, effect.resource);
+                  applyStealEffect(effect, target, sourcePlayer, Math.floor(effect.amount * rate));
+                } else {
+                  showStealPopover(effect, sourcePlayer, getPlayers());
+                }
+                break;
         case 'SKIP_TURN':
              // applySkipTurn determines target internally based on effect.target
              applySkipTurn(effect, sourcePlayer);
              break;
         case 'CHANGE_PATH':
-             // Source player initiates alliance with a target determined in applyAllianceOffer
-             applyAllianceOffer(effect, sourcePlayer);
-             break;
+
         case 'DRAW_CARD':
             // Source player draws a card
             applyDrawCard(effect, sourcePlayer);
             break;
         case 'STEAL_FROM_ALL':
-             // Source player steals from all others
-             applyStealFromAll(effect, sourcePlayer);
-             break;
+            handleStealFromAll(effect, sourcePlayer, getPlayers());
+            break;
         default:
             console.warn(`Unknown card effect type: ${effect.type}`);
     }

@@ -22,7 +22,7 @@ export const ageOfReckoningDeck = [
         name: "The Death of the Author",
         description: "Inspired by Barthes' work, challenging authorship and enabling Knowledge gain.",
         effects: [
-            { type: 'MOVEMENT', target: 'SELF', spaces: -5 },
+            { type: 'MOVEMENT', target: 'SELF', spaces: -2 },
             { type: 'RESOURCE_CHANGE', changes: { knowledge: 5 } }
         ]
     },
@@ -31,8 +31,8 @@ export const ageOfReckoningDeck = [
         name: "Postcolonial Critique",
         description: "Reflects Barthes' advocacy for multiple interpretations, advancing players while weakening opponents.",
         effects: [
-            { type: 'MOVEMENT', target: 'SELF', spaces: 7 },
-            { type: 'SABOTAGE', target: 'OTHER', changes: { influence: -5 } }
+            { type: 'MOVEMENT', target: 'SELF', spaces: 3 },
+            { type: 'STEAL', target: 'OTHER', resource: 'influence', amount:2, }
         ]
     },
     {
@@ -93,7 +93,7 @@ export const ageOfReckoningDeck = [
         description: "Challenges dominant historical narratives, rewarding critical Knowledge.",
         effects: [
             { type: 'RESOURCE_CHANGE', changes: { knowledge: 7 } },
-            { type: 'SABOTAGE', target: 'OTHER', changes: { knowledge: -3 } }
+            { type: 'STEAL', target: 'OTHER', resource: 'KNOWLEDGE', amount:2, }
         ]
     },
     {
@@ -101,7 +101,7 @@ export const ageOfReckoningDeck = [
         name: "Reclaiming Spaces",
         description: "Focuses on taking back physical and symbolic spaces, enabling movement.",
         effects: [
-            { type: 'MOVEMENT', target: 'SELF', spaces: 8 },
+            { type: 'MOVEMENT', target: 'SELF', spaces: 3 },
             { type: 'RESOURCE_CHANGE', changes: { influence: 3 } }
         ]
     }

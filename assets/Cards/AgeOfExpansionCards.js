@@ -17,7 +17,7 @@ export const ageOfExpansionDeck = [
         name: "Divide and Conquer",
         description: "Mirrors Césaire's critique of colonial strategies used to fracture societies, advancing players but diminishing their critical understanding.",
         effects: [
-            { type: 'MOVEMENT', target: 'SELF', spaces: 7 },
+            { type: 'MOVEMENT', target: 'SELF', spaces: 4 },
             { type: 'RESOURCE_CHANGE', changes: { knowledge: -5 } }
         ]
     },
@@ -27,7 +27,6 @@ export const ageOfExpansionDeck = [
         description: "Embodies Césaire's analysis of colonial rationalization, increasing wealth at the cost of moral legitimacy.",
         effects: [
             { type: 'STEAL', target: 'OTHER', resource: 'INFLUENCE', amount:3, }, 
-            { type: 'RESOURCE_CHANGE', changes: { influence: -5 } }
         ]
     },
     {
@@ -88,7 +87,6 @@ export const ageOfExpansionDeck = [
         description: "Highlights colonial capitalism's expansion, fostering temporary alliances but encouraging unequal trade.",
         effects: [
             { type: 'STEAL', target: 'OTHER', resource: 'MONEY', amount:2 }, 
-            { type: 'RESOURCE_CHANGE', changes: { money: -2 } }
         ]
     },
     {
@@ -106,7 +104,6 @@ export const ageOfExpansionDeck = [
         description: "Reinforces colonial dominance through narrative control, allowing suppression of opposition.",
         effects: [
             { type: 'STEAL', target: 'OTHER', resource: 'INFLLUENCE', amount:4, },
-            { type: 'RESOURCE_CHANGE', changes: { influence: -4 } }
         ]
     }
 ];

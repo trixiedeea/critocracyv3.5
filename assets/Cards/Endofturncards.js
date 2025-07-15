@@ -44,12 +44,12 @@ export const endOfTurnDeck = [
         name: "Colonial Monuments and the Battle for Public Memory",
         description: "The debate around the removal or preservation of colonial monuments escalates. Césaire calls for the rejection of symbols that perpetuate colonial dominance.",
         effects: {
-            Colonialist: { type: 'RESOURCE_CHANGE', changes: { money: -6, knowledge: -2, influence: -2 }, explanation: "You are forced to protect colonial monuments at great expense." },
-            Revolutionary: { type: 'RESOURCE_CHANGE', changes: { money: 2, knowledge: 1, influence: 6 }, explanation: "You lead protests that demand the removal of colonial symbols." },
-            Historian: { type: 'RESOURCE_CHANGE', changes: { money: 0, knowledge: 5, influence: 1 }, explanation: "You research the history of colonial monuments." },
-            Entrepreneur: { type: 'RESOURCE_CHANGE', changes: { money: -5, knowledge: -1, influence: -2 }, explanation: "You face financial fallout from your association with colonial symbols." },
-            Politician: { type: 'RESOURCE_CHANGE', changes: { money: 2, knowledge: 0, influence: 5 }, explanation: "You pass legislation to protect colonial monuments." },
-            Artist: { type: 'RESOURCE_CHANGE', changes: { money: 1, knowledge: 2, influence: 6 }, explanation: "Your work advocates for the removal of colonial monuments." }
+            Colonialist:    { type: 'RESOURCE_CHANGE', changes: { money: -6, knowledge: -2, influence: -2 }, explanation: "You are forced to protect colonial monuments at great expense." },
+            Revolutionary:  { type: 'RESOURCE_CHANGE', changes: { money: 2, knowledge: 1, influence: 6 }, explanation: "You lead protests that demand the removal of colonial symbols." },
+            Historian:      { type: 'RESOURCE_CHANGE', changes: { money: 0, knowledge: 5, influence: 1 }, explanation: "You research the history of colonial monuments." },
+            Entrepreneur:   { type: 'RESOURCE_CHANGE', changes: { money: -5, knowledge: -1, influence: -2 }, explanation: "You face financial fallout from your association with colonial symbols." },
+            Politician:     { type: 'RESOURCE_CHANGE', changes: { money: 2, knowledge: 0, influence: 5 }, explanation: "You pass legislation to protect colonial monuments." },
+            Artist:         { type: 'RESOURCE_CHANGE', changes: { money: 1, knowledge: 2, influence: 6 }, explanation: "Your work advocates for the removal of colonial monuments." }
         }
     },
     {
@@ -135,12 +135,12 @@ export const endOfTurnDeck = [
         name: "The Spectacle of Colonial Violence",
         description: "The spectacle of colonial violence, captured in media, is revisited. Benjamin's idea of the historical 'spectacle' forces a reconsideration of colonial violence and its ongoing impact.",
         effects: {
-            Colonialist: { type: 'RESOURCE_CHANGE', changes: { money: -3, knowledge: -2, influence: -6 }, explanation: "Your actions are exposed and criticized for their violence." },
-            Revolutionary: { type: 'RESOURCE_CHANGE', changes: { money: 2, knowledge: 6, influence: 4 }, explanation: "You expose the violence as a tool for resistance." },
-            Historian: { type: 'RESOURCE_CHANGE', changes: { money: 1, knowledge: 5, influence: 1 }, explanation: "You document the ongoing impact of colonial violence." },
-            Entrepreneur: { type: 'RESOURCE_CHANGE', changes: { money: -5, knowledge: -1, influence: -2 }, explanation: "You are targeted for profiteering from violence." },
-            Politician: { type: 'RESOURCE_CHANGE', changes: { money: -2, knowledge: -1, influence: 5 }, explanation: "You use the spectacle to manipulate public opinion." },
-            Artist: { type: 'RESOURCE_CHANGE', changes: { money: 2, knowledge: 3, influence: 7 }, explanation: "Your art sparks a public outcry over colonial violence." }
+            Colonialist:    { type: 'RESOURCE_CHANGE', changes: { money: -3, knowledge: -2, influence: -6 }, explanation: "Your actions are exposed and criticized for their violence." },
+            Revolutionary:  { type: 'RESOURCE_CHANGE', changes: { money: 2, knowledge: 6, influence: 4 }, explanation: "You expose the violence as a tool for resistance." },
+            Historian:      { type: 'RESOURCE_CHANGE', changes: { money: 1, knowledge: 5, influence: 1 }, explanation: "You document the ongoing impact of colonial violence." },
+            Entrepreneur:   { type: 'RESOURCE_CHANGE', changes: { money: -5, knowledge: -1, influence: -2 }, explanation: "You are targeted for profiteering from violence." },
+            Politician:     { type: 'RESOURCE_CHANGE', changes: { money: -2, knowledge: -1, influence: 5 }, explanation: "You use the spectacle to manipulate public opinion." },
+            Artist:         { type: 'RESOURCE_CHANGE', changes: { money: 2, knowledge: 3, influence: 7 }, explanation: "Your art sparks a public outcry over colonial violence." }
         }
     },
     {
@@ -148,12 +148,12 @@ export const endOfTurnDeck = [
         name: "The Rise of Neo-Colonialism",
         description: "Neo-colonialism rises as multinational corporations and political structures continue to dominate formerly colonized nations. Césaire's critique of economic exploitation and Tuck & Yang's ideas about decolonization are at the heart of this phenomenon.",
         effects: {
-            Colonialist: { type: 'RESOURCE_CHANGE', changes: { money: 7, knowledge: 2, influence: 3 }, explanation: "You benefit from economic domination in a neo-colonial system." },
-            Revolutionary: { type: 'RESOURCE_CHANGE', changes: { money: -2, knowledge: -3, influence: -5 }, explanation: "Your resistance is hindered by neo-colonial systems." },
-            Historian: { type: 'RESOURCE_CHANGE', changes: { money: 1, knowledge: 6, influence: 0 }, explanation: "You analyze the rise of neo-colonialism in modern contexts." },
-            Entrepreneur: { type: 'RESOURCE_CHANGE', changes: { money: -5, knowledge: -2, influence: -2 }, explanation: "You face backlash against neo-colonial business practices." },
-            Politician: { type: 'RESOURCE_CHANGE', changes: { money: 3, knowledge: 1, influence: 6 }, explanation: "You implement policies that support neo-colonial interests." },
-            Artist: { type: 'RESOURCE_CHANGE', changes: { money: -2, knowledge: -1, influence: -5 }, explanation: "Your critique is marginalized in the face of neo-colonial power." }
+            Colonialist:    { type: 'RESOURCE_CHANGE', changes: { money: 7, knowledge: 2, influence: 3 }, explanation: "You benefit from economic domination in a neo-colonial system." },
+            Revolutionary:  { type: 'RESOURCE_CHANGE', changes: { money: -2, knowledge: -3, influence: -5 }, explanation: "Your resistance is hindered by neo-colonial systems." },
+            Historian:      { type: 'RESOURCE_CHANGE', changes: { money: 1, knowledge: 6, influence: 0 }, explanation: "You analyze the rise of neo-colonialism in modern contexts." },
+            Entrepreneur:   { type: 'RESOURCE_CHANGE', changes: { money: -5, knowledge: -2, influence: -2 }, explanation: "You face backlash against neo-colonial business practices." },
+            Politician:     { type: 'RESOURCE_CHANGE', changes: { money: 3, knowledge: 1, influence: 6 }, explanation: "You implement policies that support neo-colonial interests." },
+            Artist:         { type: 'RESOURCE_CHANGE', changes: { money: -2, knowledge: -1, influence: -5 }, explanation: "Your critique is marginalized in the face of neo-colonial power." }
         }
     },
     {
@@ -161,12 +161,12 @@ export const endOfTurnDeck = [
         name: "The Rise of Queer Theories",
         description: "Queer theory emerges as a powerful critique of normative structures. Sedgwick's exploration of queer identity and Butler's theory of gender as performative action challenge conventional ideas about gender and sexuality.",
         effects: {
-            Colonialist: { type: 'RESOURCE_CHANGE', changes: { money: -2, knowledge: -3, influence: -6 }, explanation: "Your patriarchal system is challenged by queer theories." },
-            Revolutionary: { type: 'RESOURCE_CHANGE', changes: { money: 2, knowledge: 6, influence: 4 }, explanation: "You incorporate queer theory into your resistance movements." },
-            Historian: { type: 'RESOURCE_CHANGE', changes: { money: 1, knowledge: 5, influence: 1 }, explanation: "You document the influence of queer theory on modern struggles." },
-            Entrepreneur: { type: 'RESOURCE_CHANGE', changes: { money: 7, knowledge: 1, influence: 3 }, explanation: "You profit from the emerging demand for queer-inclusive products." },
-            Politician: { type: 'RESOURCE_CHANGE', changes: { money: -1, knowledge: -2, influence: 5 }, explanation: "You use queer theory to connect with marginalized groups." },
-            Artist: { type: 'RESOURCE_CHANGE', changes: { money: 3, knowledge: 4, influence: 6 }, explanation: "Your art incorporates and critiques normative gender roles." }
+            Colonialist:    { type: 'RESOURCE_CHANGE', changes: { money: -2, knowledge: -3, influence: -6 }, explanation: "Your patriarchal system is challenged by queer theories." },
+            Revolutionary:  { type: 'RESOURCE_CHANGE', changes: { money: 2, knowledge: 6, influence: 4 }, explanation: "You incorporate queer theory into your resistance movements." },
+            Historian:      { type: 'RESOURCE_CHANGE', changes: { money: 1, knowledge: 5, influence: 1 }, explanation: "You document the influence of queer theory on modern struggles." },
+            Entrepreneur:   { type: 'RESOURCE_CHANGE', changes: { money: 7, knowledge: 1, influence: 3 }, explanation: "You profit from the emerging demand for queer-inclusive products." },
+            Politician:     { type: 'RESOURCE_CHANGE', changes: { money: -1, knowledge: -2, influence: 5 }, explanation: "You use queer theory to connect with marginalized groups." },
+            Artist:         { type: 'RESOURCE_CHANGE', changes: { money: 3, knowledge: 4, influence: 6 }, explanation: "Your art incorporates and critiques normative gender roles." }
         }
     },
     {
@@ -174,12 +174,12 @@ export const endOfTurnDeck = [
         name: "Revolutionary Movements and the State's Reaction",
         description: "Revolutionary movements are met with increasing repression. Benjamin's critique of state violence and Césaire's call for anti-colonial resistance highlight the tension between revolutionary acts and state control.",
         effects: {
-            Colonialist: { type: 'RESOURCE_CHANGE', changes: { money: -5, knowledge: -2, influence: -1 }, explanation: "You are forced to fund counterinsurgency efforts." },
-            Revolutionary: { type: 'RESOURCE_CHANGE', changes: { money: -1, knowledge: 2, influence: 6 }, explanation: "Your movement grows despite state repression." },
-            Historian: { type: 'RESOURCE_CHANGE', changes: { money: 0, knowledge: 5, influence: 1 }, explanation: "You document the state's response to revolutionary movements." },
-            Entrepreneur: { type: 'RESOURCE_CHANGE', changes: { money: -5, knowledge: -1, influence: -2 }, explanation: "Your business is targeted by revolutionary movements." },
-            Politician: { type: 'RESOURCE_CHANGE', changes: { money: 3, knowledge: -1, influence: 7 }, explanation: "You use repression to suppress revolutionaries." },
-            Artist: { type: 'RESOURCE_CHANGE', changes: { money: -1, knowledge: 2, influence: 6 }, explanation: "Your art inspires revolutionary movements." }
+            Colonialist:    { type: 'RESOURCE_CHANGE', changes: { money: -5, knowledge: -2, influence: -1 }, explanation: "You are forced to fund counterinsurgency efforts." },
+            Revolutionary:  { type: 'RESOURCE_CHANGE', changes: { money: -1, knowledge: 2, influence: 6 }, explanation: "Your movement grows despite state repression." },
+            Historian:      { type: 'RESOURCE_CHANGE', changes: { money: 0, knowledge: 5, influence: 1 }, explanation: "You document the state's response to revolutionary movements." },
+            Entrepreneur:   { type: 'RESOURCE_CHANGE', changes: { money: -5, knowledge: -1, influence: -2 }, explanation: "Your business is targeted by revolutionary movements." },
+            Politician:     { type: 'RESOURCE_CHANGE', changes: { money: 3, knowledge: -1, influence: 7 }, explanation: "You use repression to suppress revolutionaries." },
+            Artist:         { type: 'RESOURCE_CHANGE', changes: { money: -1, knowledge: 2, influence: 6 }, explanation: "Your art inspires revolutionary movements." }
         }
     },
     {

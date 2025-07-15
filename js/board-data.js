@@ -153,10 +153,10 @@ export const START_SPACE = {
     coordinates: [104, 512],
     type: SPACE_TYPE.Start,
     nextCoordOptions: {
-        ageOfExpansion: [169, 466],
-        ageOfResistance: [199, 490],
-        ageOfReckoning: [205, 548],
-        ageOfLegacy: [167, 579]
+        ageOfExpansion: [104, 512],
+        ageOfResistance: [104, 512],
+        ageOfReckoning: [104, 512],
+        ageOfLegacy: [104, 512]
     }
 };
 
@@ -172,8 +172,8 @@ export const ageOfExpansionPath = {
     startCoord: [104, 512],
     endCoord: FINISH_SPACE.coordinates,
     segments: [
-      { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[104, 512]], Next: [[169, 466]], spaceId: "START" },
-      { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[169, 466]], Next: [[178, 440]], Type: "Regular" , spaceId: "1P" },
+      { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[104, 512]], Next: [[159, 463]], spaceId: "START" },
+      { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[159, 463]], Next: [[178, 440]], Type: "Regular" , spaceId: "1P" },
       { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[178, 440]], Next: [[189, 408]], Type: "Regular" , spaceId: "2P" },
       { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[189, 408]], Next: [[206, 379]], Type: "Regular" , spaceId: "3P" },
       { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[206, 379]], Next: [[217, 350]], Type: "Draw" , spaceId: "4P" },
@@ -235,8 +235,8 @@ export const ageOfResistancePath = {
     startCoord: [104, 512],
     endCoord: FINISH_SPACE.coordinates,
     segments: [
-      { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[104, 512]], Next: [[199, 490]], Type: "Regular" , spaceId: "1B" },
-      { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[199, 490]], Next: [[233, 466]], Type: "Regular" , spaceId: "2B" },
+      { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[104, 512]], Next: [[202, 495]], Type: "Regular" , spaceId: "1B" },
+      { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[202, 495]], Next: [[233, 466]], Type: "Regular" , spaceId: "2B" },
       { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[233, 466]], Next: [[259, 442]], Type: "Regular" , spaceId: "3B" },
       { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[259, 442]], Next: [[288, 414]], Type: "Draw" , spaceId: "4B" },
       { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[288, 414]], Next: [[316, 383]], Type: "Regular" , spaceId: "5B" },

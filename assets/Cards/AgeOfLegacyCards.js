@@ -5,8 +5,8 @@ export const ageOfLegacyDeck = [
         name: "Digital Divide",
         description: "Exposes inequalities in access to digital history, impacting Knowledge.",
         effects: [
-            { type: 'RESOURCE_CHANGE', changes: { knowledge: -7 } }, // Self loss
-            { type: 'STEAL', target: 'OTHER', resource: 'KNOWLEDGE', amount: 4 } // Steal 4 knowledge from another player
+            { type: 'RESOURCE_CHANGE', changes: { knowledge:4 } }, // Self loss
+            { type: 'STEAL', target: 'OTHER', resource: 'KNOWLEDGE', amount:2 } // Steal 4 knowledge from another player
         ]
     },
     {
@@ -58,7 +58,7 @@ export const ageOfLegacyDeck = [
         description: "Sparks public debate about historical interpretation, affecting Influence.",
         effects: [
             { type: 'RESOURCE_CHANGE', changes: { influence: 7 } },
-            { type: 'SABOTAGE', target: 'OTHER', changes: { influence: -4 } }
+            { type: 'STEAL', target: 'OTHER', changes: { money:4 } }
         ]
     },
     {
@@ -84,7 +84,7 @@ export const ageOfLegacyDeck = [
         description: "Considers how current actions will be remembered, rewarding forward thinking.",
         // Placeholder: Grant immunity?
         effects: [
-            { type: 'GRANT_IMMUNITY', turns: 1 } 
+            { type: 'RESOURCE_CHANGE', changes: { knowledge:6 } }, 
         ]
     },
     {
