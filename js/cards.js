@@ -434,14 +434,6 @@ function processEffect(effect, player, sourcePlayer) {
     else if (!effect.target) {
          targetPlayer = sourcePlayer;
     } 
-    // Note: Some functions below might re-determine the target internally based on convention
-
-    // Check for immunity BEFORE applying effect
-    // Always check immunity of the ACTUAL target player against the source player
-    if (hasImmunity(targetPlayer, effect.type, sourcePlayer)) { 
-        console.log(` Player ${targetPlayer.name} is immune to ${effect.type} from ${sourcePlayer.name}.`);
-        return; // Skip this effect
-    }
     
     // Apply the effect based on its type
     switch (effect.type) {
@@ -485,69 +477,12 @@ function processEffect(effect, player, sourcePlayer) {
 
 // ===== Effect Processing Functions =======
 
-/** 
- * Checks player immunity based on role and effect type/source.
- * @param {object} targetPlayer - The player being targeted by the effect.
- * @param {string} effectType - The type of effect being applied.
- * @param {object} sourcePlayer - The player initiating the effect.
- * @returns {boolean} - True if the player is immune.
- */
-function hasImmunity(targetPlayer, effectType, sourcePlayer = null) {
-    if (!targetPlayer || !targetPlayer.role || !PLAYER_ROLES[targetPlayer.role]) return false;
-    
-    const roleData = PLAYER_ROLES[targetPlayer.role];
-    
-    // 0. Alliance Immunity (Check first!)
-    // Immune if the source player is the current alliance partner
-    if (sourcePlayer && targetPlayer.currentAlliancePartnerId && targetPlayer.currentAlliancePartnerId === sourcePlayer.id) {
-        // Allow non-harmful effects? Or block all effects between allies?
-        // For now, block common negative effects. Add more types if needed.
-        const harmfulEffects = ['STEAL', 'SABOTAGE', 'STEAL_FROM_ALL']; // MOVEMENT (backwards) could be added
-        if (harmfulEffects.includes(effectType)) {
-            console.log(` Immunity Check: Target ${targetPlayer.name} is allied with source ${sourcePlayer.name}. Immune to ${effectType}.`);
-            return true; 
-        }
-    }
-
-    // 1. Opposing Role Immunity
-    // Check if sourcePlayer exists and its role is the opposing role
-    if (sourcePlayer && sourcePlayer.role && roleData.opposingRole === sourcePlayer.role) {
-         console.log(` Immunity Check: ${targetPlayer.role} opposes ${sourcePlayer.role}. Immune.`);
-         return true; // Immune to *any* attack from opposing role
-    }
-
-    // 2. Specific Role Immunities
-    switch (effectType) {
-        case 'STEAL':
-            // Check resource type if specified in effect (e.g., effect.resource = 'knowledge')
-            if (targetPlayer.role === 'HISTORIAN' /* && effect.resource === 'knowledge' */) return true;
-            if (targetPlayer.role === 'COLONIALIST' /* && effect.resource === 'influence' */) return true;
-            if (targetPlayer.role === 'POLITICIAN' /* && effect.resource === 'money' */) return true;
-            break;
-        case 'SABOTAGE': // Generic sabotage immunity count
-            if (targetPlayer.role === 'REVOLUTIONARY' && !targetPlayer.sabotageImmunityUsed) {
-                targetPlayer.sabotageImmunityUsed = true; // Mark as used for this game
-                console.log(` Revolutionary used their 1 sabotage immunity.`);
-                return true;
-            }
-            break;
-        case 'SKIP_TURN':
-            if (targetPlayer.role === 'ENTREPRENEUR') return true;
-            break;
-        case 'CHANGE_PATH': // Immunity to being forced to change
-             if (targetPlayer.role === 'ARTIST') return true;
-             break;
-        // Add other specific immunities
-    }
-    
-    return false;
-};
 
 function applyResourceChange(effect, player) {
     console.log('---------applyResourceChange---------');
     console.log(` Applying RESOURCE_CHANGE to ${player.name}:`, effect.changes);
     // effect.changes should be an object like { knowledge: 10, money: -5 }
-    updatePlayerResources(effect, player);
+    updatePlayerResources(player, effect.changes ?? effect);
     updateResourcePanel(player); 
 };
 
@@ -574,54 +509,6 @@ function applyMovement(effect, player) {
     handleCardMovement(targetPlayerForMove, effect);
 };
 
-/**
- * Applies STEAL effect. Source player steals from target player.
- * @param {object} effect - The steal effect details.
- * @param {object} targetPlayer - The player being stolen from.
- * @param {object} sourcePlayer - The player initiating the steal.
- */
-function applySteal(effect, targetPlayer, sourcePlayer) {
-    // Immunity check already done in processEffect
-    console.log(` Applying STEAL from ${sourcePlayer.name} to target ${targetPlayer.name}:`, effect);
-        
-    let resourceToSteal = effect.resource;
-    const amount = effect.amount;
-    
-    if (!resourceToSteal || !amount) {
-         console.warn("Invalid STEAL effect definition:", effect);
-         return;
-    }
-
-    // Handle random resource selection
-    if (resourceToSteal === 'random') {
-        const availableResources = ['money', 'knowledge', 'influence'].filter(res => targetPlayer.resources[res] > 0); // Only steal resources they HAVE
-        if(availableResources.length === 0) {
-            console.log(` ${targetPlayer.name} has no resources to steal.`);
-            return;
-        }
-        const randomIndex = Math.floor(Math.random() * availableResources.length);
-        resourceToSteal = availableResources[randomIndex];
-        console.log(` Random steal selected: ${resourceToSteal}`);
-    }
-    
-    // Check specific role immunities for the *resource type*
-     if ((resourceToSteal === 'knowledge' && targetPlayer.role === 'HISTORIAN') ||
-         (resourceToSteal === 'influence' && targetPlayer.role === 'COLONIALIST') ||
-         (resourceToSteal === 'money' && targetPlayer.role === 'POLITICIAN')) {
-          console.log(` Target ${targetPlayer.name} role immunity prevents stealing ${resourceToSteal}.`);
-          return;
-     }
-
-    // Proceed with steal
-    const actualAmountStolen = Math.min(targetPlayer.resources[resourceToSteal] || 0, amount);
-    if (actualAmountStolen > 0) {
-        console.log(` ${sourcePlayer.name} stealing ${actualAmountStolen} ${resourceToSteal} from ${targetPlayer.name}`);
-        updatePlayerInfo(sourcePlayer, { [resourceToSteal]: actualAmountStolen }); 
-        updatePlayerInfo(targetPlayer, { [resourceToSteal]: -actualAmountStolen }); 
-    } else {
-         console.log(` ${targetPlayer.name} has no ${resourceToSteal} to steal.`);
-    }
-};
 
 function applySkipTurn(effect, player) {
     // player here is the sourcePlayer passed from processEffect
@@ -958,66 +845,6 @@ export function hideCard() {
 };
 
 /**
- * Applies STEAL_FROM_ALL effect. Source player steals from all other players.
- * @param {object} effect - The steal from all effect details.
- * @param {object} sourcePlayer - The player initiating the steal.
- */
-function applyStealFromAll(effect, sourcePlayer) {
-    console.log(` Applying STEAL_FROM_ALL effect for ${sourcePlayer.name}:`, effect);
-        
-    const resourceToSteal = effect.resource;
-    const amountPerPlayer = effect.amount;
-
-    if (!resourceToSteal || !amountPerPlayer || amountPerPlayer <= 0) {
-        console.log("Invalid STEAL_FROM_ALL effect definition:", effect);
-        return;
-    }
-
-    // Use getPlayers() imported from players.js
-    const otherPlayers = getPlayers().filter(p => p.id !== sourcePlayer.id && !p.finished); 
-    if (otherPlayers.length === 0) {
-        console.log("STEAL_FROM_ALL: No other players to steal from.");
-        return;
-    }
-    
-    let totalStolen = 0;
-
-    otherPlayers.forEach(targetPlayer => {
-        console.log(` -> Attempting to steal ${amountPerPlayer} ${resourceToSteal} from ${targetPlayer.name}`);
-        
-        // Pass actual sourcePlayer for immunity checks
-        if (hasImmunity(targetPlayer, 'STEAL_FROM_ALL', sourcePlayer)) { 
-            console.log(`    Immune: ${targetPlayer.role} vs ${sourcePlayer.role}`);
-            return; // Skips this target player
-        }
-
-        // Also check specific resource immunities
-        if ((resourceToSteal === 'knowledge' && targetPlayer.role === 'HISTORIAN') ||
-            (resourceToSteal === 'influence' && targetPlayer.role === 'COLONIALIST') ||
-            (resourceToSteal === 'money' && targetPlayer.role === 'POLITICIAN')) {
-            console.log(`    Immune: Role ${targetPlayer.role} protects ${resourceToSteal}.`);
-            return; // Skips this target player
-        }
-
-        const actualAmountStolen = Math.min(targetPlayer.resources[resourceToSteal] || 0, amountPerPlayer);
-        if (actualAmountStolen > 0) {
-            console.log(`    Stole ${actualAmountStolen} ${resourceToSteal} from ${targetPlayer.name}`);
-            updatePlayerInfo(targetPlayer);
-            totalStolen += actualAmountStolen;
-        } else {
-            console.log(`    ${targetPlayer.name} has no ${resourceToSteal} to steal.`);
-        }
-    });
-
-    if (totalStolen > 0) {
-        console.log(` ${sourcePlayer.name} gained a total of ${totalStolen} ${resourceToSteal} from all others.`);
-        updatePlayerInfo(sourcePlayer);
-    } else {
-        console.log(` No ${resourceToSteal} was stolen from any player.`);
-    }
-};
-
-/**
  * Process a single effect, handling immunity and applying the correct effect type
  * @param {object} effect - The effect object from the card.
  * @param {object} player - The target player of the effect.
@@ -1057,7 +884,7 @@ export function applyAgeCardEffect(effect, player, sourcePlayer) {
     switch (effect.type) {
         case 'RESOURCE_CHANGE':
             // Applies to the player object passed in (usually the source) unless target logic modifies it
-            updatePlayerResources(effect, targetPlayer); 
+            updatePlayerResources(targetPlayer, effect.changes ?? effect); 
             break;
         case 'MOVEMENT':
             // applyMovement determines target internally based on effect.target
@@ -1078,10 +905,10 @@ export function applyAgeCardEffect(effect, player, sourcePlayer) {
         default:
             console.warn(`Unknown card effect type: ${effect.type}`);
             if (!player.isHuman) {
-                updatePlayerResources(effect, player);
+                updatePlayerResources(player, effect.changes ?? effect);
                 handleEndTurn();
             } else {
-                updatePlayerResources(effect, player);
+                updatePlayerResources(player, effect.changes ?? effect);
                 handleEndTurn();
             }
             break;

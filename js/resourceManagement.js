@@ -1,8 +1,5 @@
 // resourceManagement.js
 
-import { updateResourcePanel } from './ui.js';
-import 
-
 /**
  * Applies resource changes to a single player, with role-based mod//ifiers
  */

@@ -17,7 +17,6 @@ import {
 } from './game.js';
 
 import { 
-    drawTokens, 
     scaleCoordinates,
     drawBoard
 } from './board.js';
@@ -28,8 +27,6 @@ import {
     ageOfResistancePath, 
     ageOfReckoningPath, 
     ageOfLegacyPath, 
-    PATH_COLORS,
-    choicepoints
 } from './board-data.js';
 
 

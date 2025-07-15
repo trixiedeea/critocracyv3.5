@@ -29,7 +29,6 @@ import {
     fullDeckRegionPathMap, 
     choicepoints
 } from './board-data.js';
-import { ageOfExpansionDeck } from '../assets/Cards/AgeOfExpansionCards.js';
 
 /**
  * Initializes the entire UI module. Should be called once the DOM is fully loaded.
