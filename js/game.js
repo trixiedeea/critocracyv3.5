@@ -1084,11 +1084,15 @@ export async function advanceToNextPlayer() {
     let nextPlayerIndex = (state.currentPlayerIndex + 1) % state.totalPlayerCount;
     let loopCheck = 0; // Prevent infinite loops
 
+    console.log(`Advancing from player index ${state.currentPlayerIndex} of ${state.totalPlayerCount} total players`);
+    console.log(`Initial next index: ${nextPlayerIndex}`);
+
     // Find the next player who hasn't finished
     while (state.players[nextPlayerIndex].finished && loopCheck < state.totalPlayerCount) {
-        console.log(`Player ${state.players[nextPlayerIndex].name} has finished, skipping.`);
+        console.log(`Player ${state.players[nextPlayerIndex].name} at index ${nextPlayerIndex} has finished, skipping.`);
         nextPlayerIndex = (nextPlayerIndex + 1) % state.totalPlayerCount;
         loopCheck++;
+        console.log(`Trying next index: ${nextPlayerIndex}, loop count: ${loopCheck}`);
     }
 
     // If loopCheck reaches totalPlayerCount, it means everyone left is finished - trigger game over again just in case.
@@ -1098,6 +1102,7 @@ export async function advanceToNextPlayer() {
          return;
     }
 
+    console.log(`Final next player index selected: ${nextPlayerIndex} - Player: ${state.players[nextPlayerIndex].name}`);
     updateGameState({
         currentPlayerIndex: nextPlayerIndex,
         currentPhase: 'ROLLING', // Start in ROLLING phase until dice is rolled

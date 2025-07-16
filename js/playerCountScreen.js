@@ -1,4 +1,4 @@
-const DEBUG_MODE = false;
+const DEBUG_MODE = true;
 
 // Player Count Screen - Enforces exactly 6 total players
 document.addEventListener("DOMContentLoaded", () => {
@@ -133,4 +133,3 @@ playerCountConfirmButton.addEventListener("click", () => {
 });
 
 });
-    

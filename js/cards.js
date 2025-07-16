@@ -433,7 +433,7 @@ function processEffect(effect, player, sourcePlayer) {
     // If no target property, assume the effect applies to the sourcePlayer (player who drew card)
     else if (!effect.target) {
          targetPlayer = sourcePlayer;
-    } 
+    }
     
     // Apply the effect based on its type
     switch (effect.type) {
@@ -558,67 +558,6 @@ function applyDrawCard(effect, sourcePlayer) {
     }
 };
 
-// Helper function to format resource changes
-function formatResourceChanges(changes) {
-    if (!changes) return '';
-    
-    const changesList = [];
-    if (changes.money !== undefined) {
-        changesList.push(`${changes.money >= 0 ? '+' : ''}${changes.money} Money`);
-    }
-    if (changes.knowledge !== undefined) {
-        changesList.push(`${changes.knowledge >= 0 ? '+' : ''}${changes.knowledge} Knowledge`);
-    }
-    if (changes.influence !== undefined) {
-        changesList.push(`${changes.influence >= 0 ? '+' : ''}${changes.influence} Influence`);
-    }
-    return changesList.join(', ');
-};
-
-// Helper function to format a single effect
-function formatEffect(effect) {
-    if (!effect) return '';
-    
-    // Handle different effect types
-    switch(effect.type) {
-        case 'RESOURCE_CHANGE':
-        case 'RESOURCE':
-            const changes = effect.changes ? formatResourceChanges(effect.changes) : '';
-            return `${effect.description || 'Resource change'}: ${changes}`;
-            
-        case 'MOVEMENT':
-        case 'MOVE':
-            const spaces = effect.spaces || 'some';
-            const direction = effect.direction ? ` ${effect.direction}` : '';
-            const target = effect.target && effect.target !== 'SELF' ? ` (${effect.target})` : '';
-            return `Move${direction} ${spaces} spaces${target}`;
-            
-        case 'STEAL':
-            const amount = effect.amount || 'some';
-            const resource = effect.resource || 'resources';
-            const from = effect.target ? ` from ${effect.target}` : '';
-            return `Steal ${amount} ${resource}${from}`;
-            
-        case 'SKIP_TURN':
-            return `Skip ${effect.target || 'your'} next turn`;
-            
-        case 'DRAW_CARD':
-            const count = effect.count || 1;
-            return `Draw ${count} card${count !== 1 ? 's' : ''}`;
-            
-        case 'CHANGE_PATH':
-        case 'PATH_CHANGE':
-            return `Change path to ${effect.path || 'a new path'}`;
-            
-        default:
-            // If we have a description, use that
-            if (effect.description) return effect.description;
-            // If we have an effect property, use that
-            if (effect.effect) return effect.effect;
-            // As a last resort, show the raw effect
-            return JSON.stringify(effect);
-    }
-};
 
 export async function showCard(card, deckType, player, onComplete) {
     console.log('---------showCard---------');
@@ -631,21 +570,24 @@ export async function showCard(card, deckType, player, onComplete) {
         (card.deck && card.deck.includes('endOfTurn'));
     const isAgeDeck = /^age-Of/i.test(deckType);
 
-    // Only hide card popovers, not all popovers
     document.querySelectorAll('[data-deck-id]').forEach(popover => {
         popover.style.display = 'none';
     });
 
-    const dialog = document.querySelector(`[data-deck-id="${deckType}"]`)?.closest('dialog');
+    let dialog = document.querySelector(`[data-deck-id="${deckType}"]`)?.closest('dialog') 
+              || document.getElementById('card-Popover');
     if (!dialog) {
-        console.error("Deck popover element not found for deck:", deckType);
+        console.error("No valid dialog found");
+        if (card.effects) applyCardEffect(card.effects, player);
+        if (typeof onComplete === 'function') onComplete();
         return;
     }
 
-    const popoverContent = dialog.querySelector(`[data-deck-id="${deckType}"]`);
-    if (popoverContent) {
-        popoverContent.style.display = 'block';
-    }
+    const popoverContent = dialog.querySelector(`[data-deck-id="${deckType}"]`) 
+                        || dialog.querySelector('.popover-Content') 
+                        || dialog;
+    if (popoverContent) popoverContent.style.display = 'block';
+
     dialog.className = 'popover';
     if (deckMeta?.color) dialog.classList.add(`card-${deckType}`);
     else if (card?.color) dialog.classList.add(`card-${card.color}`);
@@ -655,16 +597,11 @@ export async function showCard(card, deckType, player, onComplete) {
     const effectsEl = dialog.querySelector('#card-Effects');
     const showDetailsButton = dialog.querySelector('#show-Card-Details-Button');
     const closeCardButton = dialog.querySelector('#close-Card-Button');
-    const closeAgeCardButton = dialog.querySelector('.close-Age-Card-Button');
+    const optionAButton = dialog.querySelector('.card-Choice-Button-One');
+    const optionBButton = dialog.querySelector('.card-Choice-Button-Two');
 
-    if (!titleEl || !descEl || !effectsEl || !showDetailsButton || (!closeCardButton && !closeAgeCardButton)) {
-        console.error("Required elements missing in popover dialog");
-        return;
-    }
+    if (titleEl) titleEl.textContent = card.name || 'Card';
 
-    titleEl.textContent = card.name || 'Card';
-
-    // Format resource summary preview
     let resourceSummary = '';
     if (Array.isArray(card.effects)) {
         card.effects.forEach(effect => {
@@ -681,107 +618,134 @@ export async function showCard(card, deckType, player, onComplete) {
                 resourceSummary += `<p><span class="effect-icon">⏭️</span> <strong>Effect:</strong> Skip Turn</p>`;
             } else if (effect.type === 'STEAL') {
                 resourceSummary += `<p><span class="effect-icon">🔄</span> <strong>Effect:</strong> Steal ${effect.amount} ${effect.resource}</p>`;
-            } else if (effect.type === 'ALLIANCE_OFFER') {
-                resourceSummary += `<p><span class="effect-icon">🤝</span> <strong>Effect:</strong> Alliance Offer</p>`;
+            } else if (effect.type === 'STEAL_FROM_ALL') {
+        resourceSummary += `<p><span class="effect-icon">🤝</span> <strong>Effect:</strong> Alliance Offer</p>`;
             }
         });
     } else if (typeof card.effects === 'object' && isEndOfTurnCard) {
         resourceSummary += `<p><span class="effect-icon">💡</span><i>(Effects vary by role - click below for details)</i></p>`;
     }
 
-    descEl.innerHTML = `<div class="card-description">${card.description || ''}</div>
-                        <div class="card-effects-summary">${resourceSummary}</div>`;
+    if (descEl) {
+        descEl.innerHTML = `<div class="card-description">${card.description || ''}</div>
+                            <div class="card-effects-summary">${resourceSummary}</div>`;
+    }
 
-    effectsEl.innerHTML = '';
-    effectsEl.style.display = 'none';
+    if (effectsEl) {
+        effectsEl.innerHTML = '';
+        effectsEl.style.display = 'none';
+    }
 
-    showDetailsButton.style.display = isAgeDeck ? 'none' : 'block';
-    showDetailsButton.disabled = false;
+    if (showDetailsButton) {
+        showDetailsButton.style.display = isAgeDeck ? 'none' : 'block';
+        showDetailsButton.disabled = false;
+        showDetailsButton.onclick = () => {
+            let explanationHTML = '';
+            if (isEndOfTurnCard && player?.role) {
+                const allRoles = ['Colonialist', 'Revolutionary', 'Historian', 'Entrepreneur', 'Politician', 'Artist'];
+                explanationHTML += "<div class='role-effects-container'><h3>Effects for All Roles:</h3><ul class='role-effects-list'>";
+                allRoles.forEach(role => {
+                    const roleEffect = card.effects[role];
+                    if (roleEffect) {
+                        const changes = roleEffect.changes || {};
+                        const changeText = [
+                            changes.money !== undefined ? `${changes.money >= 0 ? '+' : ''}${changes.money} Money` : '',
+                            changes.knowledge !== undefined ? `${changes.knowledge >= 0 ? '+' : ''}${changes.knowledge} Knowledge` : '',
+                            changes.influence !== undefined ? `${changes.influence >= 0 ? '+' : ''}${changes.influence} Influence` : ''
+                        ].filter(Boolean).join(', ');
 
-    showDetailsButton.onclick = () => {
-        let explanationHTML = '';
+                        const fullText = `<span class='role-name'>${role}:</span> <span class='resource-changes'>[${changeText}]</span> <span class='effect-explanation'>${roleEffect.explanation || ''}</span>`;
+                        const currentClass = role === player.role ? 'current-role' : '';
+                        explanationHTML += `<li class="role-effect ${currentClass}">${fullText}</li>`;
+                    } else {
+                        explanationHTML += `<li class='role-effect'><span class='role-name'>${role}:</span> No effect defined.</li>`;
+                    }
+                });
+                explanationHTML += "</ul></div>";
+            } else if (Array.isArray(card.effects)) {
+                explanationHTML += '<p><strong>Card Effects:</strong></p><ul>';
+                card.effects.forEach(effect => {
+                    explanationHTML += `<li>${formatEffect(effect)}</li>`;
+                });
+                explanationHTML += '</ul>';
+            }
 
-        if (isEndOfTurnCard && player?.role) {
-            const allRoles = ['Colonialist', 'Revolutionary', 'Historian', 'Entrepreneur', 'Politician', 'Artist'];
-            explanationHTML += "<div class='role-effects-container'><h3>Effects for All Roles:</h3><ul class='role-effects-list'>";
-            allRoles.forEach(role => {
-                const roleEffect = card.effects[role];
-                if (roleEffect) {
-                    const changes = roleEffect.changes || {};
-                    const changeText = [
-                        changes.money !== undefined ? `${changes.money >= 0 ? '+' : ''}${changes.money} Money` : '',
-                        changes.knowledge !== undefined ? `${changes.knowledge >= 0 ? '+' : ''}${changes.knowledge} Knowledge` : '',
-                        changes.influence !== undefined ? `${changes.influence >= 0 ? '+' : ''}${changes.influence} Influence` : ''
-                    ].filter(Boolean).join(', ');
+            if (effectsEl) {
+                effectsEl.innerHTML = explanationHTML;
+                effectsEl.style.display = 'block';
+            }
+            showDetailsButton.style.display = 'none';
+        };
+    }
 
-                    const fullText = `<span class='role-name'>${role}:</span> <span class='resource-changes'>[${changeText}]</span> <span class='effect-explanation'>${roleEffect.explanation || ''}</span>`;
-                    const currentClass = role === player.role ? 'current-role' : '';
-                    explanationHTML += `<li class="role-effect ${currentClass}">${fullText}</li>`;
-                } else {
-                    explanationHTML += `<li class='role-effect'><span class='role-name'>${role}:</span> No effect defined.</li>`;
-                }
+    // Choice Buttons
+    if (card.choice && optionAButton && optionBButton) {
+        optionAButton.textContent = card.choice.optionA.text;
+        optionBButton.textContent = card.choice.optionB.text;
+
+        optionAButton.replaceWith(optionAButton.cloneNode(true));
+        optionBButton.replaceWith(optionBButton.cloneNode(true));
+
+        if (cardChoiceButtonOne) {
+            cardChoiceButtonOne.addEventListener("click", () => {
+                applyAgeCardEffect(card.choice.optionA.effects, player);
+                dialog.close();
+                if (typeof onComplete === 'function') onComplete();
             });
-            explanationHTML += "</ul></div>";
-        } else if (Array.isArray(card.effects)) {
-            explanationHTML += '<p><strong>Card Effects:</strong></p><ul>';
-            card.effects.forEach(effect => {
-                const formatted = formatEffect(effect);
-                explanationHTML += `<li>${formatted}</li>`;
-            });
-            explanationHTML += '</ul>';
         }
+        if (optionBButton) {
+            optionBButton.addEventListener("click", () => {
+                applyAgeCardEffect(card.choice.optionB.effects, player);
+                dialog.close();
+                if (typeof onComplete === 'function') onComplete();
+            });
+        }
+    }
 
-        effectsEl.innerHTML = explanationHTML;
-        effectsEl.style.display = 'block';
-        showDetailsButton.style.display = 'none';
-    };
-
-    // Store the original card data in the dialog for event listeners to access
     dialog.dataset.cardData = JSON.stringify(card);
-    
-    dialog.showModal();
+
+    try {
+        dialog.showModal();
+    } catch (e) {
+        console.error("Error showing dialog:", e);
+        if (card.effects) applyCardEffect(card.effects, player);
+        if (typeof onComplete === 'function') onComplete();
+        return;
+    }
 
     if (isAI) {
         setTimeout(() => {
-            if (dialog.open) {
-                dialog.close();
-                if (typeof onComplete === 'function') onComplete();
-                if (isEndOfTurnCard) {
-                    applyCardEffect(card, player);
-                } else if (isAgeDeck) {
-                    applyAgeCardEffect(card.effects, player, player);
-                }
+            if (!dialog.open) return;
+            dialog.close();
+            if (typeof onComplete === 'function') onComplete();
+            if (isEndOfTurnCard) {
+                applyCardEffect(card, player);
+            } else if (card.effects) {
+                applyAgeCardEffect(card.effects, player, player);
+            } else if (card.choice) {
+                applyCardEffect(card.choice.optionA.effects, player);
             }
         }, 9000);
     }
+}
 
-    function formatResourceChanges(changes) {
-        const result = [];
-        if (changes.money !== undefined) result.push(`${changes.money >= 0 ? '+' : ''}${changes.money}💰`);
-        if (changes.knowledge !== undefined) result.push(`${changes.knowledge >= 0 ? '+' : ''}${changes.knowledge}📚`);
-        if (changes.influence !== undefined) result.push(`${changes.influence >= 0 ? '+' : ''}${changes.influence}🎭`);
-        return result.join(', ');
-    }
+function formatResourceChanges(changes) {
+    const result = [];
+    if (changes.money !== undefined) result.push(`${changes.money >= 0 ? '+' : ''}${changes.money}💰`);
+    if (changes.knowledge !== undefined) result.push(`${changes.knowledge >= 0 ? '+' : ''}${changes.knowledge}📚`);
+    if (changes.influence !== undefined) result.push(`${changes.influence >= 0 ? '+' : ''}${changes.influence}🎭`);
+    return result.join(', ');
+}
 
-    function formatEffect(effect) {
-        if (effect.type === 'RESOURCE_CHANGE' && effect.changes) {
-            return formatResourceChanges(effect.changes);
-        }
-        if (effect.type === 'MOVEMENT') {
-            return `Move ${effect.spaces} spaces.`;
-        }
-        if (effect.type === 'SKIP_TURN') {
-            return 'Skip your turn.';
-        }
-        if (effect.type === 'STEAL') {
-            return `Steal ${effect.amount} ${effect.resource}`;
-        }
-        if (effect.type === 'ALLIANCE_OFFER') {
-            return 'Offer an alliance.';
-        }
-        return '(Unknown effect)';
-    }
-};
+function formatEffect(effect) {
+    if (effect.type === 'RESOURCE_CHANGE' && effect.changes) return formatResourceChanges(effect.changes);
+    if (effect.type === 'MOVEMENT') return `Move ${effect.spaces} spaces.`;
+    if (effect.type === 'SKIP_TURN') return 'Skip your turn.';
+    if (effect.type === 'STEAL') return `Steal ${effect.amount} ${effect.resource}`;
+    if (effect.type === 'ALLIANCE_OFFER') return 'Offer an alliance.';
+    return '(Unknown effect)';
+}
+
 
 // Hide card popover
 export function hideCard() {
@@ -863,7 +827,7 @@ export function applyAgeCardEffect(effect, player, sourcePlayer) {
     // If no target property, assume the effect applies to the sourcePlayer (player who drew card)
     else if (!effect.target) {
          targetPlayer = sourcePlayer;
-    } 
+    }
     
     // Apply the effect based on its type
     switch (effect.type) {
@@ -898,7 +862,7 @@ export function applyAgeCardEffect(effect, player, sourcePlayer) {
             }
             break;
     }
-}
+};
 
 export function isEndOfTurnCard(card) {
     console.log('---------isEndOfTurnCard---------');
@@ -907,4 +871,3 @@ export function isEndOfTurnCard(card) {
         (card.deck && card.deck.includes('endOfTurn'))
     );
 }
-

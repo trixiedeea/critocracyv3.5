@@ -285,4 +285,21 @@ export function handleStealFromAll(effect, sourcePlayer, allPlayers) {
 }
 
 
+export function applySkipTurn(effect, player) {
+  if (!player) {
+    console.warn('applySkipTurn: No player provided.');
+    return;
+  }
+
+  player.skipNextTurn = true;
+
+  console.log(`${player.name}'s next turn will be skipped.`);
+  
+  // Optionally update UI or log
+  if (typeof updatePlayerStatus === 'function') {
+    updatePlayerStatus(player, 'SKIPPED');
+  }
+}
+
+
 

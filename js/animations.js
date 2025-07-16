@@ -250,6 +250,7 @@ export const ensurePlayerPath = (player) => {
  * @param {function|null} onComplete - Callback after animation finishes.
  */
 export function animateTokenToPosition(player, newPosition, duration = 1000, skipSpaceAction = false, onComplete = null) {
+  console.log(`----------animateTokenToPosition: ${player.name} moving ${state.rollResult} spaces -----------`);
   player = getCurrentPlayer();
   const rollResult = state.rollResult;
   console.log(`Moving ${rollResult} spaces for ${player.name}`);
@@ -344,12 +345,6 @@ export function animateTokenToPosition(player, newPosition, duration = 1000, ski
       }
     
       const segment = findSegmentByCoord(currentCoord);
-      console.log(
-        `=====Step ${rollResult - remainingSteps + 1}/${rollResult}:======= ` +
-        `======Space ID: ${segment.spaceId}======= ` +
-        `======Coords: [${segment.coordinates[0][0]}, ${segment.coordinates[0][1]}]======= ` +
-        `======Steps Remaining: ${remainingSteps - 1}=======`
-      );
       if (!segment || !segment.Next || segment.Next.length === 0) {
         console.warn("Invalid or incomplete segment found at", currentCoord);
         resolve();
@@ -406,13 +401,9 @@ export function animateTokenToPosition(player, newPosition, duration = 1000, ski
             currentCoord = { ...player.currentCoords };
           }
           
-          // Only decrement if spaceId changes at choicepoint
-          const currentSegment = findSegmentByCoord(currentCoord);
-          const chosenSegment = findSegmentByCoord({ x: chosenOption.coords[0], y: chosenOption.coords[1] });
-          if (currentSegment && chosenSegment && currentSegment.spaceId !== chosenSegment.spaceId) {
-            remainingSteps--;
-            updateGameState({ remainingSteps });
-          }
+          remainingSteps--;
+          // Persist updated step count immediately
+          updateGameState({ remainingSteps });
           
           // Clear the interrupted move data
           delete state.interruptedMove;
@@ -434,18 +425,15 @@ export function animateTokenToPosition(player, newPosition, duration = 1000, ski
         y: segment.Next[0][1]
       };
 
-      // Only decrement if spaceId changes (use a temp variable for step logic)
-      const currentSegmentForStep = findSegmentByCoord(currentCoord);
-      const nextSegmentForStep = findSegmentByCoord(nextCoord);
-      if (currentSegmentForStep && nextSegmentForStep && currentSegmentForStep.spaceId !== nextSegmentForStep.spaceId) {
-        remainingSteps--;
-        updateGameState({ remainingSteps });
-      }
-       
+      // Count step as we leave the currentCoord
+      remainingSteps--;
+            // Persist updated step count immediately
+            updateGameState({ remainingSteps });
+      
       // Animate visual movement
       await animatePosition(token, currentCoord, nextCoord, duration);
       
-      // Update to exact coordinates from the path segment (original logic)
+      // Update to exact coordinates from the path segment
       const nextSegment = findSegmentByCoord(nextCoord);
       if (nextSegment) {
         const exactCoord = nextSegment.coordinates[0];

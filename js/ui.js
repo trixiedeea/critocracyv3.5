@@ -116,7 +116,10 @@ function initializeElementReferences() {
                 },
                 popovers: {
                     choicepointPopover: document.getElementById('choicepoint-Popover'),
-                    closeAgeCardButtons: document.querySelectorAll('.close-Age-Card-Button'),
+                    ageCardChoiceButtonOne: document.querySelectorAll('.card-Choice-Button-One'),
+                    ageCardChoiceButtonTwo: document.querySelectorAll('.card-Choice-Button-Two'),
+                    cardChoiceOptionOne: document.querySelectorAll('.card-Choice-Option-One'),
+                    cardChoiceOptionTwo: document.querySelectorAll('.card-Choice-Option-Two'),
                     choicepointPopoverContainer: document.getElementById('choicepoint-Popover-Container'),
                     pathChoicePopoverContainer: document.getElementById('path-Choice-Popover-Container'),
                     cardPopoverContainer: document.getElementById('card-Popover-Container'),
@@ -807,38 +810,11 @@ export function updateGameControls() {
         
 /**
  * Update player's resource panel with current values.
- * Expected HTML structure:
- * <div id="player-resource-panel-p1">
- *   <span class="player-name">Alice</span>
- *   <span class="money">💰 10</span>
- *   <span class="knowledge">📚 5</span>
- *   <span class="influence">🗳️ 3</span>
- *   <div class="resource-feedback"></div>
- * </div>
  */
 export function updateResourcePanel(player) {
     console.log('---------updateResourcePanel---------');
     // Try to find (or freshly create) the panel again
-    const panel = document.getElementById(`player-resource-panel-${player.id}`);
-    if (!panel) {
-      // If panel doesn't exist yet, create it dynamically
-      const container = document.getElementById('resource-Display-Container');
-      if (container) {
-        const newPanel = document.createElement('div');
-        newPanel.id = `player-resource-panel-${player.id}`;
-        newPanel.classList.add('player-resource-panel');
-        newPanel.innerHTML = `
-          <span class="player-name"></span>
-          <span class="money"></span>
-          <span class="knowledge"></span>
-          <span class="influence"></span>
-          <div class="resource-feedback"></div>
-        `;
-        container.appendChild(newPanel);
-      }
-    }
-
-    const panelUpdated = document.getElementById(`player-resource-panel-${player.id}`);
+    const panelUpdated = document.getElementById(`resource-Display-Container-${player.id}`);
     if (!panelUpdated) {
       console.error(`No resource panel found for player ID: ${player.id}`);
       return;
@@ -855,7 +831,7 @@ export function updateResourcePanel(player) {
    */
 export function showResourceChangeFeedback(playerId, resourceType, amount) {
     console.log('---------showResourceChangeFeedback---------');
-    const panel = document.getElementById(`player-resource-panel-${playerId}`);
+    const panel = document.getElementById(`resource-Display-Container-${playerId}`);
     if (!panel) return;
   
     const feedbackEl = panel.querySelector('.resource-feedback');
