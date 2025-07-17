@@ -1104,11 +1104,15 @@ dialog.popover::backdrop {
 
 /* Effects Container */
 #card-Effects {
-    background-color: rgba(0, 0, 0, 0.2);
-    padding: 12px;
-    margin: 15px 0;
-    border-radius: 6px;
+    background-color: rgba(0, 0, 0, 0);
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
     font-size: 0.95em;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+    font-weight: bold;
+    grid-template-rows: 6;
 }
   
 .popover-header {
@@ -1201,7 +1205,7 @@ dialog.popover::backdrop {
     border: 2px solid #b56aff;
 } 
 
-#age-Of-Resistance-Path,
+#age-Of-Resistance-Path ,
 .path-Choice-Button.path-blue,
 .choicepoint-button.blue {
     background-color: #1b3de5;

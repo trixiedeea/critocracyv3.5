@@ -8,7 +8,7 @@ export const ageOfResistanceDeck = [
           text: "Fund the museum",
           effects: [
             { type: 'RESOURCE_CHANGE', changes: { influence: 5 } },
-            { type: 'MOVEMENT', target: 'SELF', spaces: 7 }
+            { type: 'MOVEMENT', target: 'SELF', spaces: 3 }
           ]
         },
         optionB: {

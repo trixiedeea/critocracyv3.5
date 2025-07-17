@@ -597,8 +597,6 @@ export async function showCard(card, deckType, player, onComplete) {
     const effectsEl = dialog.querySelector('#card-Effects');
     const showDetailsButton = dialog.querySelector('#show-Card-Details-Button');
     const closeCardButton = dialog.querySelector('#close-Card-Button');
-    const optionAButton = dialog.querySelector('.card-Choice-Button-One');
-    const optionBButton = dialog.querySelector('.card-Choice-Button-Two');
 
     if (titleEl) titleEl.textContent = card.name || 'Card';
 
@@ -619,7 +617,7 @@ export async function showCard(card, deckType, player, onComplete) {
             } else if (effect.type === 'STEAL') {
                 resourceSummary += `<p><span class="effect-icon">🔄</span> <strong>Effect:</strong> Steal ${effect.amount} ${effect.resource}</p>`;
             } else if (effect.type === 'STEAL_FROM_ALL') {
-        resourceSummary += `<p><span class="effect-icon">🤝</span> <strong>Effect:</strong> Alliance Offer</p>`;
+                resourceSummary += `<p><span class="effect-icon">🤝</span> <strong>Effect:</strong> Alliance Offer</p>`;
             }
         });
     } else if (typeof card.effects === 'object' && isEndOfTurnCard) {
@@ -665,7 +663,7 @@ export async function showCard(card, deckType, player, onComplete) {
             } else if (Array.isArray(card.effects)) {
                 explanationHTML += '<p><strong>Card Effects:</strong></p><ul>';
                 card.effects.forEach(effect => {
-                    explanationHTML += `<li>${formatEffect(effect)}</li>`;
+                    explanationHTML += `<li>${formatEffects(effect.Type)}</li>`;
                 });
                 explanationHTML += '</ul>';
             }
@@ -679,33 +677,52 @@ export async function showCard(card, deckType, player, onComplete) {
     }
 
     // Choice Buttons
+    const optionAButton = dialog.querySelector('.optionAButton');
+    const optionBButton = dialog.querySelector('.optionBButton');
+    const cardChoiceAColumn = dialog.querySelector('.card-Choice-A-Column');
+    const cardChoiceBColumn = dialog.querySelector('.card-Choice-B-Column');
+    
     if (card.choice && optionAButton && optionBButton) {
         optionAButton.textContent = card.choice.optionA.text;
         optionBButton.textContent = card.choice.optionB.text;
-
-        optionAButton.replaceWith(optionAButton.cloneNode(true));
-        optionBButton.replaceWith(optionBButton.cloneNode(true));
-
-        if (cardChoiceButtonOne) {
-            cardChoiceButtonOne.addEventListener("click", () => {
+        optionAButton.style.display = 'inline-block';
+        optionBButton.style.display = 'inline-block';
+    
+        // 1. When clicked, remove the buttons
+        optionAButton.addEventListener("click", () => {
+            optionAButton.style.display = 'none';
+            optionBButton.style.display = 'none';
+            
+            // 2. Show the effects in the column
+            cardChoiceAColumn.innerHTML = formatEffects(card.choice.optionA.effects);
+            
+            // 3. Wait for 5 seconds before closing dialog and applying effects
+            setTimeout(() => {
+                dialog.close();
                 applyAgeCardEffect(card.choice.optionA.effects, player);
-                dialog.close();
                 if (typeof onComplete === 'function') onComplete();
-            });
-        }
-        if (optionBButton) {
-            optionBButton.addEventListener("click", () => {
+            }, 5000);
+        });
+    
+        optionBButton.addEventListener("click", () => {
+            optionAButton.style.display = 'none';
+            optionBButton.style.display = 'none';
+            
+            // 2. Show the effects in the column
+            cardChoiceBColumn.innerHTML = formatEffects(card.choice.optionB.effects);
+            
+            // 3. Wait for 5 seconds before closing dialog and applying effects
+            setTimeout(() => {
+                dialog.close();
                 applyAgeCardEffect(card.choice.optionB.effects, player);
-                dialog.close();
                 if (typeof onComplete === 'function') onComplete();
-            });
-        }
+            }, 5000);
+        });
     }
-
-    dialog.dataset.cardData = JSON.stringify(card);
+    dialog.dataset.cardData = JSON.stringify(card); 
 
     try {
-        dialog.showModal();
+        dialog.showModal?.();
     } catch (e) {
         console.error("Error showing dialog:", e);
         if (card.effects) applyCardEffect(card.effects, player);
@@ -737,13 +754,24 @@ function formatResourceChanges(changes) {
     return result.join(', ');
 }
 
-function formatEffect(effect) {
-    if (effect.type === 'RESOURCE_CHANGE' && effect.changes) return formatResourceChanges(effect.changes);
-    if (effect.type === 'MOVEMENT') return `Move ${effect.spaces} spaces.`;
-    if (effect.type === 'SKIP_TURN') return 'Skip your turn.';
-    if (effect.type === 'STEAL') return `Steal ${effect.amount} ${effect.resource}`;
-    if (effect.type === 'ALLIANCE_OFFER') return 'Offer an alliance.';
-    return '(Unknown effect)';
+function formatEffects(effects) {
+    if (!Array.isArray(effects)) {
+        console.warn('formatEffects received non-array:', effects);
+        return '(No effects)';
+    }
+    return effects.map(effect => {
+        if (effect.type === 'RESOURCE_CHANGE' && effect.changes)
+            return formatResourceChanges(effect.changes);
+        if (effect.type === 'MOVEMENT')
+            return `Move ${effect.spaces} spaces.`;
+        if (effect.type === 'SKIP_TURN')
+            return 'Skip your turn.';
+        if (effect.type === 'STEAL')
+            return `Steal ${effect.amount} ${effect.resource} from another player.`;
+        if (effect.type === 'STEAL_FROM_ALL')
+            return `Steal ${effect.amount} ${effect.resource} from all players.`;
+        return '(Unknown effect)';
+    }).join('\n');
 }
 
 
@@ -808,7 +836,7 @@ export function hideCard() {
  * @param {object} sourcePlayer - The player who initiated the effect (drew the card).
  */
 export function applyAgeCardEffect(effect, player, sourcePlayer) {
-    console.log(` Processing effect: ${JSON.stringify(effect)} for target ${player.name} from source ${sourcePlayer.name}`);
+    console.log(` Processing effect: ${JSON.stringify(effect)} for target ${player.name} from source ${sourcePlayer ? sourcePlayer.name : 'unknown'}`);
     
     // Define the target player based on the effect's target property if it exists
     let targetPlayer = player; // Default target is the player passed in (often source player)

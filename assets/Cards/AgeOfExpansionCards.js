@@ -1,7 +1,7 @@
 // Special Event cards for Critocracy
 // These cards are drawn when landing on special event spaces
 
-// Age of Expansion (Purple) cards
+// Age of Expansion (Purple) cards  
 export const ageOfExpansionDeck = [
     {
     deck: "Age of Expansion",

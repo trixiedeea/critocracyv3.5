@@ -27,10 +27,12 @@ import {
     ageOfResistancePath, 
     ageOfReckoningPath, 
     ageOfLegacyPath, 
+    FINISH_SPACE
 } from './board-data.js';
 
 
 import {drawCard } from './cards.js';
+import { markPlayerFinished } from './players.js';
 
 // Animation timing constants
 export const TIMING = {

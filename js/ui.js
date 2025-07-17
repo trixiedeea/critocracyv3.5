@@ -821,9 +821,9 @@ export function updateResourcePanel(player) {
     }
   
     panelUpdated.querySelector('.player-name').textContent = player.name;
-    panelUpdated.querySelector('.money').textContent = `💰 ${player.resources.money}`;
-    panelUpdated.querySelector('.knowledge').textContent = `📚 ${player.resources.knowledge}`;
-    panelUpdated.querySelector('.influence').textContent = `🗳️ ${player.resources.influence}`;
+    panelUpdated.querySelector('.money').textContent = `Knowledge ${player.resources.money}`;
+    panelUpdated.querySelector('.knowledge').textContent = `Money ${player.resources.knowledge}`;
+    panelUpdated.querySelector('.influence').textContent = `Influence ${player.resources.influence}`;
 };
   
   /**
