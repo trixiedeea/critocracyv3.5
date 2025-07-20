@@ -666,9 +666,19 @@ ul {
     border-radius: 10px;
   }
 
+ul.resource-Display li {
+    display: flex;
+    justify-content: center;
+    align-items: left;
+    margin-bottom: 0.1rem;
+    list-style: none;
+}
+
 ul li {
     padding-left: 1rem;
-    list-style-type: none;
+    list-style-type: inside;
+    margin-bottom: 1rem;
+    justify-content: left;
 }
 
 #game-Board-Screen {
@@ -743,9 +753,11 @@ ul li {
     justify-content: space-between;
     position: relative;
     bottom: 0;
+    margin-top: 58%;
     align-items: center;
     background-color: rgba(37, 158, 188, 0.178);
     padding: 10px;
+    width: 30%;
     z-index: 12;
 }
 
@@ -826,6 +838,7 @@ ul li {
     justify-content: center;
     align-items: center;
     margin-top: 5px;
+
 }
 
 #dice-animation-container {
@@ -1135,15 +1148,6 @@ dialog.popover::backdrop {
     display: flex;
     justify-content: center;
     align-items: center;
-}
-
-.card-Choice-A-Column,
-.card-Choice-B-Column {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 16px;
 }
 
 #age-Card-Choice-Button-One,

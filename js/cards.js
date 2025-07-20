@@ -30,6 +30,7 @@ import { TIMING, clearDeckHighlights } from './animations.js';
 import { getCurrentPlayer } from './game.js';
 
 import { fullDeckRegionPathMap } from './board-data.js';
+import { drawBoard } from './board.js';
 
 // Combine path Card decks into one structure for easier access by color
 const CARD_DATA = {
@@ -824,25 +825,30 @@ export async function showCard(card, player, onComplete) {
             console.log('AI making choice for card:', card.name);
             dialog.close();
             
-            if (isEndOfTurnCard) {
+            if (isEndOfTurnCard) {I
                 console.log('Applying end of turn card effects');
                 state.currentCard = card; // Ensure current card is set
+                drawBoard();
                 applyCardEffect(player);
             } else if (card.choice) {
                 // AI always chooses option A for now
                 console.log('AI choosing option A');
                 if (isAgeDeck) {
+                    drawBoard();
                     applyAgeCardEffect(card.choice.optionA.effects, player);
                 } else {
                     state.currentCard = { ...card, effects: card.choice.optionA.effects };
+                    drawBoard();
                     applyCardEffect(player);
                 }
             } else if (card.effects) {
                 console.log('Applying direct effects');
                 if (isAgeDeck) {
+                    drawBoard();
                     applyAgeCardEffect(card.effects, player);
                 } else {
                     state.currentCard = card; // Ensure current card is set
+                    drawBoard();
                     applyCardEffect(player);
                 }
             }
@@ -855,8 +861,10 @@ export async function showCard(card, player, onComplete) {
         // For non-choice cards with effects, apply them immediately for human players
         console.log('Applying immediate effects for non-choice card');
         if (isAgeDeck) {
+            drawBoard();
             applyAgeCardEffect(card.effects, player);
         } else {
+            drawBoard();
             applyCardEffect(card.effects, player);
         }
     }

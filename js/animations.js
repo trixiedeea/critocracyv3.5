@@ -126,11 +126,15 @@ export const animateDiceRoll = async (diceElement, finalValue, duration = 1500) 
   // Add rolling class to trigger animation
   dice.classList.add('rolling');
 
-  // Use the provided finalValue or generate a random roll if not provided
-   const result = Math.ceil(Math.random() * 6);
+  // Use debug mode to always return 6, otherwise generate a random roll
+   const result = state.debugMode ? 6 : Math.ceil(Math.random() * 6);
    
    // Store the roll result in state
    updateGameState({ rollResult: result });
+   
+   if (state.debugMode) {
+       console.log('[DEBUG] Dice roll forced to 6 (debug mode)');
+   }
 
   // After animation completes, show the result
   setTimeout(() => {
