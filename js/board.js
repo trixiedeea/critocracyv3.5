@@ -565,6 +565,7 @@ export async function setupBoard() {
  * Draws the game board, spaces, connections, and player tokens.
  */
 export function drawBoard() {
+    console.log('---------drawBoard---------');
     // ... (ctx check) ...
     if (!state.board.ctx) { /* ... */ return; }
     const ctx = state.board.ctx;

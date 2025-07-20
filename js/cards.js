@@ -374,12 +374,13 @@ export function discardCard(card, deckType) {
 };
 
 /**
- * Applies the effects listed on a card to the target player(s).
+ * Applies the effects listed on the current card to the target player(s).
  */
-export async function applyCardEffect(card, player) {
-    console.log('---------applyCardEffect---------');
+export async function applyCardEffect(player) {
+    console.log('---------applyCardEffect---------')
+    const card = state.currentCard;
     if (!card || !player) {
-        console.warn("Cannot apply card effect: Invalid card or player.", { card, player });
+        console.warn("Cannot apply card effect: No current card or invalid player.", { currentCard: card, player });
         return;
     }
 
@@ -721,7 +722,8 @@ export async function showCard(card, player, onComplete) {
     if (closeCardButton) {
         closeCardButton.onclick = () => {
             dialog.close();
-            applyCardEffect(card.effects, player);
+            state.currentCard = card; // Ensure current card is set
+            applyCardEffect(player);
             if (typeof onComplete === 'function') onComplete();
         };
     }
@@ -824,21 +826,24 @@ export async function showCard(card, player, onComplete) {
             
             if (isEndOfTurnCard) {
                 console.log('Applying end of turn card effects');
-                applyCardEffect(card.effects, player);
+                state.currentCard = card; // Ensure current card is set
+                applyCardEffect(player);
             } else if (card.choice) {
                 // AI always chooses option A for now
                 console.log('AI choosing option A');
                 if (isAgeDeck) {
-                    applyAgeCardEffect(card.choice.optionA.effects, player, player);
+                    applyAgeCardEffect(card.choice.optionA.effects, player);
                 } else {
-                    applyCardEffect(card.choice.optionA.effects, player);
+                    state.currentCard = { ...card, effects: card.choice.optionA.effects };
+                    applyCardEffect(player);
                 }
             } else if (card.effects) {
                 console.log('Applying direct effects');
                 if (isAgeDeck) {
-                    applyAgeCardEffect(card.effects, player, player);
+                    applyAgeCardEffect(card.effects, player);
                 } else {
-                    applyCardEffect(card.effects, player);
+                    state.currentCard = card; // Ensure current card is set
+                    applyCardEffect(player);
                 }
             }
             
@@ -850,7 +855,7 @@ export async function showCard(card, player, onComplete) {
         // For non-choice cards with effects, apply them immediately for human players
         console.log('Applying immediate effects for non-choice card');
         if (isAgeDeck) {
-            applyAgeCardEffect(card.effects, player, player);
+            applyAgeCardEffect(card.effects, player);
         } else {
             applyCardEffect(card.effects, player);
         }

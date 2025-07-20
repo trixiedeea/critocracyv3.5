@@ -650,27 +650,23 @@ export function highlightDeckRegions(player, deckType, positions) {
       const width = highlight.position.toprightx - highlight.position.topleft;
       const height = highlight.position.bottomleft - highlight.position.toplefty;
       
-      // Extract base color from rgba string (remove the alpha part)
-      const baseColor = highlight.color.replace(/,\s*[\d.]+\s*\)$/, '');
-      
       ctx.save();
+      ctx.globalAlpha = alpha;
       
-      // Draw semi-transparent fill behind the pulsing borders
-      ctx.fillStyle = baseColor + `,${alpha * 0.3})`;
+      // Fill the background with the base color (not a transparent hole)
+      ctx.fillStyle = highlight.color;
       ctx.fillRect(highlight.position.topleft, highlight.position.toplefty, width, height);
       
-      // Draw border with pulsing effect
-      ctx.strokeStyle = baseColor + `,${alpha})`;
-      ctx.lineWidth = 4; // Slightly thicker border for better visibility
+      // Draw pulsing borders
+      ctx.strokeStyle = highlight.color;
+      ctx.lineWidth = 6;
       ctx.strokeRect(highlight.position.topleft, highlight.position.toplefty, width, height);
       
-      // Draw a second border with lower opacity for a glow effect
-      ctx.strokeStyle = baseColor + `,${alpha * 0.5})`;
       ctx.lineWidth = 8;
       ctx.strokeRect(highlight.position.topleft, highlight.position.toplefty, width, height);
       
       ctx.restore();
-    });
+    }); 
     
     // Continue animation only if there are still highlights
     if (state.ui.dynamic.deckHighlights.length > 0) {
