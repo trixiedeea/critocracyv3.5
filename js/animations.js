@@ -252,7 +252,7 @@ export const ensurePlayerPath = (player) => {
  * @param {function|null} onComplete - Callback after animation finishes.
  */
 export function animateTokenToPosition(player, newPosition, duration = 1000, skipSpaceAction = false, onComplete = null) {
-  console.log(`----------animateTokenToPosition: ${player.name} moving ${state.rollResult} spaces -----------`);
+  console.log(`----------animateTokenToPosition---------: ${player.name} moving ${state.rollResult} spaces -----------`);
   player = getCurrentPlayer();
   const rollResult = state.rollResult;
   console.log(`Moving ${rollResult} spaces for ${player.name}`);
@@ -461,6 +461,7 @@ export function animateTokenToPosition(player, newPosition, duration = 1000, ski
  * Clears all highlights including deck highlights and move highlights
  */
 export function clearHighlights() {
+    console.log('---------clearHighlights---------');
     // Clear deck highlights
     clearDeckHighlights();
     
@@ -486,6 +487,7 @@ document.addEventListener('DOMContentLoaded', () => {
 export let diceShakeInterval = null;
 
 export function startDiceShake() {
+    console.log('---------startDiceShake---------');
     const dice = document.getElementById('dice');
     if (!dice) return;
     
@@ -509,6 +511,7 @@ export function startDiceShake() {
  * Stops the dice shake animation
  */
 export function stopDiceShake() {
+    console.log('---------stopDiceShake---------');
     const dice = document.getElementById('dice');
     if (!dice) return;
     

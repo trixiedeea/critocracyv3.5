@@ -213,7 +213,7 @@ export const ageOfReckoningDeck = [
           text: "Protest exclusion",
           effects: [
             { type: 'RESOURCE_CHANGE', changes: { knowledge: 7 } },
-            { type: 'SABOTAGE', target: 'OTHER', changes: { knowledge: -3 } }
+            { type: 'STEALI', target: 'OTHER', changes: { knowledge: -3 } }
           ]
         },
         optionB: {
@@ -245,8 +245,6 @@ export const ageOfReckoningDeck = [
         }
       }
     },
-  
-    // 🆕 New Card 1
     {
     deck: "Age of Reckoning",
     name: "Forgiveness Campaign",
@@ -290,8 +288,6 @@ export const ageOfReckoningDeck = [
         }
       }
     },
-  
-    // 🆕 New Card 3
     {
     deck: "Age of Reckoning",
     name: "Factory Reopening",

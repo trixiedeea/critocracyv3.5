@@ -42,7 +42,6 @@ export const boardState = {
     playerTokenImages: {},
     clickableSpaces: []
 };
-
 // ===== NEW Coordinate Helper Functions (To be implemented later) ======
 
 /**

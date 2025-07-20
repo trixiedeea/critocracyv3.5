@@ -44,6 +44,8 @@ const _state = {
         started: false,
         ended: false,
         currentPhase: 'SETUP',
+        currentCard: null,      // Currently active card
+        currentDeck: null,      // Current deck type (ageOfExpansion, endOfTurn, etc.)
         players: [],
         aiPlayerCount: 0,
         totalPlayerCount: 0,
@@ -278,4 +280,14 @@ export function startGame() {
     _state.game.gameStarted = true;
     _state.game.phase = 'PLAYING';
     notifySubscribers();
+}
+
+export let currentCard = null;
+export let currentDeck = null;
+export let currentOnComplete = null;
+
+export function setCurrentCardState(card, deck, onComplete) {
+    currentCard = card;
+    currentDeck = deck;
+    currentOnComplete = onComplete;
 }

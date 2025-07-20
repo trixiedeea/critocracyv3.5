@@ -28,7 +28,8 @@ import {
     drawCard, 
     applyCardEffect,
     showCard,
-    hideCard
+    hideCard,
+    discardCard
 } from './cards.js';
 import { 
     createPlayer, 
@@ -65,7 +66,6 @@ import { state, updateGameState, updateUIState } from './state.js';
  */
 // Debug mode flag - set to true to test with a single AI player
 const DEBUG_MODE = false;
-
 /**
  * Initializes the core game modules (Board, Cards, Players).
  * @param {Array} playerConfigs - Array of player configurations
@@ -528,6 +528,7 @@ export async function processEndPlayerTurn() {
     const currentPlayer = getCurrentPlayer();
     if (!currentPlayer) {
         console.error('[processEndPlayerTurn] No current player found.');
+        discardCard();
         return;
     }
 

@@ -1,0 +1,769 @@
+    /**
+ * Displays a card in the UI with appropriate animations and interactions
+ * @param {Object} card - The card to display
+ * @param {string} deckType - The type of deck the card came from
+ * @param {Object} player - The player viewing the card
+ * @param {Function} onComplete - Callback when card is closed
+ */
+export async function showCard(card, deckType, player, onComplete) {
+    console.log('---------showCard---------')
+    console.log(`Displaying card: ${card?.name || 'Unknown'} from ${deckType} deck`);
+    
+    const deckMeta = deckInfo[deckType];
+    const isAI = player && !player.isHuman;
+    const isEndOfTurnCard = deckType === 'endOfTurnDeck' || 
+        (card.type && card.type.includes('endOfTurn')) ||
+        (card.deck && card.deck.includes('endOfTurn'));
+    const isAgeDeck = /^age-Of/i.test(deckType);
+
+    if (isEndOfTurnCard) console.log('Card details:', JSON.stringify({
+        id: card?.id,
+        type: card?.type,
+        hasChoice: !!card?.choice,
+        effects: card?.effects ? 'Present' : 'None'
+    }, null, 2));
+    else console.log('Card details:', JSON.stringify({
+        id: card?.id,
+        type: card?.type,
+        hasChoice: !!card?.choice,
+        effects: {
+            optionA: card?.choice?.optionA?.effects? 'Present' : 'None',
+            optionB: card?.choice?.optionB?.effects? 'Present' : 'None'
+        }
+    }, null, 2));
+    
+    // Store current card in state
+    state.currentCard = card;
+    state.currentDeck = deckType;
+
+    document.querySelectorAll('[data-deck-id]').forEach(popover => {
+        popover.style.display = 'none';
+    });
+
+    let dialog = document.querySelector(`[data-deck-id="${deckType}"]`)?.closest('dialog') 
+              || document.getElementById('card-Popover');
+    if (!dialog) {
+        console.error("No valid dialog found");
+        if (typeof onComplete === 'function') onComplete();
+        return;
+    }
+
+    const popoverContent = dialog.querySelector(`[data-deck-id="${deckType}"]`) 
+                        || dialog.querySelector('.popover-Content') 
+                        || dialog;
+    if (popoverContent) popoverContent.style.display = 'block';
+
+    dialog.className = 'popover';
+    if (deckMeta?.color) dialog.classList.add(`card-${deckType}`);
+    else if (card?.color) dialog.classList.add(`card-${card.color}`);
+
+    // Set up basic card content before showing modal
+    const titleEl = dialog.querySelector('#card-Title');
+    const descEl = dialog.querySelector('#card-Description');
+    const effectsEl = dialog.querySelector('#card-Effects');
+    const showDetailsButton = dialog.querySelector('#show-Card-Details-Button');
+    const closeCardButton = dialog.querySelector('#close-Card-Button');
+
+    if (titleEl) titleEl.textContent = card.name || 'Card';
+
+    let resourceSummary = '';
+    if (Array.isArray(card.effects)) {
+        card.effects.forEach(effect => {
+            if (effect.type === 'RESOURCE_CHANGE' && effect.changes) {
+                const formatted = formatResourceChanges(effect.changes);
+                if (formatted) {
+                    let target = effect.target === 'OTHER' ? ' (Target: Other)' :
+                                 (effect.target && effect.target !== 'SELF' ? ` (Target: ${effect.target})` : '');
+                    resourceSummary += `<p><span class="effect-icon">💰</span> <strong>Effect${target}:</strong> ${formatted}</p>`;
+                }
+            } else if (effect.type === 'MOVEMENT') {
+                resourceSummary += `<p><span class="effect-icon">🚶</span> <strong>Effect:</strong> Move ${effect.spaces}</p>`;
+            } else if (effect.type === 'SKIP_TURN') {
+                resourceSummary += `<p><span class="effect-icon">⏭️</span> <strong>Effect:</strong> Skip Turn</p>`;
+            } else if (effect.type === 'STEAL') {
+                resourceSummary += `<p><span class="effect-icon">🔄</span> <strong>Effect:</strong> Steal ${effect.amount} ${effect.resource}</p>`;
+            } else if (effect.type === 'STEAL_FROM_ALL') {
+                resourceSummary += `<p><span class="effect-icon">🤝</span> <strong>Effect:</strong> Alliance Offer</p>`;
+            }
+        });
+    } else if (typeof card.effects === 'object' && isEndOfTurnCard) {
+        resourceSummary += `<p><span class="effect-icon">💡</span><i>(Effects vary by role - click below for details)</i></p>`;
+    }
+
+    if (descEl) {
+        descEl.innerHTML = `<div class="card-description">${card.description || ''}</div>
+                            <div class="card-effects-summary">${resourceSummary}</div>`;
+    }
+
+    if (effectsEl) {
+        effectsEl.innerHTML = '';
+        effectsEl.style.display = 'none';
+    }
+
+    if (showDetailsButton) {
+        showDetailsButton.style.display = isAgeDeck ? 'none' : 'block';
+        showDetailsButton.disabled = false;
+        showDetailsButton.onclick = () => {
+            let explanationHTML = '';
+            if (isEndOfTurnCard && player?.role) {
+                const allRoles = ['Colonialist', 'Revolutionary', 'Historian', 'Entrepreneur', 'Politician', 'Artist'];
+                explanationHTML += "<div class='role-effects-container'><h3>Effects for All Roles:</h3><ul class='role-effects-list'>";
+                allRoles.forEach(role => {
+                    const roleEffect = card.effects[role];
+                    if (roleEffect) {
+                        const changes = roleEffect.changes || {};
+                        const changeText = [
+                            changes.money !== undefined ? `${changes.money >= 0 ? '+' : ''}${changes.money} Money` : '',
+                            changes.knowledge !== undefined ? `${changes.knowledge >= 0 ? '+' : ''}${changes.knowledge} Knowledge` : '',
+                            changes.influence !== undefined ? `${changes.influence >= 0 ? '+' : ''}${changes.influence} Influence` : ''
+                        ].filter(Boolean).join(', ');
+
+                        const fullText = `<span class='role-name'>${role}:</span> <span class='resource-changes'>[${changeText}]</span> <span class='effect-explanation'>${roleEffect.explanation || ''}</span>`;
+                        const currentClass = role === player.role ? 'current-role' : '';
+                        explanationHTML += `<li class="role-effect ${currentClass}">${fullText}</li>`;
+                    } else {
+                        explanationHTML += `<li class='role-effect'><span class='role-name'>${role}:</span> No effect defined.</li>`;
+                    }
+                });
+                explanationHTML += "</ul></div>";
+            } else if (Array.isArray(card.effects)) {
+                explanationHTML += '<p><strong>Card Effects:</strong></p><ul>';
+                card.effects.forEach(effect => {
+                    explanationHTML += `<li>${effect.Description || JSON.stringify(effect)}</li>`;
+                });
+                explanationHTML += '</ul>';
+            }
+
+            if (effectsEl) {
+                effectsEl.innerHTML = explanationHTML;
+                effectsEl.style.display = 'block';
+            }
+            showDetailsButton.style.display = 'none';
+        };
+    }
+    
+    if (closeCardButton) {
+        closeCardButton.onclick = () => {
+            dialog.close();
+            applyCardEffect(card.effects, player);
+            if (typeof onComplete === 'function') onComplete();
+        };
+    }
+
+    dialog.dataset.cardData = JSON.stringify(card);
+    currentCard = card;
+    currentPlayer = player;
+
+    // Show dialog first - safer DOM element selection timing
+    dialog.showModal();
+    
+    // Re-query DOM elements after modal is shown for safer selection
+    const optionAButton = dialog.querySelector('.optionAButton');
+    const optionBButton = dialog.querySelector('.optionBButton');
+    const cardChoiceColumnA = dialog.querySelector('.card-Choice-A-Column');
+    const cardChoiceColumnB = dialog.querySelector('.card-Choice-B-Column');
+    
+    // Handle choice cards with unified approach but specialized deck handling
+    if (card.choice) {
+        console.log('Setting up choice buttons for card:', card.name, 'Choice data:', card.choice);
+        
+        // Make sure buttons are visible and enabled
+        if (optionAButton) {
+            optionAButton.style.display = 'inline-block';
+            optionAButton.disabled = false;
+        }
+        if (optionBButton) {
+            optionBButton.style.display = 'inline-block';
+            optionBButton.disabled = false;
+        }
+        
+        // Store card data on dialog for later reference
+        dialog.dataset.cardData = JSON.stringify({
+            ...card,
+            deckType,
+            playerId: player?.id
+        });
+
+        // Specialized Age Deck Handling for Option A
+        if (isAgeDeck) {
+            // Set up Option A for Age Decks
+            if (optionAButton) {
+                optionAButton.textContent = card.choice.optionA?.text || 'Option A';
+                optionAButton.style.display = 'inline-block';
+                optionAButton.disabled = false;
+                
+                // Memory Management: Remove old listeners by cloning
+                const cleanOptionAButton = optionAButton.cloneNode(true);
+                optionAButton.replaceWith(cleanOptionAButton);
+                
+                // Re-query the fresh button after replacement
+                const freshOptionAButton = dialog.querySelector('.optionAButton');
+                if (freshOptionAButton) {
+                    freshOptionAButton.textContent = card.choice.optionA?.text || 'Option A';
+                    freshOptionAButton.style.display = 'inline-block';
+                    
+                    freshOptionAButton.onclick = () => {
+                        console.log('Age Deck Option A selected');
+                        freshOptionAButton.style.display = 'none';
+                        
+                        if (cardChoiceColumnA) {
+                            let effectsHTML = '';
+                            const effects = card.choice.optionA.effects;
+
+                            if (Array.isArray(effects)) {
+                                effects.forEach(effect => {
+                                    effectsHTML += `<p>${(effect.Type || effect.type)}</p>`;
+                                });
+                            }
+
+                            cardChoiceColumnA.innerHTML = effectsHTML;
+                            cardChoiceColumnA.style.display = 'block';
+
+                            // Longer Display Time: 5-second timeout for age deck effects
+                            setTimeout(() => {
+                                dialog.close();
+                                applyAgeCardEffect(card.choice.optionA.effects, player);
+                                cardChoiceColumnA.style.display = 'none';
+                                if (typeof onComplete === 'function') onComplete();
+                            }, 5000);
+                        }
+                    };
+                }
+            
+            }
+            
+            // Set up Option B for Age Decks (separate and distinct)
+            if (optionBButton) {
+                optionBButton.textContent = card.choice.optionB?.text || 'Option B';
+                optionBButton.style.display = 'inline-block';
+                optionBButton.disabled = false;
+                
+                // Memory Management: Remove old listeners by cloning
+                const cleanOptionBButton = optionBButton.cloneNode(true);
+                optionBButton.replaceWith(cleanOptionBButton);
+                
+                // Re-query the fresh button after replacement
+                const freshOptionBButton = dialog.querySelector('.optionBButton');
+                if (freshOptionBButton) {
+                    freshOptionBButton.textContent = card.choice.optionB?.text || 'Option B';
+                    freshOptionBButton.style.display = 'inline-block';
+
+                    freshOptionBButton.onclick = () => {
+                        console.log('Age Deck Option B selected');
+                        freshOptionBButton.style.display = 'none';
+
+                        if (cardChoiceColumnB) {
+                            let effectsHTML = '';
+                            const effects = card.choice.optionB.effects;
+
+                            if (Array.isArray(effects)) {
+                                effects.forEach(effect => {
+                                    effectsHTML += `<p>${effect.type}</p>`;
+                                });
+                            }
+
+                            cardChoiceColumnB.innerHTML = effectsHTML;
+                            cardChoiceColumnB.style.display = 'block';
+
+                            setTimeout(() => {
+                                dialog.close();
+                                applyAgeCardEffect(card.choice.optionB.effects, player);
+                                cardChoiceColumnB.style.display = 'none';
+                                if (typeof onComplete === 'function') onComplete();
+                            }, 3000);
+                        }
+                    };
+                }
+            }
+       
+
+    } else if (card.choice) {
+        console.warn('Card has choices but option buttons are missing in the UI');
+    }
+    
+    // Comprehensive AI Logic from Function 2 approach
+      
+    // Handle AI player auto-choice
+    if (isAI) {
+        console.log('AI player handling card:', card.name);
+        setTimeout(() => {
+            if (!dialog.open) return;
+            
+            console.log('AI making choice for card:', card.name);
+            dialog.close();
+            
+            if (isEndOfTurnCard) {
+                console.log('Applying end of turn card effects');
+                applyCardEffect(card.effects, player);
+            } else if (card.choice) {
+                // AI always chooses option A for now
+                console.log('AI choosing option A');
+                if (isAgeDeck) {
+                    applyAgeCardEffect(card.choice.optionA.effects, player, player);
+                } else {
+                    applyCardEffect(card.choice.optionA.effects, player);
+                }
+            } else if (card.effects) {
+                console.log('Applying direct effects');
+                if (isAgeDeck) {
+                    applyAgeCardEffect(card.effects, player, player);
+                } else {
+                    applyCardEffect(card.effects, player);
+                }
+            }
+            
+            if (typeof onComplete === 'function') {
+                onComplete();
+            }
+        }, 5000); // 5 second delay for AI
+    } else if (card.effects && !card.choice) {
+        // For non-choice cards with effects, apply them immediately for human players
+        console.log('Applying immediate effects for non-choice card');
+        if (isAgeDeck) {
+            applyAgeCardEffect(card.effects, player, player);
+        } else {
+            applyCardEffect(card.effects, player);
+        }
+    }
+    
+    return dialog;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * Displays a card in the UI with appropriate animations and interactions
+ * @param {Object} card - The card to display
+ * @param {string} deckType - The type of deck the card came from
+ * @param {Object} player - The player viewing the card
+ * @param {Function} onComplete - Callback when card is closed
+ */
+export async function showCard(card, deckType, player, onComplete) {
+    console.log('---------showCard---------')
+    console.log(`Displaying card: ${card?.name || 'Unknown'} from ${deckType} deck`);
+    
+    const deckMeta = deckInfo[deckType];
+    const isAI = player && !player.isHuman;
+    const isEndOfTurnCard = deckType === 'endOfTurnDeck' || 
+        (card.type && card.type.includes('endOfTurn')) ||
+        (card.deck && card.deck.includes('endOfTurn'));
+    const isAgeDeck = /^age-Of/i.test(deckType);
+
+    if (isEndOfTurnCard) console.log('Card details:', JSON.stringify({
+        id: card?.id,
+        type: card?.type,
+        hasChoice: !!card?.choice,
+        effects: card?.effects ? 'Present' : 'None'
+    }, null, 2));
+    else console.log('Card details:', JSON.stringify({
+        id: card?.id,
+        type: card?.type,
+        hasChoice: !!card?.choice,
+        effects: {
+            optionA: card?.choice?.optionA?.effects? 'Present' : 'None',
+            optionB: card?.choice?.optionB?.effects? 'Present' : 'None'
+        }
+    }, null, 2));
+    
+    // Store current card in state
+    state.currentCard = card;
+    state.currentDeck = deckType;
+
+    document.querySelectorAll('[data-deck-id]').forEach(popover => {
+        popover.style.display = 'none';
+    });
+
+    let dialog = document.querySelector(`[data-deck-id="${deckType}"]`)?.closest('dialog') 
+              || document.getElementById('card-Popover');
+    if (!dialog) {
+        console.error("No valid dialog found");
+        if (typeof onComplete === 'function') onComplete();
+        return;
+    }
+
+    const popoverContent = dialog.querySelector(`[data-deck-id="${deckType}"]`) 
+                        || dialog.querySelector('.popover-Content') 
+                        || dialog;
+    if (popoverContent) popoverContent.style.display = 'block';
+
+    dialog.className = 'popover';
+    if (deckMeta?.color) dialog.classList.add(`card-${deckType}`);
+    else if (card?.color) dialog.classList.add(`card-${card.color}`);
+
+    // Set up basic card content before showing modal
+    const titleEl = dialog.querySelector('#card-Title');
+    const descEl = dialog.querySelector('#card-Description');
+    const effectsEl = dialog.querySelector('#card-Effects');
+    const showDetailsButton = dialog.querySelector('#show-Card-Details-Button');
+    const closeCardButton = dialog.querySelector('#close-Card-Button');
+
+    if (titleEl) titleEl.textContent = card.name || 'Card';
+
+    let resourceSummary = '';
+    if (Array.isArray(card.effects)) {
+        card.effects.forEach(effect => {
+            if (effect.type === 'RESOURCE_CHANGE' && effect.changes) {
+                const formatted = formatResourceChanges(effect.changes);
+                if (formatted) {
+                    let target = effect.target === 'OTHER' ? ' (Target: Other)' :
+                                 (effect.target && effect.target !== 'SELF' ? ` (Target: ${effect.target})` : '');
+                    resourceSummary += `<p><span class="effect-icon">💰</span> <strong>Effect${target}:</strong> ${formatted}</p>`;
+                }
+            } else if (effect.type === 'MOVEMENT') {
+                resourceSummary += `<p><span class="effect-icon">🚶</span> <strong>Effect:</strong> Move ${effect.spaces}</p>`;
+            } else if (effect.type === 'SKIP_TURN') {
+                resourceSummary += `<p><span class="effect-icon">⏭️</span> <strong>Effect:</strong> Skip Turn</p>`;
+            } else if (effect.type === 'STEAL') {
+                resourceSummary += `<p><span class="effect-icon">🔄</span> <strong>Effect:</strong> Steal ${effect.amount} ${effect.resource}</p>`;
+            } else if (effect.type === 'STEAL_FROM_ALL') {
+                resourceSummary += `<p><span class="effect-icon">🤝</span> <strong>Effect:</strong> Alliance Offer</p>`;
+            }
+        });
+    } else if (typeof card.effects === 'object' && isEndOfTurnCard) {
+        resourceSummary += `<p><span class="effect-icon">💡</span><i>(Effects vary by role - click below for details)</i></p>`;
+    }
+
+    if (descEl) {
+        descEl.innerHTML = `<div class="card-description">${card.description || ''}</div>
+                            <div class="card-effects-summary">${resourceSummary}</div>`;
+    }
+
+    if (effectsEl) {
+        effectsEl.innerHTML = '';
+        effectsEl.style.display = 'none';
+    }
+
+    if (showDetailsButton) {
+        showDetailsButton.style.display = isAgeDeck ? 'none' : 'block';
+        showDetailsButton.disabled = false;
+        showDetailsButton.onclick = () => {
+            let explanationHTML = '';
+            if (isEndOfTurnCard && player?.role) {
+                const allRoles = ['Colonialist', 'Revolutionary', 'Historian', 'Entrepreneur', 'Politician', 'Artist'];
+                explanationHTML += "<div class='role-effects-container'><h3>Effects for All Roles:</h3><ul class='role-effects-list'>";
+                allRoles.forEach(role => {
+                    const roleEffect = card.effects[role];
+                    if (roleEffect) {
+                        const changes = roleEffect.changes || {};
+                        const changeText = [
+                            changes.money !== undefined ? `${changes.money >= 0 ? '+' : ''}${changes.money} Money` : '',
+                            changes.knowledge !== undefined ? `${changes.knowledge >= 0 ? '+' : ''}${changes.knowledge} Knowledge` : '',
+                            changes.influence !== undefined ? `${changes.influence >= 0 ? '+' : ''}${changes.influence} Influence` : ''
+                        ].filter(Boolean).join(', ');
+
+                        const fullText = `<span class='role-name'>${role}:</span> <span class='resource-changes'>[${changeText}]</span> <span class='effect-explanation'>${roleEffect.explanation || ''}</span>`;
+                        const currentClass = role === player.role ? 'current-role' : '';
+                        explanationHTML += `<li class="role-effect ${currentClass}">${fullText}</li>`;
+                    } else {
+                        explanationHTML += `<li class='role-effect'><span class='role-name'>${role}:</span> No effect defined.</li>`;
+                    }
+                });
+                explanationHTML += "</ul></div>";
+            } else if (Array.isArray(card.effects)) {
+                explanationHTML += '<p><strong>Card Effects:</strong></p><ul>';
+                card.effects.forEach(effect => {
+                    explanationHTML += `<li>${effect.Description || JSON.stringify(effect)}</li>`;
+                });
+                explanationHTML += '</ul>';
+            }
+
+            if (effectsEl) {
+                effectsEl.innerHTML = explanationHTML;
+                effectsEl.style.display = 'block';
+            }
+            showDetailsButton.style.display = 'none';
+        };
+    }
+    
+    if (closeCardButton) {
+        closeCardButton.onclick = () => {
+            dialog.close();
+            applyCardEffect(card.effects, player);
+            if (typeof onComplete === 'function') onComplete();
+        };
+    }
+
+    dialog.dataset.cardData = JSON.stringify(card);
+    currentCard = card;
+    currentPlayer = player;
+
+    // Show dialog first - safer DOM element selection timing
+    dialog.showModal();
+    
+    // Re-query DOM elements after modal is shown for safer selection
+    const optionAButton = dialog.querySelector('.optionAButton');
+    const optionBButton = dialog.querySelector('.optionBButton');
+    const cardChoiceColumnA = dialog.querySelector('.card-Choice-A-Column');
+    const cardChoiceColumnB = dialog.querySelector('.card-Choice-B-Column');
+    
+    // Handle choice cards with unified approach but specialized deck handling
+    if (card.choice) {
+        console.log('Setting up choice buttons for card:', card.name, 'Choice data:', card.choice);
+        
+        // Make sure buttons are visible and enabled
+        if (optionAButton) {
+            optionAButton.style.display = 'inline-block';
+            optionAButton.disabled = false;
+        }
+        if (optionBButton) {
+            optionBButton.style.display = 'inline-block';
+            optionBButton.disabled = false;
+        }
+        
+        // Store card data on dialog for later reference
+        dialog.dataset.cardData = JSON.stringify({
+            ...card,
+            deckType,
+            playerId: player?.id
+        });
+
+        // Specialized Age Deck Handling for Option A
+        if (isAgeDeck) {
+            // Set up Option A for Age Decks
+            if (optionAButton) {
+                optionAButton.textContent = card.choice.optionA?.text || 'Option A';
+                optionAButton.style.display = 'inline-block';
+                optionAButton.disabled = false;
+                
+                // Memory Management: Remove old listeners by cloning
+                const cleanOptionAButton = optionAButton.cloneNode(true);
+                optionAButton.replaceWith(cleanOptionAButton);
+                
+                // Re-query the fresh button after replacement
+                const freshOptionAButton = dialog.querySelector('.optionAButton');
+                if (freshOptionAButton) {
+                    freshOptionAButton.textContent = card.choice.optionA?.text || 'Option A';
+                    freshOptionAButton.style.display = 'inline-block';
+                    
+                    freshOptionAButton.onclick = () => {
+                        console.log('Age Deck Option A selected');
+                        freshOptionAButton.style.display = 'none';
+                        
+                        if (cardChoiceColumnA) {
+                            let effectsHTML = '';
+                            const effects = card.choice.optionA.effects;
+
+                            if (Array.isArray(effects)) {
+                                effects.forEach(effect => {
+                                    effectsHTML += `<p>${(effect.Type || effect.type)}</p>`;
+                                });
+                            }
+
+                            cardChoiceColumnA.innerHTML = effectsHTML;
+                            cardChoiceColumnA.style.display = 'block';
+
+                            // Longer Display Time: 5-second timeout for age deck effects
+                            setTimeout(() => {
+                                dialog.close();
+                                applyAgeCardEffect(card.choice.optionA.effects, player);
+                                cardChoiceColumnA.style.display = 'none';
+                                if (typeof onComplete === 'function') onComplete();
+                            }, 5000);
+                        }
+                    };
+                }
+            
+            }
+            
+            // Set up Option B for Age Decks (separate and distinct)
+            if (optionBButton) {
+                optionBButton.textContent = card.choice.optionB?.text || 'Option B';
+                optionBButton.style.display = 'inline-block';
+                optionBButton.disabled = false;
+                
+                // Memory Management: Remove old listeners by cloning
+                const cleanOptionBButton = optionBButton.cloneNode(true);
+                optionBButton.replaceWith(cleanOptionBButton);
+                
+                // Re-query the fresh button after replacement
+                const freshOptionBButton = dialog.querySelector('.optionBButton');
+                if (freshOptionBButton) {
+                    freshOptionBButton.textContent = card.choice.optionB?.text || 'Option B';
+                    freshOptionBButton.style.display = 'inline-block';
+
+                    freshOptionBButton.onclick = () => {
+                        console.log('Age Deck Option B selected');
+                        freshOptionBButton.style.display = 'none';
+
+                        if (cardChoiceColumnB) {
+                            let effectsHTML = '';
+                            const effects = card.choice.optionB.effects;
+
+                            if (Array.isArray(effects)) {
+                                effects.forEach(effect => {
+                                    effectsHTML += `<p>${effect.type}</p>`;
+                                });
+                            }
+
+                            cardChoiceColumnB.innerHTML = effectsHTML;
+                            cardChoiceColumnB.style.display = 'block';
+
+                            setTimeout(() => {
+                                dialog.close();
+                                applyAgeCardEffect(card.choice.optionB.effects, player);
+                                cardChoiceColumnB.style.display = 'none';
+                                if (typeof onComplete === 'function') onComplete();
+                            }, 3000);
+                        }
+                    };
+                }
+            }
+        } else if (card.choice) {
+            // Standard handling for non-age deck choice cards
+            if (optionAButton) {
+                optionAButton.textContent = card.choice.optionA.text;
+                optionAButton.style.display = 'inline-block';
+                optionAButton.disabled = false;
+            }
+            if (optionBButton) {
+                optionBButton.textContent = card.choice.optionB.text;
+                optionBButton.style.display = 'inline-block';
+                optionBButton.disabled = false;
+            }
+
+            // Memory Management: Clean event listeners
+            const cleanOptionAButton = optionAButton.cloneNode(true);
+            const cleanOptionBButton = optionBButton.cloneNode(true);
+            optionAButton.replaceWith(cleanOptionAButton);
+            optionBButton.replaceWith(cleanOptionBButton);
+
+            // Re-query fresh buttons
+            const freshOptionAButton = dialog.querySelector('.optionAButton');
+            const freshOptionBButton = dialog.querySelector('.optionBButton');
+
+            if (freshOptionAButton) {
+                freshOptionAButton.onclick = () => {
+                    console.log('Standard Option A selected');
+                    freshOptionAButton.style.display = 'none';
+                    if (freshOptionBButton) freshOptionBButton.style.display = 'none';
+
+                    if (cardChoiceColumnA) {
+                        let effectsHTML = '';
+                        const effects = card.choice.optionA.effects;
+
+                        if (Array.isArray(effects)) {
+                            effects.forEach(effect => {
+                                effectsHTML += `<p>${(effect.Type || effect.type)}</p>`;
+                            });
+                        }
+
+                        cardChoiceColumnA.innerHTML = effectsHTML;
+                        cardChoiceColumnA.style.display = 'block';
+
+                        setTimeout(() => {
+                            dialog.close();
+                            applyAgeCardEffect(card.choice.optionA.effects, player);
+                            cardChoiceColumnA.style.display = 'none';
+                            if (typeof onComplete === 'function') onComplete();
+                        }, 3000);
+                    } else {
+                        // No choice column, close immediately
+                        setTimeout(() => {
+                            dialog.close();
+                            if (typeof onComplete === 'function') onComplete();
+                        }, 1000);
+                    }
+                };
+            }
+
+            if (freshOptionBButton) {
+                freshOptionBButton.onclick = () => {
+                    console.log('Standard Option B selected');
+                    freshOptionBButton.style.display = 'none';
+                    if (freshOptionAButton) freshOptionAButton.style.display = 'none';
+
+                    if (cardChoiceColumnB) {
+                        let effectsHTML = '';
+                        const effects = card.choice.optionB.effects;
+
+                        if (Array.isArray(effects)) {
+                            effects.forEach(effect => {
+                                effectsHTML += `<p>${effect.type || effect.Type}</p>`;
+                            });
+                        }
+
+                        cardChoiceColumnB.innerHTML = effectsHTML;
+                        cardChoiceColumnB.style.display = 'block';
+
+                        setTimeout(() => {
+                            dialog.close();
+                            applyAgeCardEffect(card.choice.optionB.effects, player);
+                            cardChoiceColumnB.style.display = 'none';
+                            if (typeof onComplete === 'function') onComplete();
+                        }, 3000);
+                    } else {
+                        // No choice column, close immediately
+                        setTimeout(() => {
+                            dialog.close();
+                            if (typeof onComplete === 'function') onComplete();
+                        }, 1000);
+                    }
+                };
+            }
+        }
+
+    } else if (card.choice) {
+        console.warn('Card has choices but option buttons are missing in the UI');
+    }
+    
+    // Comprehensive AI Logic from Function 2 approach
+      
+    // Handle AI player auto-choice
+    if (isAI) {
+        console.log('AI player handling card:', card.name);
+        setTimeout(() => {
+            if (!dialog.open) return;
+            
+            console.log('AI making choice for card:', card.name);
+            dialog.close();
+            
+            if (isEndOfTurnCard) {
+                console.log('Applying end of turn card effects');
+                applyCardEffect(card.effects, player);
+            } else if (card.choice) {
+                // AI always chooses option A for now
+                console.log('AI choosing option A');
+                if (isAgeDeck) {
+                    applyAgeCardEffect(card.choice.optionA.effects, player, player);
+                } else {
+                    applyCardEffect(card.choice.optionA.effects, player);
+                }
+            } else if (card.effects) {
+                console.log('Applying direct effects');
+                if (isAgeDeck) {
+                    applyAgeCardEffect(card.effects, player, player);
+                } else {
+                    applyCardEffect(card.effects, player);
+                }
+            }
+            
+            if (typeof onComplete === 'function') {
+                onComplete();
+            }
+        }, 5000); // 5 second delay for AI
+    } else if (card.effects && !card.choice) {
+        // For non-choice cards with effects, apply them immediately for human players
+        console.log('Applying immediate effects for non-choice card');
+        if (isAgeDeck) {
+            applyAgeCardEffect(card.effects, player, player);
+        } else {
+            applyCardEffect(card.effects, player);
+        }
+    }
+    
+    return dialog;
+}

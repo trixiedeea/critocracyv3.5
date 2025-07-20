@@ -316,7 +316,7 @@ export const ageOfLegacyDeck = [
            ]
         }
     }
-}]
+} ]
 
 // Export the cards array directly
 export const PINK_DECK = [...ageOfLegacyDeck];

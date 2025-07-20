@@ -298,32 +298,32 @@ gameBoard.dice.addEventListener('click', () => {
     // --- Close Card Button (End of Turn Cards Only) ---
     if (popovers.closeCardButton) {
         console.log("Setting up Close Card button event listener");
+
         popovers.closeCardButton.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
             console.log("Close card button clicked");
-            
+
             // Clear deck highlights
             clearDeckHighlights();
-            
+
             // Close the dialog
             const dialog = popovers.closeCardButton.closest('dialog');
             if (dialog) {
                 dialog.close();
+
                 // Trigger canvas redraw after dialog is closed
                 const event = new CustomEvent('redrawCanvas');
                 document.dispatchEvent(event);
             }
-            
+
             // Apply card effects
             const currentPlayer = getCurrentPlayer();
             if (currentPlayer) {
-                // Get the original card data from the dialog
                 const cardData = dialog?.dataset?.cardData;
                 if (cardData) {
                     try {
                         const card = JSON.parse(cardData);
-                        // Apply the card effects
                         applyCardEffect(card, currentPlayer);
                     } catch (error) {
                         console.error('Error parsing card data:', error);
@@ -333,11 +333,9 @@ gameBoard.dice.addEventListener('click', () => {
                 }
             }
         });
-        console.log("Close Card button event listener attached successfully");
-    } else {
-        console.error("Close Card button not found!");
     }
 };
+    // --- Option A Button ---
 
 /**
  * Handles the logic for when the canvas is clicked during the AWAITING_CARD_CLICK phase.
@@ -346,6 +344,7 @@ gameBoard.dice.addEventListener('click', () => {
  * @param {Object} player - Optional player object for programmatic calls
  */
 export function handleCanvasCardClick(event, coords = null, player = null) {
+    console.log('---------handleCanvasCardClick---------');
     const { boardCanvas } = state.ui.elements.gameBoard;
     
     // Use provided player or get current player
@@ -679,6 +678,7 @@ export function promptForPathChoice(pathOptions, player, aiChosenOption = null) 
 };
 
 export function promptForChoicepoint(options, onChoice) {
+    console.log('---------promptForChoicepoint---------');
     const popover = document.getElementById('choicepoint-Popover');
     const container = document.getElementById('choicepoint-Options');
 

@@ -76,16 +76,16 @@ export const ageOfExpansionDeck = [
             effects: [
                 { type: 'RESOURCE_CHANGE', changes: { money: 5 } },
                 { type: 'RESOURCE_CHANGE', changes: { influence: -3 } }
-                  ]
-                },
-                optionB: {
-                  text: "Publish a critique of the venture",
-                  effects: [
-                    { type: 'RESOURCE_CHANGE', changes: { knowledge: 5 } },
-                    { type: 'RESOURCE_CHANGE', changes: { money: -2 } }
-                  ]
-                }
-            }
+            ]
+        },
+        optionB: {
+            text: "Publish a critique of the venture",
+            effects: [
+                { type: 'RESOURCE_CHANGE', changes: { knowledge: 5 } },
+                { type: 'RESOURCE_CHANGE', changes: { money: -2 } }
+            ]
+        }
+    }
         },
         {
     deck: "Age of Expansion",
@@ -97,16 +97,16 @@ export const ageOfExpansionDeck = [
             effects: [
                 { type: 'RESOURCE_CHANGE', changes: { influence: 5 } },
                 { type: 'MOVEMENT', target: 'SELF', spaces: 3 }
-                  ]
-                },
-                optionB: {
-                  text: "Fund secular education",
-                  effects: [
-                    { type: 'RESOURCE_CHANGE', changes: { knowledge: 4 } },
-                    { type: 'RESOURCE_CHANGE', changes: { influence: -2 } }
-                  ]
-                }
-            }
+            ]
+        },
+        optionB: {
+            text: "Fund secular education",
+            effects: [
+                { type: 'RESOURCE_CHANGE', changes: { knowledge: 4 } },
+                { type: 'RESOURCE_CHANGE', changes: { influence: -2 } }
+            ]
+        }
+    }
         },
         {
     deck: "Age of Expansion",
@@ -117,15 +117,15 @@ export const ageOfExpansionDeck = [
             text: "Deploy troops",
             effects: [
                 { type: 'MOVEMENT', target: 'OTHER', spaces: -2 }
-                ]
-                },
-                optionB: {
-                  text: "Address grievances",
-                  effects: [
-                    { type: 'RESOURCE_CHANGE', changes: { influence: 3, knowledge: 2 } }
-                  ]
-                }
-            }
+            ]
+        },
+        optionB: {
+            text: "Address grievances",
+            effects: [
+                { type: 'RESOURCE_CHANGE', changes: { influence: 3, knowledge: 2 } }
+            ]
+        }
+    }
         },
         {
     deck: "Age of Expansion",
@@ -137,16 +137,16 @@ export const ageOfExpansionDeck = [
             effects: [
                 { type: 'RESOURCE_CHANGE', changes: { money: 7 } },
                 { type: 'SKIP_TURN', target: 'SELF' }
-                  ]
-                },
-                optionB: {
-                  text: "Follow ethical standards",
-                  effects: [
-                    { type: 'RESOURCE_CHANGE', changes: { influence: 4 } },
-                    { type: 'RESOURCE_CHANGE', changes: { money: -3 } }
-                  ]
-                }
-            }
+            ]
+        },
+        optionB: {
+            text: "Follow ethical standards",
+            effects: [
+                { type: 'RESOURCE_CHANGE', changes: { influence: 4 } },
+                { type: 'RESOURCE_CHANGE', changes: { money: -3 } }
+            ]
+        }
+    }
         },
         {
     deck: "Age of Expansion",
@@ -158,16 +158,16 @@ export const ageOfExpansionDeck = [
             effects: [
                 { type: 'STEAL', target: 'OTHER', resource: 'MONEY', amount: 4 },
                 { type: 'RESOURCE_CHANGE', changes: { influence: -6 } }
-                  ]
-                },
-                optionB: {
-                  text: "Honor the protection request",
-                  effects: [
-                    { type: 'RESOURCE_CHANGE', changes: { knowledge: 5 } },
-                    { type: 'RESOURCE_CHANGE', changes: { money: -2 } }
-                  ]
-                }
-            }
+            ]
+        },
+        optionB: {
+            text: "Honor the protection request",
+            effects: [
+                { type: 'RESOURCE_CHANGE', changes: { knowledge: 5 } },
+                { type: 'RESOURCE_CHANGE', changes: { money: -2 } }
+            ]
+        }
+    }
         },
         {
     deck: "Age of Expansion",
@@ -179,16 +179,16 @@ export const ageOfExpansionDeck = [
             effects: [
                 { type: 'MOVEMENT', target: 'SELF', spaces: 3 },
                 { type: 'RESOURCE_CHANGE', changes: { knowledge: 5 } }
-                  ]
-                },
-                optionB: {
-                  text: "Include indigenous voices",
-                  effects: [
-                    { type: 'RESOURCE_CHANGE', changes: { influence: 5 } },
-                    { type: 'RESOURCE_CHANGE', changes: { money: -2 } }
-                  ]
-                }
-            }
+            ]
+        },
+        optionB: {
+            text: "Include indigenous voices",
+            effects: [
+                { type: 'RESOURCE_CHANGE', changes: { influence: 5 } },
+                { type: 'RESOURCE_CHANGE', changes: { money: -2 } }
+            ]
+        }
+    }
         },
         {
     deck: "Age of Expansion",
@@ -200,16 +200,16 @@ export const ageOfExpansionDeck = [
             effects: [
                 { type: 'STEAL', target: 'OTHER', resource: 'MONEY', amount: 2 },
                 { type: 'RESOURCE_CHANGE', changes: { money: -2 } }
-                  ]
-                },
-                optionB: {
-                  text: "Enforce taxation",
-                  effects: [
-                    { type: 'RESOURCE_CHANGE', changes: { money: 3 } },
-                    { type: 'RESOURCE_CHANGE', changes: { influence: -2 } }
-                  ]
-                }
-            }
+            ]
+        },
+        optionB: {
+            text: "Enforce taxation",
+            effects: [
+                { type: 'RESOURCE_CHANGE', changes: { money: 3 } },
+                { type: 'RESOURCE_CHANGE', changes: { influence: -2 } }
+            ]
+        }
+    }
         },
         {
     deck: "Age of Expansion",
@@ -221,16 +221,16 @@ export const ageOfExpansionDeck = [
             effects: [
                 { type: 'RESOURCE_CHANGE', changes: { money: 6 } },
                 { type: 'RESOURCE_CHANGE', changes: { knowledge: -5 } }
-                  ]
-                },
-                optionB: {
-                  text: "Support smallholders",
-                  effects: [
-                    { type: 'RESOURCE_CHANGE', changes: { knowledge: 4 } },
-                    { type: 'RESOURCE_CHANGE', changes: { money: -2 } }
-                  ]
-                }
-            }
+            ]
+        },
+        optionB: {
+            text: "Support smallholders",
+            effects: [
+                { type: 'RESOURCE_CHANGE', changes: { knowledge: 4 } },
+                { type: 'RESOURCE_CHANGE', changes: { money: -2 } }
+            ]
+        }
+    }
         },
         {
     deck: "Age of Expansion",
@@ -242,16 +242,16 @@ export const ageOfExpansionDeck = [
             effects: [
                 { type: 'STEAL', target: 'OTHER', resource: 'INFLUENCE', amount: 4 },
                 { type: 'RESOURCE_CHANGE', changes: { influence: -4 } }
-                  ]
-                },
-                optionB: {
-                  text: "Promote critical literacy",
-                  effects: [
-                    { type: 'RESOURCE_CHANGE', changes: { knowledge: 5 } },
-                    { type: 'RESOURCE_CHANGE', changes: { money: -1 } }
-                  ]
-                }
-            }
+            ]
+        },
+        optionB: {
+            text: "Promote critical literacy",
+            effects: [
+                { type: 'RESOURCE_CHANGE', changes: { knowledge: 5 } },
+                { type: 'RESOURCE_CHANGE', changes: { money: -1 } }
+            ]
+        }
+    }
         },
         {
     deck: "Age of Expansion",
@@ -261,18 +261,18 @@ export const ageOfExpansionDeck = [
         optionA: {
             text: "Send mining teams",
             effects: [
-                    { type: 'RESOURCE_CHANGE', changes: { money: 5 } },
-                    { type: 'RESOURCE_CHANGE', changes: { knowledge: -3 } }
-                  ]
-                },
-                optionB: {
-                  text: "Fund archaeological expedition",
-                  effects: [
-                    { type: 'RESOURCE_CHANGE', changes: { knowledge: 5 } },
-                    { type: 'RESOURCE_CHANGE', changes: { influence: 2 } }
-                  ]
-                }
-            }
+                { type: 'RESOURCE_CHANGE', changes: { money: 5 } },
+                { type: 'RESOURCE_CHANGE', changes: { knowledge: -3 } }
+            ]
+        },
+        optionB: {
+            text: "Fund archaeological expedition",
+            effects: [
+                { type: 'RESOURCE_CHANGE', changes: { knowledge: 5 } },
+                { type: 'RESOURCE_CHANGE', changes: { influence: 2 } }
+            ]
+        }
+    }
         },
         {
     deck: "Age of Expansion",
@@ -282,18 +282,18 @@ export const ageOfExpansionDeck = [
         optionA: {
             text: "Standardize currency",
             effects: [
-                    { type: 'RESOURCE_CHANGE', changes: { money: 4, knowledge: -2 } }
-                  ]
-                },
-                optionB: {
-                  text: "Preserve local systems",
-                  effects: [
-                    { type: 'RESOURCE_CHANGE', changes: { influence: 3, knowledge: 2 } }
-                  ]
-                }
-            }
+            { type: 'RESOURCE_CHANGE', changes: { money: 4, knowledge: -2 } }
+            ]
         },
-        {
+        optionB: {
+            text: "Preserve local systems",
+            effects: [
+            { type: 'RESOURCE_CHANGE', changes: { influence: 3, knowledge: 2 } }
+            ]
+        }
+    }
+    },
+    {
     deck: "Age of Expansion",
     name: "Empire Expo",
     description: "You're organizing a world expo. Do you showcase imperial strength or cultural diversity?",
@@ -301,19 +301,18 @@ export const ageOfExpansionDeck = [
         optionA: {
             text: "Showcase imperial strength",
             effects: [
-                    { type: 'RESOURCE_CHANGE', changes: { money: 4 } },
-                    { type: 'RESOURCE_CHANGE', changes: { influence: -2 } }
-                  ]
-                },
-                optionB: {
-                  text: "Highlight cultural diversity",
-                  effects: [
-                    { type: 'RESOURCE_CHANGE', changes: { influence: 4 } },
-                    { type: 'RESOURCE_CHANGE', changes: { money: -1 } }
-                  ]
-                }
-            }
+            { type: 'RESOURCE_CHANGE', changes: { money: 4 } },
+            { type: 'RESOURCE_CHANGE', changes: { influence: -2 } }
+            ]
+        },
+        optionB: {
+            text: "Highlight cultural diversity",
+            effects: [
+            { type: 'RESOURCE_CHANGE', changes: { influence: 4 } },
+            { type: 'RESOURCE_CHANGE', changes: { money: -1 } }
+            ]
         }
+    }}
     ];
           
 
