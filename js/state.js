@@ -291,3 +291,39 @@ export function setCurrentCardState(card, deck, onComplete) {
     currentDeck = deck;
     currentOnComplete = onComplete;
 }
+
+// ONE single lookup table (object) holding the parsers
+export const EFFECT_PARSERS = {
+    RESOURCE_CHANGE: ({ changes }) =>
+        Object.entries(changes).map(([res, amt]) => {
+            const verb = amt >= 0 ? 'Gain' : 'Lose';
+            return `${verb} ${Math.abs(amt)} ${capitalize(res)}`;
+        }),
+
+    STEAL: ({ amount, resource }) =>
+        `Pick a player to steal ${amount} ${resource ? `of ${resource}` : 'of any resource'} from.`,
+
+    STEAL_FROM_ALL: ({ amount, resource }) =>
+        `Steal ${amount} ${resource ? `of ${resource}` : 'of any resource'} from all players.`,
+
+    MOVEMENT: ({ spaces }) => {
+        if (!spaces) return '';
+        return spaces > 0
+            ? `Move forward ${spaces} ${spaces === 1 ? 'space' : 'spaces'}.`
+            : `Move back ${Math.abs(spaces)} ${Math.abs(spaces) === 1 ? 'space' : 'spaces'}.`;
+    }
+};
+
+// SINGLE function that everybody calls
+export function getEffectDescription(effect) {
+    const parser = EFFECT_PARSERS[effect.type];
+    if (!parser) return [`Unknown effect type: ${effect.type}`];
+
+    const result = parser(effect);
+    // Always hand back an array so the UI can loop safely
+    return Array.isArray(result) ? result : [result];
+}
+
+function capitalize(word) {
+    return word.charAt(0).toUpperCase() + word.slice(1);
+}

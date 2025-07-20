@@ -23,7 +23,7 @@ import { ageOfResistanceDeck } from '../assets/Cards/AgeOfResistanceCards.js';
 
 // Import UI functions needed
 import { showMessage, updatePlayerInfo, updateResourcePanel } from './ui.js';
-import { state } from './state.js';
+import { state, getEffectDescription } from './state.js';
 import { TIMING, clearDeckHighlights } from './animations.js';
 
 // Import game state functions
@@ -766,11 +766,13 @@ export async function showCard(card, player, onComplete) {
                 console.log('Age Deck Option A selected');
                 freshOptionAButton.style.display = 'none';
                 
-                if (card.choice.optionA.effects && Array.isArray(card.choice.optionA.effects)) {
+                if (card.choice.optionA.effects?.length) {
                     card.choice.optionA.effects.forEach(effect => {
-                        const p = document.createElement('p');
-                        p.textContent = effect.type;
-                        cardChoiceColumnA.appendChild(p);
+                        getEffectDescription(effect).forEach(desc => {
+                            const p = document.createElement('p');
+                            p.textContent = desc;
+                            cardChoiceColumnA.appendChild(p);
+                        });
                     });
                 }
                 
@@ -778,7 +780,7 @@ export async function showCard(card, player, onComplete) {
                     dialog.close();
                     applyAgeCardEffect(card.choice.optionA.effects, player);
                     if (typeof onComplete === 'function') onComplete();
-                }, 3000);
+                }, 5000);
             };
         }
         
@@ -791,12 +793,14 @@ export async function showCard(card, player, onComplete) {
             freshOptionBButton.onclick = () => {
                 console.log('Age Deck Option B selected');
                 freshOptionBButton.style.display = 'none';
-                
-                if (card.choice.optionB.effects && Array.isArray(card.choice.optionB.effects)) {
+
+                if (card.choice.optionB.effects?.length) {
                     card.choice.optionB.effects.forEach(effect => {
-                        const p = document.createElement('p');
-                        p.textContent = effect.type;
-                        cardChoiceColumnB.appendChild(p);
+                        getEffectDescription(effect).forEach(desc => {
+                            const p = document.createElement('p');
+                            p.textContent = desc;
+                            cardChoiceColumnB.appendChild(p);
+                        });
                     });
                 }
                 
@@ -804,7 +808,7 @@ export async function showCard(card, player, onComplete) {
                     dialog.close();
                     applyAgeCardEffect(card.choice.optionB.effects, player);
                     if (typeof onComplete === 'function') onComplete();
-                }, 3000);
+                }, 5000);
             };
         }
     }
