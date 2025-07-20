@@ -825,7 +825,7 @@ export async function showCard(card, player, onComplete) {
             console.log('AI making choice for card:', card.name);
             dialog.close();
             
-            if (isEndOfTurnCard) {I
+            if (isEndOfTurnCard) {
                 console.log('Applying end of turn card effects');
                 state.currentCard = card; // Ensure current card is set
                 drawBoard();
