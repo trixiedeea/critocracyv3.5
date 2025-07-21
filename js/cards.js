@@ -1,19 +1,3 @@
-// Import player functions needed for card effects
-import { 
-    getPlayers, 
-    setPlayerSkipTurn, 
-    PLAYER_ROLES,
-    getRandomOtherPlayer,
-    updatePlayerResources,
-} from './players.js';
-
-// Import game logic functions needed for complex effects
-import { 
-    handleCardMovement,
-    handleEndTurn, 
-    processEndPlayerTurn,
-} from './game.js';
-
 // Import card data directly from JS files
 import { endOfTurnDeck } from '../assets/Cards/Endofturncards.js';
 import { ageOfExpansionDeck } from '../assets/Cards/AgeOfExpansionCards.js';
@@ -21,13 +5,11 @@ import { ageOfLegacyDeck } from '../assets/Cards/AgeOfLegacyCards.js';
 import { ageOfReckoningDeck } from '../assets/Cards/AgeOfReckoningCards.js';
 import { ageOfResistanceDeck } from '../assets/Cards/AgeOfResistanceCards.js';
 
-// Import UI functions needed
-import { showMessage, updatePlayerInfo, updateResourcePanel } from './ui.js';
+import { applyCardEffects, applyAgeCardEffects } from './resourceManagement.js';
+
 import { state, getEffectDescription } from './state.js';
 import { TIMING, clearDeckHighlights } from './animations.js';
 
-// Import game state functions
-import { getCurrentPlayer } from './game.js';
 
 import { fullDeckRegionPathMap } from './board-data.js';
 import { drawBoard } from './board.js';
@@ -374,195 +356,6 @@ export function discardCard(card, deckType) {
     document.dispatchEvent(event);
 };
 
-/**
- * Applies the effects listed on the current card to the target player(s).
- */
-export async function applyCardEffect(player) {
-    console.log('---------applyCardEffect---------')
-    const card = state.currentCard;
-    if (!card || !player) {
-        console.warn("Cannot apply card effect: No current card or invalid player.", { currentCard: card, player });
-        return;
-    }
-
-    console.log(`Applying effects of card "${card.name}" to player ${player.name}...`);
-    
-    // Handle different effect formats
-    if (!card.effects) {
-        console.error(`Card "${card.name}" has no effects property.`);
-        return;
-    }
-    
-    // Case 1: Effects organized by role (object with role keys)
-    if (typeof card.effects === 'object' && !Array.isArray(card.effects)) {
-        console.log(`Card "${card.name}" has role-based effects structure.`);
-        
-        // Find effects for the player's role (convert to PascalCase to match card data)
-        const pascalCaseRole = player.role.charAt(0).toUpperCase() + player.role.slice(1).toLowerCase();
-        const roleEffects = card.effects[pascalCaseRole];
-        if (roleEffects) {
-            console.log(`Applying ${player.role}-specific effects:`, roleEffects);
-            
-            // If the role effects is an array, process each effect
-            if (Array.isArray(roleEffects)) {
-                roleEffects.forEach(effect => processEffect(effect, player, player));
-            }
-            // If it's a single effect object, process it directly
-            else if (typeof roleEffects === 'object') {
-                processEffect(roleEffects, player, player);
-            }
-        } else {
-            console.error(`No specific effects defined for ${player.role} role.`);
-            
-            // Check if there's a generic "ALL" key for effects that apply to all roles
-            if (card.effects.ALL) {
-                const allEffects = card.effects.ALL;
-                if (Array.isArray(allEffects)) {
-                    allEffects.forEach(effect => processEffect(effect, player, player));
-                } else {
-                    processEffect(allEffects, player, player);
-                }
-            }
-        }
-        
-        // Call processEndPlayerTurn after applying effects
-        processEndPlayerTurn();
-        return;
-    }
-    
-    // Case 2: Effects as an array (original format)
-    if (Array.isArray(card.effects)) {
-        card.effects.forEach(effect => processEffect(effect, player, player));
-        
-        // Call processEndPlayerTurn after applying effects
-        processEndPlayerTurn();
-        return;
-    }
-    
-    // If we get here, the effects property has an unexpected format
-    console.log(`Card "${card.name}" effects has an unexpected format:`, card.effects);
-    
-    // Call processEndPlayerTurn even if effects format is unexpected
-    processEndPlayerTurn();
-};
-
-/**
- * Process a single effect, handling immunity and applying the correct effect type
- * @param {object} effect - The effect object from the card.
- * @param {object} player - The target player of the effect.
- * @param {object} sourcePlayer - The player who initiated the effect (drew the card).
- */
-function processEffect(effect, player, sourcePlayer) {
-    console.log('---------processEffect---------');
-    console.log(` Processing effect: ${JSON.stringify(effect)} for target ${player.name} from source ${sourcePlayer.name}`);
-    
-    // Define the target player based on the effect's target property if it exists
-    let targetPlayer = player; // Default target is the player passed in (often source player)
-    if (effect.target === 'OTHER') {
-        targetPlayer = getRandomOtherPlayer(sourcePlayer);
-        if (!targetPlayer) {
-            console.log(`Effect targeted OTHER, but no other player found.`);
-            return; // Cannot apply effect if no target
-        }
-        console.log(` Effect target is OTHER: ${targetPlayer.name}`);
-        // For effects targeting others, the 'player' arg might be misleading, use targetPlayer
-    } else if (effect.target === 'SELF') {
-        targetPlayer = sourcePlayer; // Explicitly target the source player
-        console.log(` Effect target is SELF: ${targetPlayer.name}`);
-    } 
-    // If no target property, assume the effect applies to the sourcePlayer (player who drew card)
-    else if (!effect.target) {
-         targetPlayer = sourcePlayer;
-    }
-    
-    // Apply the effect based on its type
-    switch (effect.type) {
-        case 'RESOURCE_CHANGE':
-            // Applies to the player object passed in (usually the source) unless target logic modifies it
-            applyResourceChange(effect, targetPlayer); 
-            break;
-        case 'MOVEMENT':
-            // applyMovement determines target internally based on effect.target
-            applyMovement(effect, sourcePlayer); 
-            break;
-        case 'STEAL':
-            case 'STEAL':
-                // delay steal for player interaction
-                if (sourcePlayer.isAI) {
-                  const validTargets = getValidStealTargets(sourcePlayer, getPlayers(), effect);
-                  const target = getRandom(validTargets);
-                  const rate = getResistanceRate(target, effect.resource);
-                  applyStealEffect(effect, target, sourcePlayer, Math.floor(effect.amount * rate));
-                } else {
-                  showStealPopover(effect, sourcePlayer, getPlayers());
-                }
-                break;
-        case 'SKIP_TURN':
-             // applySkipTurn determines target internally based on effect.target
-             applySkipTurn(effect, sourcePlayer);
-             break;
-        case 'CHANGE_PATH':
-        case 'STEAL_FROM_ALL':
-            handleStealFromAll(effect, sourcePlayer, getPlayers());
-            break;
-        default:
-            console.warn(`Unknown card effect type: ${effect.type}`);
-    }
-};
-
-function applyResourceChange(effect, player) {
-    console.log('---------applyResourceChange---------');
-    console.log(` Applying RESOURCE_CHANGE to ${player.name}:`, effect.changes);
-    // effect.changes should be an object like { knowledge: 10, money: -5 }
-    updatePlayerResources(player, effect.changes ?? effect);
-    updateResourcePanel(player); 
-};
-
-function applyMovement(effect, player) {
-    // player here is the sourcePlayer passed from processEffect
-    console.log(` Processing MOVEMENT effect initiated by ${player.name}:`, effect);
-
-    let targetPlayerForMove = null;
-    if (effect.target === 'SELF') {
-        targetPlayerForMove = player;
-    } else if (effect.target === 'OTHER') {
-        targetPlayerForMove = getRandomOtherPlayer(player);
-        if (!targetPlayerForMove) {
-            console.log("No other player found for MOVEMENT effect.");
-            return; 
-        }
-        console.log(` Target for movement effect is other player: ${targetPlayerForMove.name}`);
-    } else {
-        // If target is not specified, assume SELF
-        targetPlayerForMove = player; 
-    }
-    
-    // Pass the responsibility to game.js
-    handleCardMovement(targetPlayerForMove, effect);
-};
-
-function applySkipTurn(effect, player) {
-    // player here is the sourcePlayer passed from processEffect
-    console.log(` Processing SKIP_TURN initiated by ${player.name}:`, effect);
-    let target = null;
-    if (effect.target === 'SELF') {
-        target = player;
-    } else if (effect.target === 'OTHER') {
-         target = getRandomOtherPlayer(player);
-    } else {
-         // If target is not specified, assume SELF
-         target = player; 
-    }
-    
-    if (!target) {
-         console.log("No target found for SKIP_TURN effect.");
-         return;
-    }
-    
-    console.log(` Player ${target.name} will skip their next turn.`);
-    setPlayerSkipTurn(target, true); 
-};
-
     /**
  * Displays a card in the UI with appropriate animations and interactions
  * @param {Object} card - The card to display
@@ -648,7 +441,7 @@ export async function showCard(card, player, onComplete) {
     if (Array.isArray(card.effects)) {
         card.effects.forEach(effect => {
             if (effect.type === 'RESOURCE_CHANGE' && effect.changes) {
-                const formatted = formatResourceChanges(effect.changes);
+                const formatted = getEffectDescription(effect.changes);
                 if (formatted) {
                     let target = effect.target === 'OTHER' ? ' (Target: Other)' :
                                  (effect.target && effect.target !== 'SELF' ? ` (Target: ${effect.target})` : '');
@@ -724,7 +517,7 @@ export async function showCard(card, player, onComplete) {
         closeCardButton.onclick = () => {
             dialog.close();
             state.currentCard = card; // Ensure current card is set
-            applyCardEffect(player);
+            applyCardEffects(player);
             if (typeof onComplete === 'function') onComplete();
         };
     }
@@ -779,11 +572,18 @@ export async function showCard(card, player, onComplete) {
                     });
                 }
                 
-                setTimeout(() => {
-                    dialog.close();
-                    applyAgeCardEffect(card.choice.optionA.effects, player);
-                    if (typeof onComplete === 'function') onComplete();
-                }, 5000);
+                // Set the player's choice before applying effects
+                player.choice = 'A';
+                
+                // Close the dialog and apply effects
+                dialog.close();
+                applyAgeCardEffects(player, () => {
+                    // Clear the choice after effects are applied
+                    delete player.choice;
+                    if (typeof onComplete === 'function') {
+                        onComplete();
+                    }
+                });
             };
         }
         
@@ -795,6 +595,18 @@ export async function showCard(card, player, onComplete) {
             
             freshOptionBButton.onclick = () => {
                 console.log('Age Deck Option B selected');
+                // Set the player's choice before applying effects
+                player.choice = 'B';
+                
+                // Close the dialog and apply effects
+                dialog.close();
+                applyAgeCardEffects(player, () => {
+                    // Clear the choice after effects are applied
+                    delete player.choice;
+                    if (typeof onComplete === 'function') {
+                        onComplete();
+                    }
+                });
                 freshOptionBButton.style.display = 'none';
 
                 if (card.choice.optionB.effects?.length) {
@@ -809,7 +621,7 @@ export async function showCard(card, player, onComplete) {
                 
                 setTimeout(() => {
                     dialog.close();
-                    applyAgeCardEffect(card.choice.optionB.effects, player);
+                    applyAgeCardEffects(card.choice.optionB.effects, player);
                     if (typeof onComplete === 'function') onComplete();
                 }, 5000);
             };
@@ -829,27 +641,27 @@ export async function showCard(card, player, onComplete) {
                 console.log('Applying end of turn card effects');
                 state.currentCard = card; // Ensure current card is set
                 drawBoard();
-                applyCardEffect(player);
+                applyCardEffects(player);
             } else if (card.choice) {
                 // AI always chooses option A for now
                 console.log('AI choosing option A');
                 if (isAgeDeck) {
                     drawBoard();
-                    applyAgeCardEffect(card.choice.optionA.effects, player);
+                    applyAgeCardEffects(card.choice.optionA.effects, player);
                 } else {
                     state.currentCard = { ...card, effects: card.choice.optionA.effects };
                     drawBoard();
-                    applyCardEffect(player);
+                    applyCardEffects(player);
                 }
             } else if (card.effects) {
                 console.log('Applying direct effects');
                 if (isAgeDeck) {
                     drawBoard();
-                    applyAgeCardEffect(card.effects, player);
+                    applyAgeCardEffects(card.effects, player);
                 } else {
                     state.currentCard = card; // Ensure current card is set
                     drawBoard();
-                    applyCardEffect(player);
+                    applyCardEffects(player);
                 }
             }
             
@@ -862,22 +674,16 @@ export async function showCard(card, player, onComplete) {
         console.log('Applying immediate effects for non-choice card');
         if (isAgeDeck) {
             drawBoard();
-            applyAgeCardEffect(card.effects, player);
+            applyAgeCardEffects(card.effects, player);
         } else {
             drawBoard();
-            applyCardEffect(card.effects, player);
+            // Ensure we're passing the player object, not the effects
+            state.currentCard = card; // Make sure the card is set in state
+            applyCardEffects(player);
         }
     }
     
     return dialog;
-}
-
-function formatResourceChanges(changes) {
-    const result = [];
-    if (changes.money !== undefined) result.push(`${changes.money >= 0 ? '+' : ''}${changes.money}💰`);
-    if (changes.knowledge !== undefined) result.push(`${changes.knowledge >= 0 ? '+' : ''}${changes.knowledge}📚`);
-    if (changes.influence !== undefined) result.push(`${changes.influence >= 0 ? '+' : ''}${changes.influence}🎭`);
-    return result.join(', ');
 }
 
 // Hide card popover
@@ -931,70 +737,6 @@ export function hideCard() {
             const event = new CustomEvent('redrawCanvas');
             document.dispatchEvent(event);
         }
-    }
-};
-
-/**
- * Process a single effect, handling immunity and applying the correct effect type
- * @param {object} effect - The effect object from the card.
- * @param {object} player - The target player of the effect.
- * @param {object} sourcePlayer - The player who initiated the effect (drew the card).
- */
-export function applyAgeCardEffect(effect, player, sourcePlayer) {
-    console.log('---------applyAgeCardEffect---------');
-    console.log(` Processing effect: ${JSON.stringify(effect)} for target ${player.name} from source ${sourcePlayer ? sourcePlayer.name : 'unknown'}`);
-    
-    // Define the target player based on the effect's target property if it exists
-    let targetPlayer = player; // Default target is the player passed in (often source player)
-    if (effect.target === 'OTHER') {
-        targetPlayer = getRandomOtherPlayer(sourcePlayer);
-        if (!targetPlayer) {
-            console.log(`Effect targeted OTHER, but no other player found.`);
-            return; // Cannot apply effect if no target
-        }
-        console.log(` Effect target is OTHER: ${targetPlayer.name}`);
-        // For effects targeting others, the 'player' arg might be misleading, use targetPlayer
-    } else if (effect.target === 'SELF') {
-        targetPlayer = sourcePlayer; // Explicitly target the source player
-        console.log(` Effect target is SELF: ${targetPlayer.name}`);
-    } 
-    // If no target property, assume the effect applies to the sourcePlayer (player who drew card)
-    else if (!effect.target) {
-         targetPlayer = sourcePlayer;
-    }
-    
-    // Apply the effect based on its type
-    switch (effect.type) {
-        case 'RESOURCE_CHANGE':
-            // Applies to the player object passed in (usually the source) unless target logic modifies it
-            updatePlayerResources(targetPlayer, effect.changes ?? effect); 
-            break;
-        case 'MOVEMENT':
-            // applyMovement determines target internally based on effect.target
-            handleCardMovement(effect, sourcePlayer); 
-            break;
-        case 'STEAL':
-             // Source player steals from the target player
-             applySteal(effect, targetPlayer, sourcePlayer);
-             break;
-        case 'SKIP_TURN':
-             // applySkipTurn determines target internally based on effect.target
-             applySkipTurn(effect, sourcePlayer);
-             break;
-        case 'STEAL_FROM_ALL':
-             // Source player steals from all others
-             applyStealFromAll(effect, sourcePlayer);
-             break;
-        default:
-            console.warn(`Unknown card effect type: ${effect.type}`);
-            if (!player.isHuman) {
-                updatePlayerResources(player, effect.changes ?? effect);
-                handleEndTurn();
-            } else {
-                updatePlayerResources(player, effect.changes ?? effect);
-                handleEndTurn();
-            }
-            break;
     }
 };
 

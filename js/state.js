@@ -8,6 +8,9 @@ import { SPACE_TYPE } from './board-data.js';
 
 // ===== State Objects =====
 const _state = {
+    // Track player resources by player ID
+    playerResources: {},
+    
     // UI State
     ui: {
         currentScreen: 'start',
@@ -121,6 +124,37 @@ export function getGameState() {
  */
 export function getUIState() {
     return JSON.parse(JSON.stringify(_state.ui));
+}
+
+/**
+ * Get a player's resources from global state
+ * @param {string} playerId - The ID of the player
+ * @returns {Object} Player's resources or null if not found
+ */
+export function getPlayerResources(playerId) {
+    if (!playerId || !_state.playerResources[playerId]) return null;
+    return JSON.parse(JSON.stringify(_state.playerResources[playerId]));
+}
+
+/**
+ * Update a player's resources in global state
+ * @param {string} playerId - The ID of the player
+ * @param {Object} resources - The new resource values
+ */
+export function updatePlayerResources(playerId, resources) {
+    if (!playerId || !resources) return;
+    _state.playerResources[playerId] = JSON.parse(JSON.stringify(resources));
+    notifySubscribers();
+}
+
+/**
+ * Initialize player resources in global state
+ * @param {string} playerId - The ID of the player
+ * @param {Object} initialResources - Initial resource values
+ */
+export function initPlayerResources(playerId, initialResources) {
+    if (!playerId || !initialResources) return;
+    _state.playerResources[playerId] = JSON.parse(JSON.stringify(initialResources));
 }
 
 /**

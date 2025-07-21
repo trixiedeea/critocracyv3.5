@@ -214,21 +214,37 @@ export function getRandomOtherPlayer(currentPlayer) {
 }
 
 
+import { updatePlayerResources as updateGlobalResources } from './state.js';
+
 export function updatePlayerResources(player, changes) {
+    console.group(`[PLAYER] updatePlayerResources - ${player?.name} (${player?.role})`);
+    console.log('Changes requested:', changes);
+    
     if (!player || !changes) {
-        console.error('Invalid parameters for updatePlayerResources:', { player, changes });
+        const error = `Invalid parameters for updatePlayerResources: ${JSON.stringify({
+            hasPlayer: !!player,
+            hasChanges: !!changes,
+            playerId: player?.id,
+            changesType: typeof changes
+        }, null, 2)}`;
+        console.error(error);
+        console.groupEnd();
         return false;
     }
     
     // Validate player has resources object
     if (!player.resources) {
-        console.error('Player missing resources object:', player);
-        return false;
+        console.warn('Player missing resources object, initializing...');
+        player.resources = { money: 0, knowledge: 0, influence: 0 };
     }
+    
+    console.log('Current resources:', JSON.parse(JSON.stringify(player.resources)));
 
     // Validate and normalize changes
     const normalizedChanges = {};
     let isValid = true;
+    
+    console.log('Normalizing changes...');
     for (const resource in changes) {
         if (!RESOURCES.includes(resource)) {
             console.warn(`Invalid resource type '${resource}' ignored`);
@@ -242,6 +258,7 @@ export function updatePlayerResources(player, changes) {
             break;
         }
         
+        console.log(`- ${resource}: ${change}`);
         normalizedChanges[resource] = change;
     }
     
@@ -249,25 +266,66 @@ export function updatePlayerResources(player, changes) {
 
     // Calculate new values first to ensure all changes are valid
     const newValues = { ...player.resources };
+    console.log('\nApplying changes to resources:');
+    
     for (const [resource, change] of Object.entries(normalizedChanges)) {
+        console.group(`Processing ${resource}:`);
+        console.log(`Current: ${newValues[resource] || 0} ${resource}`);
+        console.log(`Change:  ${change >= 0 ? '+' : ''}${change} ${resource}`);
         const currentValue = newValues[resource] || 0;
         const newValue = currentValue + change;
         
         // Prevent negative resources
         if (newValue < 0) {
             console.error(`Cannot update ${resource}: would result in negative value (${newValue})`);
+            console.groupEnd(); // End resource group
+            console.groupEnd(); // End main group
             return false;
         }
+        
+        console.log(`New:     ${newValue} ${resource}`);
+        console.groupEnd(); // End resource group
         
         newValues[resource] = newValue;
     }
 
-    // Apply validated changes
-    Object.assign(player.resources, newValues);
-    console.log(`Resources updated for ${player.name}:`, player.resources);
+    // Log the state before update
+    console.log('\n=== RESOURCE UPDATE SUMMARY ===');
+    console.log('Before update:', JSON.parse(JSON.stringify(player.resources)));
     
-    // Trigger UI update
-    // Update UI for this specific player
-    updatePlayerInfo(player.id);
-    return true;
+    // Update local player object
+    Object.assign(player.resources, newValues);
+    
+    console.log('After update: ', JSON.parse(JSON.stringify(player.resources)));
+    
+    // Log the actual changes made
+    const changesMade = {};
+    for (const [resource, change] of Object.entries(normalizedChanges)) {
+        changesMade[resource] = {
+            from: (player.resources[resource] || 0) - change,
+            to: player.resources[resource],
+            change: change
+        };
+    }
+    console.log('Changes applied:', changesMade);
+    
+    try {
+        // Update global state
+        console.log('Updating global state...');
+        updateGlobalResources(player.id, { ...player.resources });
+        console.log('Global state updated');
+        
+        // Trigger UI update
+        console.log('Updating UI...');
+        updatePlayerInfo(player.id);
+        console.log('UI update complete');
+        
+        console.log('=== RESOURCE UPDATE COMPLETE ===');
+        console.groupEnd();
+        return true;
+    } catch (error) {
+        console.error('Error updating resources:', error);
+        console.groupEnd();
+        return false;
+    }
 }

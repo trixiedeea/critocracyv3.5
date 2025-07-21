@@ -23,7 +23,9 @@ import {
     handlePlayerAction,
 } from './game.js';
 
-import { drawCard, applyCardEffect, applyAgeCardEffect } from './cards.js';
+import { drawCard } from './cards.js';
+
+import { applyAgeCardEffects, applyCardEffects } from './resourceManagement.js';
 
 import { 
     fullDeckRegionPathMap, 
@@ -188,16 +190,16 @@ function setupEventListeners() {
         advanceToNextPlayer();
     });
 
- // Attach once — during game init or when board screen loads
-gameBoard.dice.addEventListener('click', () => {
-    if (state.currentPhase !== 'ROLLING') return; // Only act during ROLLING phase
-  
-    console.log('🎯 Dice clicked in ROLLING phase');
-  
-    stopDiceShake?.(); // Optional: stops visual shake
-    updateGameState({ currentPhase: 'PLAYING' }); // Phase gating
-    animateDiceRoll(2000); // Your full animation + logic
-  });
+    // Attach once — during game init or when board screen loads
+    gameBoard.dice.addEventListener('click', () => {
+        if (state.currentPhase !== 'ROLLING') return; // Only act during ROLLING phase
+    
+        console.log('🎯 Dice clicked in ROLLING phase');
+    
+        stopDiceShake?.(); // Optional: stops visual shake
+        updateGameState({ currentPhase: 'PLAYING' }); // Phase gating
+        animateDiceRoll(2000); // Your full animation + logic
+    });
   
       
       
@@ -230,7 +232,7 @@ gameBoard.dice.addEventListener('click', () => {
                         try {
                             const card = JSON.parse(cardData);
                             // Apply the age card effects
-                            applyAgeCardEffect(card.effects, currentPlayer, currentPlayer);
+                            applyAgeCardEffects(Player);
                         } catch (error) {
                             console.error('Error parsing card data:', error);
                         }
@@ -241,10 +243,6 @@ gameBoard.dice.addEventListener('click', () => {
             });
         });
     }
-
-
-
-    
 
     // --- End Game Screen Button ---
     endGame.newGameButton.addEventListener('click', () => {
@@ -268,72 +266,73 @@ gameBoard.dice.addEventListener('click', () => {
 
     // Set up end turn button
     const endTurnButton = document.getElementById('end-Turn-Button');
-    if (endTurnButton) {
-        console.log("Setting up End Turn button event listener");
-        endTurnButton.onclick = null; // Clear any existing handlers
-        endTurnButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log("End turn button clicked - DEBUG START");
-            console.log("Button disabled state:", endTurnButton.disabled);
-            console.log("Current game phase:", state.currentPhase);
-            console.log("Current player:", getCurrentPlayer());
-            
-            // Play sound effect
-            //playSound('endTurn');
-            
-            // Remove shake animation
-            endTurnButton.style.animation = '';
-            
-            // Call advance to next player
-            console.log("About to call advanceToNextPlayer()");
-            advanceToNextPlayer();
-            console.log("advanceToNextPlayer() called - DEBUG END");
-        });
-        console.log("End Turn button event listener attached successfully");
-    } else {
-        console.error("End Turn button not found!");
-    }
+        if (endTurnButton) {
+            console.log("Setting up End Turn button event listener");
+            endTurnButton.onclick = null; // Clear any existing handlers
+            endTurnButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log("End turn button clicked - DEBUG START");
+                console.log("Button disabled state:", endTurnButton.disabled);
+                console.log("Current game phase:", state.currentPhase);
+                console.log("Current player:", getCurrentPlayer());
+                
+                // Play sound effect
+                //playSound('endTurn');
+                
+                // Remove shake animation
+                endTurnButton.style.animation = '';
+                
+                // Call advance to next player
+                console.log("About to call advanceToNextPlayer()");
+                advanceToNextPlayer();
+                console.log("advanceToNextPlayer() called - DEBUG END");
+            });
+            console.log("End Turn button event listener attached successfully");
+        } else {
+            console.error("End Turn button not found!");
+        }
 
-    // --- Close Card Button (End of Turn Cards Only) ---
+        // --- Close Card Button (End of Turn Cards Only) ---
     if (popovers.closeCardButton) {
-        console.log("Setting up Close Card button event listener");
+            console.log("Setting up Close Card button event listener");
 
-        popovers.closeCardButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log("Close card button clicked");
+            popovers.closeCardButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log("Close card button clicked");
 
-            // Clear deck highlights
-            clearDeckHighlights();
+                // Clear deck highlights
+                clearDeckHighlights();
 
-            // Close the dialog
-            const dialog = popovers.closeCardButton.closest('dialog');
-            if (dialog) {
-                dialog.close();
+                // Close the dialog
+                const dialog = popovers.closeCardButton.closest('dialog');
+                if (dialog) {
+                    dialog.close();
 
-                // Trigger canvas redraw after dialog is closed
-                const event = new CustomEvent('redrawCanvas');
-                document.dispatchEvent(event);
-            }
-
-            // Apply card effects
-            const currentPlayer = getCurrentPlayer();
-            if (currentPlayer) {
-                const cardData = dialog?.dataset?.cardData;
-                if (cardData) {
-                    try {
-                        const card = JSON.parse(cardData);
-                        applyCardEffect(card, currentPlayer);
-                    } catch (error) {
-                        console.error('Error parsing card data:', error);
-                    }
-                } else {
-                    console.error('No card data found in dialog');
+                    // Trigger canvas redraw after dialog is closed
+                    const event = new CustomEvent('redrawCanvas');
+                    document.dispatchEvent(event);
                 }
-            }
-        });
-    }
+
+                // Apply card effects
+                const currentPlayer = getCurrentPlayer();
+                if (currentPlayer) {
+                    const cardData = dialog?.dataset?.cardData;
+                    if (cardData) {
+                        try {
+                            const card = JSON.parse(cardData);
+                            state.currentCard = card; // Set the current card in state
+                            applyCardEffects(currentPlayer); // Pass only the player object
+                        } catch (error) {
+                            console.error('Error parsing card data:', error);
+                        }
+                    } else {
+                        console.error('No card data found in dialog');
+                    }
+                }
+            });
+        }
 };
     // --- Option A Button ---
 
@@ -814,7 +813,7 @@ export function updateGameControls() {
 export function updateResourcePanel(player) {
     console.log('---------updateResourcePanel---------');
     // Try to find (or freshly create) the panel again
-    const panelUpdated = document.getElementById(`resource-Display-Container-${player.id}`);
+    const panelUpdated = document.getElementById(`player-Resource-Panel-${player.id}`);
     if (!panelUpdated) {
       console.error(`No resource panel found for player ID: ${player.id}`);
       return;
@@ -855,5 +854,3 @@ export function showResourceChangeFeedback(playerId, resourceType, amount) {
       feedbackEl.style.transform = 'translateY(0px)';
     }, 1000);
 }
-  
-
