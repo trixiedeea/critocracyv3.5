@@ -12,6 +12,62 @@ Button:hover {
     background-color: #a3aeab;
 }
 
+/* End Turn Button */
+#end-turn-button {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    z-index: 100;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: bold;
+    background-color: #2ecc71;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#end-turn-button:hover:not(:disabled) {
+    background-color: #27ae60;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+#end-turn-button:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+#end-turn-button:disabled {
+    background-color: #95a5a6;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Shake animation for end turn button */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.shake {
+    animation: shake 0.5s ease-in-out infinite;
+}
+
+/* Pulse animation for end turn button */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.pulse {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
 /* Button styles */
 button {
     padding: 10px 15px;
@@ -1405,6 +1461,19 @@ dialog.popover::backdrop {
 #player-Popover-Button:active {
     transform: translateY(1px);
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+canvas {
+    outline: none !important;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+canvas:focus {
+    outline: none !important;
 }
 
 

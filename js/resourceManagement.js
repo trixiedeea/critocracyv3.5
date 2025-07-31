@@ -3,21 +3,55 @@
 
 import { 
   getPlayers, 
-  getRandomOtherPlayer,
-  updatePlayerResources,
 } from './players.js';
 
-// Import game logic functions needed for complex effects
 import { 
-  handleEndTurn, 
+  triggerGameOver,
   processEndPlayerTurn,
 } from './game.js';
-import { state } from './state.js';
 
+import { 
+  updatePlayerResources, 
+  updateGameState,
+  getCurrentPlayer,
+  isActionAllowed
+} from './state.js';
+
+import { 
+  ensurePlayerPath,
+  animateTokenToPosition
+} from './animations.js';
+
+import { 
+    processCardEffects,
+    processAgeCardEffects
+} from './cards.js';
+
+import {
+    drawBoard,
+    scaleCoordinates
+} from './board.js';
+
+import { 
+    fullDeckRegionPathMap, 
+    ageOfExpansionPath, 
+    ageOfResistancePath, 
+    ageOfReckoningPath, 
+    ageOfLegacyPath 
+} from './board-data.js';
+
+import { updatePlayerInfo } from './ui.js';
 
 // ========== //constants ==========
 
 const RESOURCE_TYPES = ['money', 'knowledge', 'influence'];
+
+const pathKey = {
+    ageOfExpansionPath: fullDeckRegionPathMap.ageOfExpansion.pathKey,
+    ageOfResistancePath: fullDeckRegionPathMap.ageOfResistance.pathKey,
+    ageOfReckoningPath: fullDeckRegionPathMap.ageOfReckoning.pathKey,
+    ageOfLegacyPath: fullDeckRegionPathMap.ageOfLegacy.pathKey,
+};
 
 const roleMultipliers = {
   gain: {
@@ -47,323 +81,285 @@ const resistanceRates = {
   COLONIALIST: { influence: 0.15 }
 };
 
+function isValidResource(resource) {
+  return RESOURCE_TYPES.includes(resource);
+}
+
+// Helper function to get multiplier for a resource
+// Takes into account player role and resource type
+export async function getMultiplier(resource, isGain) {
+  console.log('---------getMultiplier---------');
+  const player = getCurrentPlayer();
+  if (!player?.role) {
+    console.warn(`getMultiplier: No current player or role for ${resource} (${isGain ? 'gain' : 'loss'})`);
+    return 1;
+  }
+  
+  const role = player.role;
+  if (!role) {
+    console.warn(`getMultiplier: Unknown role ${player.role} for player ${player.name}`);
+    return 1;
+  }
+  
+  const multiplier = isGain 
+    ? (roleMultipliers.gain[role]?.[resource] || 1)
+    : (roleMultipliers.loss[role]?.[resource] || 1);
+    
+  console.log(`[MULTIPLIER] ${player.name}'s ${isGain ? 'gain' : 'loss'} multiplier for ${resource}: ${multiplier}x (${player.role})`);
+  console.log('---------getMultiplier END---------');
+  return multiplier;
+}
+
+/**
+ * Gets the resistance rate for a player's resource
+ * @param {Object} targetPlayer - The target player
+ * @param {string} resource - The resource type
+ * @returns {number} The resistance multiplier (1 = no resistance)
+ */
+export async function getResistanceRate(targetPlayer, resource) {
+  //console.log('---------getResistanceRate---------');
+  
+  if (!targetPlayer?.role) {
+    console.warn(`getResistanceRate: No target player or role for ${resource}`);
+    return 1;
+  }
+  
+  const role = targetPlayer.role.toUpperCase();
+  const resourceLower = resource.toLowerCase();
+  
+  const resistance = resistanceRates[role]?.[resourceLower] || 1;
+  
+  console.log(`[RESISTANCE] ${targetPlayer.name}'s resistance to ${resource} loss: ${resistance}x (${targetPlayer.role})`);
+  console.log('---------getResistanceRate END---------');
+  return resistance;
+}
+
 /**
  * Applies the effects listed on the current card to the target player(s).
  * Called for regular cards. Calls processEndPlayerTurn when complete.
- * @param {Object} player - The player to apply effects to
- * @param {Function} [onComplete] - Optional callback after effects are applied
+ * @param {Object} card - The card to apply effects from
+
  */
-export function applyCardEffects(player, onComplete) {
-  console.log('---------applyCardEffects---------')
-  const card = state.currentCard;
-  if (!card || !player) {
-    console.warn("Cannot apply card effect: No current card or invalid player.", { currentCard: card, player });
-    processEndPlayerTurn();
-    if (onComplete) onComplete(false);
+export function applyCardEffect(card) {
+  updateGameState({ currentPhase: 'PLAYING' });
+  if (!isActionAllowed('AWAITING_PATH_CHOICE', 'ROLLING', 'TURN_TRANSITION')) return;
+  console.log('---------applyCardEffect---------');
+  console.log('Full card object received:', JSON.stringify(card, null, 2));
+
+  const player = getCurrentPlayer();
+
+  if (!player) {
+    console.error('No current player found');
     return;
+}
+    
+  if (!card || !player) {
+      console.warn(`Cannot apply effects of card "${card.name}" to player ${player.name} card or player is undefined`);
+      return;
   }
 
   console.log(`Applying effects of card "${card.name}" to player ${player.name}...`);
   
+  // Handle different effect formats
   if (!card.effects) {
-    console.error(`Card "${card.name}" has no effects property.`);
-    processEndPlayerTurn();
-    if (onComplete) onComplete(false);
+      console.error(`Card "${card.name}" has no effects property.`);
+      return;
+  }
+  
+  // Case 1: Effects organized by role (object with role keys)
+  if (typeof card.effects === 'object' && !Array.isArray(card.effects)) {
+    console.log(`Card "${card.name}" has role-based effects structure.`);
+    
+    // REPLACE THIS ENTIRE SECTION WITH OPTION 2:
+    // Try different case formats to match card data
+    const rolesToTry = [
+        player.role.toUpperCase(),           // HISTORIAN
+        player.role.charAt(0).toUpperCase() + player.role.slice(1).toLowerCase(), // Historian
+        player.role.toLowerCase()            // historian
+    ];
+    
+    let roleEffects = null;
+    let matchedRole = null;
+    
+    for (const roleFormat of rolesToTry) {
+        if (card.effects[roleFormat]) {
+            roleEffects = card.effects[roleFormat];
+            matchedRole = roleFormat;
+            break;
+        }
+    }
+    
+    if (roleEffects) {
+        console.log(`Applying ${player.role}-specific effects (matched as "${matchedRole}"):`, roleEffects);
+        
+        // Process the effect
+        if (Array.isArray(roleEffects)) {
+            roleEffects.forEach(effect => processCardEffects(effect, player));
+        } else if (typeof roleEffects === 'object') {
+            processCardEffects(roleEffects, player, player);
+        }
+    } else {
+        console.warn(`No effects found for role "${player.role}" on card "${card.name}"`);
+        console.log('Available roles:', Object.keys(card.effects));
+        
+        // Check if there's a generic "ALL" key for effects that apply to all roles
+        if (card.effects.ALL) {
+            const allEffects = card.effects.ALL;
+            if (Array.isArray(allEffects)) {
+                allEffects.forEach(effect => processCardEffects(effect, player));
+            } else {
+                processCardEffects(allEffects, player);
+            }
+        }
+    }
+    updateGameState({
+        currentPhase: 'PLAYING',
+    });
+    console.warn('game phase updated to PLAYING');
+      // Call processEndPlayerTurn after applying effects
+      console.log('---------applyCardEffect END---------');
+      processEndPlayerTurn();
+      return;
+  }
+  
+  // Case 2: Effects as an array (original format)
+  if (Array.isArray(card.effects)) {
+      card.effects.forEach(effect => processCardEffects(effect, player));
+      
+      // Call processEndPlayerTurn after applying effects
+      console.log('---------applyCardEffect END---------');
+      processEndPlayerTurn();
+      return;
+  }
+  
+  // If we get here, the effects property has an unexpected format
+  console.log(`Card "${card.name}" effects has an unexpected format:`, card.effects);
+  
+  // Call processEndPlayerTurn even if effects format is unexpected
+  console.log('---------applyCardEffect END---------');
+  processEndPlayerTurn();
+};
+
+export async function applyAgeCardEffect(card, optionName = null, playerId) {
+  if (!isActionAllowed('AWAITING_PATH_CHOICE', 'ROLLING', 'TURN_TRANSITION')) return;
+  updateGameState({ currentPhase: 'PLAYING' });
+  console.log('---------applyAgeCardEffect---------')
+  console.log('Card:', card.name);
+  console.log('Option:', optionName);
+  
+  const player = getCurrentPlayer(playerId);
+  if (!player) {
+    console.error('No current player found');
     return;
   }
   
-  const processEffects = (effects) => {
-    if (!effects) {
-      console.warn('No effects to process');
-      return false;
+  let effects;
+  
+  if (optionName) {
+    effects = card.choice?.[optionName]?.effects;
+    if (!effects || !Array.isArray(effects)) {
+      console.warn(`No effects array found for option ${optionName}:`, card.choice?.[optionName]);
+      console.log('---------applyAgeCardEffect END---------')
+      await processAgeCardEffects(card, []);
+      return;
     }
-    
+  } else {
+    effects = card.effects;
+    if (!effects || !Array.isArray(effects)) {
+      console.warn('No effects array found on card:', card);
+      console.log('---------applyAgeCardEffect END---------')
+      await processAgeCardEffects(card, []);
+      return;
+    }
+  }
+  
+  console.log(`Starting sequential processing of ${effects.length} effects`);
+  
+  // Process all effects sequentially with proper async/await chains
+  for (const effect of effects) {
     try {
-      if (Array.isArray(effects)) {
-        return processEffectGroup(effects, player, player);
-      } else if (typeof effects === 'object') {
-        return processEffectGroup([effects], player, player);
+      console.log('Processing effect:', effect);
+      
+      // Handle different effect types with proper async chains
+      switch (effect.type) {
+        case 'RESOURCE_CHANGE': {
+          const player = getCurrentPlayer(playerId);
+          if (!player) {
+            console.error('No current player found during RESOURCE_CHANGE');
+            break;
+          }
+        
+          if (effect.changes && typeof effect.changes === 'object') {
+            for (const [resourceType, amount] of Object.entries(effect.changes)) {
+              if (typeof amount === 'number') {
+                await applyResourceChange(resourceType, amount, 'cardEffect', player.id);
+              }
+            }
+          } else if (effect.resource && typeof effect.amount === 'number') {
+            await applyResourceChange(effect.resource, effect.amount, 'cardEffect', player.id);
+          } else {
+            console.warn('Invalid RESOURCE_CHANGE effect:', effect);
+          }
+          break;
       }
-      return false;
+        case 'MOVEMENT':
+        case 'MOVE_TO':
+          await handleCardMovement(effect);
+          break;
+          
+        case 'SKIP_TURN':
+          // Handle both old format (effect.turns) and age card format (effect.target)
+          const skipEffect = {
+            turns: effect.turns || 1, // Default to 1 turn if not specified
+            target: effect.target || 'SELF'
+          };
+          await applySkipTurn(skipEffect, player);
+          break;
+          
+        case 'STEAL':
+          // Normalize age card STEAL effect format to work with existing functions
+          const normalizedStealEffect = {
+            type: 'STEAL',
+            resource: effect.resource ? effect.resource.toLowerCase() : 'money', // Convert MONEY → money
+            amount: effect.amount || 1,
+            target: effect.target || 'OTHER'
+          };
+          // Start proper steal chain: applyStealEffect → getValidStealTargets → showStealPopover → handleStealEffect
+          await applyStealEffect(normalizedStealEffect, player);
+          break;
+
+        case 'STEAL_FROM_ALL':
+          await handleStealFromAll(effect, player, getPlayers());
+          break;
+          
+        default:
+          // For any other effect type, use processCardEffects
+          await processCardEffects(effect, player);
+      }
     } catch (error) {
-      console.error('Error processing effects:', error);
-      return false;
+      console.error('Error processing effect:', effect, error);
     }
-  };
-  
-  try {
-    // Handle role-based effects (object with role keys)
-    if (typeof card.effects === 'object' && !Array.isArray(card.effects)) {
-      console.log(`Card "${card.name}" has role-based effects structure.`);
-      
-      if (!player.role) {
-        console.error('Player role is undefined or invalid:', player);
-        processEndPlayerTurn();
-        if (onComplete) onComplete(false);
-        return;
-      }
-      
-      // Convert role to PascalCase to match card data
-      const roleStr = String(player.role);
-      const pascalCaseRole = roleStr.charAt(0).toUpperCase() + roleStr.slice(1).toLowerCase();
-      const roleEffects = card.effects[pascalCaseRole];
-      
-      if (roleEffects) {
-        console.log(`Applying ${player.role}-specific effects:`, roleEffects);
-        processEffects(roleEffects);
-      } else if (card.effects.ALL) {
-        console.log(`No specific effects for ${player.role}, applying ALL effects`);
-        processEffects(card.effects.ALL);
-      } else {
-        console.log(`No effects defined for ${player.role} role and no ALL effects found.`);
-      }
-    }
-    // Handle array-based effects
-    else if (Array.isArray(card.effects)) {
-      console.log(`Card "${card.name}" has array-based effects.`);
-      processEffects(card.effects);
-    }
-    else {
-      console.error(`Card "${card.name}" effects has unexpected format:`, card.effects);
-    }
-  } catch (error) {
-    console.error(`Error applying card effects for ${card.name}:`, error);
-  } finally {
-    // Always call processEndPlayerTurn for regular cards
-    console.log('Regular card effects complete, ending turn');
-    processEndPlayerTurn();
-    if (onComplete) onComplete(true);
   }
+
+  console.log('All effects completed - calling processAgeCardEffects');
+  // Validate and finalize all effects
+  await processAgeCardEffects(card, effects);
 }
 
-/**
- * Applies the effects from Age cards to the target player(s).
- * Called for Age of cards. Calls handleEndTurn when complete.
- * @param {Object} player - The player to apply effects to
- * @param {Function} [onComplete] - Optional callback after effects are applied
- */
-export function applyAgeCardEffects(player, onComplete) {
-  console.log('---------applyAgeCardEffects---------')
-  const card = state.currentCard;
-  if (!card || !player) {
-    console.warn("Cannot apply age card effect: No current card or invalid player.", { currentCard: card, player });
-    handleEndTurn();
-    if (onComplete) onComplete(false);
-    return;
-  }
-
-  console.log(`Applying age card effects of "${card.name}" to player ${player.name}...`);
+export async function applyResourceChange(resourceType, amount, source, playerId) {
+  console.log('---------applyResourceChange---------')
   
-  if (!card.choice?.optionA?.effects && !card.choice?.optionB?.effects) {
-    console.error(`Age card "${card.name}" has no effects property.`);
-    handleEndTurn();
-    if (onComplete) onComplete(false);
-    return;
+  const player = getCurrentPlayer(playerId);
+  if (!player) {
+    console.error('applyResourceChange: No current player found');
+    return null;
   }
   
-  // Determine which choice was made by the player
-  const chosenOption = player.choice; // Assuming player.choice contains 'A' or 'B'
-  let selectedEffects = null;
-  
-  if (chosenOption === 'A' && card.choice.optionA?.effects) {
-    selectedEffects = card.choice.optionA.effects;
-    console.log(`Applying optionA effects based on player's choice...`);
-  } else if (chosenOption === 'B' && card.choice.optionB?.effects) {
-    selectedEffects = card.choice.optionB.effects;
-    console.log(`Applying optionB effects based on player's choice...`);
-  } else {
-    console.warn(`No valid choice found for player ${player.name} or no effects for chosen option.`, { 
-      playerChoice: chosenOption, 
-      hasOptionA: !!card.choice.optionA?.effects, 
-      hasOptionB: !!card.choice.optionB?.effects 
-    });
-    handleEndTurn();
-    if (onComplete) onComplete(false);
-    return;
-  }
-  
-  const processEffects = () => {
-    if (!selectedEffects) {
-      console.warn('No effects to process for age card');
-      return false;
-    }
-    
-    try {
-      if (Array.isArray(selectedEffects)) {
-        return processEffectGroup(selectedEffects, player, player);
-      } else if (selectedEffects && typeof selectedEffects === 'object') {
-        return processEffectGroup(selectedEffects, player, player);
-      }
-      return false;
-    } catch (error) {
-      console.error('Error processing age card effects:', error);
-      return false;
-    }
-  };
-  
-  try {
-    // Process the selected effects
-    const success = processEffects();
-    
-    if (!success) {
-      console.warn('Some effects may not have been processed correctly');
-    }
-    
-    return success;
-  } catch (error) {
-    console.error(`Error applying age card effects for ${card.name}:`, error);
-    return false;
-  } finally {
-    // For age cards, we call handleEndTurn to continue the turn
-    console.log('Age card effects complete, continuing turn');
-    handleEndTurn();
-    if (onComplete) onComplete(true);
-  }
-}
-/**
- * Handles resource change effects
- * @private
- */
-function handleResourceChangeEffect(effect, targetPlayer) {
-  if (effect.changes) {
-    Object.entries(effect.changes).forEach(([resource, amount]) => {
-      applyResourceChange(targetPlayer, resource, amount, 'cardEffect');
-    });
-  } else {
-    // Handle direct resource properties
-    ['money', 'knowledge', 'influence'].forEach(resource => {
-      if (effect[resource]) {
-        applyResourceChange(targetPlayer, resource, effect[resource], 'cardEffect');
-      }
-    });
-  }
-}
-
-/**
- * Handles steal effects
- * @private
- */
-function handleStealEffect(effect, sourcePlayer, targetPlayer) {
-  if (sourcePlayer.isAI) {
-    const validTargets = getValidStealTargets(sourcePlayer, getPlayers(), effect);
-    if (validTargets.length > 0) {
-      const target = validTargets[Math.floor(Math.random() * validTargets.length)];
-      const rate = getResistanceRate(target, effect.resource);
-      const adjustedAmount = Math.floor(effect.amount * rate);
-      applyStealEffect(effect, target, sourcePlayer, adjustedAmount);
-    }
-  } else {
-    showStealPopover(effect, sourcePlayer, getPlayers());
-  }
-}
-
-/**
- * Handles a single effect by routing it to the appropriate handler
- * @private
- * @param {Object} effect - The effect to process
- * @param {Object} player - The target player
- * @param {Object} sourcePlayer - The player who triggered the effect
- * @returns {boolean} True if the effect was handled successfully
- */
-function handleEffect(effect, player, sourcePlayer) {
-  if (!effect || !player) return false;
-  
-  try {
-    // Determine target player
-    let targetPlayer = player;
-    if (effect.target === 'OTHER') {
-      targetPlayer = getRandomOtherPlayer(sourcePlayer);
-      if (!targetPlayer) {
-        console.log(`Effect targeted OTHER, but no other player found.`);
-        return false;
-      }
-    } else if (effect.target === 'SELF') {
-      targetPlayer = sourcePlayer;
-    }
-
-    // Route to appropriate handler based on effect type
-    switch (effect.type) {
-      case 'RESOURCE_CHANGE':
-        handleResourceChangeEffect(effect, targetPlayer);
-        break;
-        
-      case 'MOVEMENT':
-        handleCardMovement(targetPlayer, effect);
-        break;
-        
-      case 'STEAL':
-        handleStealEffect(effect, sourcePlayer, targetPlayer);
-        break;
-        
-      case 'SKIP_TURN':
-        applySkipTurn(effect, targetPlayer);
-        break;
-        
-      case 'STEAL_FROM_ALL':
-        handleStealFromAll(effect, sourcePlayer, getPlayers());
-        break;
-        
-      default:
-        console.warn(`Unknown effect type: ${effect.type}`);
-        // Fallback: try to apply as direct resource changes
-        handleResourceChangeEffect(effect, targetPlayer);
-        return false;
-    }
-    return true;
-  } catch (error) {
-    console.error('Error in handleEffect:', error);
-    return false;
-  }
-}
-
-/**
- * Helper function to process a group of effects (array or single effect)
- * @param {Array|Object} effectGroup - The effect(s) to process
- * @param {Object} player - The target player
- * @param {Object} sourcePlayer - The player who triggered the effect
- * @returns {boolean} True if all effects were processed successfully
- */
-function processEffectGroup(effectGroup, player, sourcePlayer) {
-  if (!effectGroup) return false;
-  
-  try {
-    const effects = Array.isArray(effectGroup) ? effectGroup : [effectGroup];
-    let allProcessed = true;
-    
-    for (const effect of effects) {
-      if (effect) {
-        const success = handleEffect(effect, player, sourcePlayer);
-        allProcessed = allProcessed && success;
-      }
-    }
-    
-    return allProcessed;
-  } catch (error) {
-    console.error('Error in processEffectGroup:', error);
-    return false;
-  }
-}
-
-/**
- * Applies resource changes to a single player, with role-based mod//ifiers
- */
-/**
- * Applies resource changes to a single player with role-based modifiers
- * @param {Object} player - The player object
- * @param {string} resourceType - Type of resource (money/knowledge/influence)
- * @param {number} amount - Amount to change (positive for gain, negative for loss)
- * @param {string} source - Source of the change (default: 'cardEffect')
- */
-import { getPlayerResources as getGlobalResources, updatePlayerResources as updateGlobalResources } from './state.js';
-
-function applyResourceChange(player, resourceType, amount, source = 'cardEffect') {
-  console.group(`[RESOURCE] applyResourceChange - ${player?.name} (${player?.role})`);
+  console.log(`[RESOURCE] Starting chain: applyResourceChange → getMultiplier → getResistanceRate → handleCardResourceEffect`);
   console.log('Parameters:', { resourceType, amount, source });
-  
-  if (!player || !resourceType || typeof amount !== 'number' || typeof source !== 'string') {
-    const error = `Invalid parameters for applyResourceChange: ${JSON.stringify({ player: !!player, resourceType, amount, source })}`;
-    console.error(error);
-    console.groupEnd();
+
+  if (!resourceType || typeof amount !== 'number' || typeof source !== 'string') {
+    console.error(`Invalid parameters for applyResourceChange:`, { resourceType, amount, source });
     return null;
   }
 
@@ -372,143 +368,80 @@ function applyResourceChange(player, resourceType, amount, source = 'cardEffect'
     return null;
   }
 
-  console.log(`[RESOURCE] Applying ${amount > 0 ? 'gain' : 'loss'} of ${Math.abs(amount)} ${resourceType} to ${player.name} (${player.role}) from ${source}`);
-
-  // Get current resources from global state
-  const currentResources = getGlobalResources(player.id) || player.resources;
-  if (!currentResources) {
-    const error = `Could not get current resources for player: ${player.id}`;
-    console.error(error);
-    console.groupEnd();
-    return null;
-  }
-  
-  console.log('Current resources before change:', JSON.parse(JSON.stringify(currentResources)));
-
-  // Store the original amount from the card effect
-  const originalAmount = amount;
-  let adjustedAmount = amount;
-  let multiplierApplied = 1;
-  let multiplierType = 'none';
-  
-  console.log(`Processing ${amount > 0 ? 'gain' : 'loss'} of ${Math.abs(amount)} ${resourceType} for ${player.role}`);
-
-  // Apply role-based multipliers
-  const isGain = amount > 0;
-  
-  // First check for loss multipliers (like HISTORIAN's knowledge loss reduction)
-  if (!isGain && roleMultipliers.loss?.[player.role]?.[resourceType]) {
-    multiplierApplied = roleMultipliers.loss[player.role][resourceType];
-    multiplierType = 'loss';
-    adjustedAmount = Math.round(amount * multiplierApplied);
-    console.log(`[RESOURCE] ${player.name} (${player.role}) loss multiplier ${multiplierApplied}x applied to ${resourceType}`);
-  } 
-  // Then check for gain multipliers
-  else if (isGain && roleMultipliers.gain?.[player.role]?.[resourceType]) {
-    multiplierApplied = roleMultipliers.gain[player.role][resourceType];
-    multiplierType = 'gain';
-    adjustedAmount = Math.round(amount * multiplierApplied);
-    console.log(`[RESOURCE] ${player.name} (${player.role}) gain multiplier ${multiplierApplied}x applied to ${resourceType}`);
-  } 
-  // Default case - no multipliers applied
-  else {
-    adjustedAmount = Math.round(amount);
-  }
-
-  // Store previous value for logging
+  // Get current resources for logging (before changes)
+  const currentResources = player.resources || {};
   const previousValue = currentResources[resourceType] || 0;
-  
-  // Calculate the final amount after applying multipliers
-  const finalAmount = adjustedAmount;
-  
-  // Calculate new value and ensure it doesn't go below 0
-  const newValue = Math.max(0, previousValue + finalAmount);
-  
-  // Update the player's resources in the global state
-  const updatedResources = { ...currentResources, [resourceType]: newValue };
-  updateGlobalResources(player.id, updatedResources);
-  
-  // Also update the local player object for backward compatibility
-  if (!player.resources) player.resources = {};
-  player.resources[resourceType] = newValue;
 
-  // Create detailed log entry
+  // Step 1: Get multiplier (this calls getMultiplier)
+  const isGain = amount > 0;
+  const multiplier = await getMultiplier(resourceType, isGain);
+  
+  // Step 2: Get resistance rate (this calls getResistanceRate) 
+  const resistance = await getResistanceRate(player, resourceType);
+  
+  // Step 3: Apply both multiplier and resistance
+  let adjustedAmount = amount;
+  if (isGain) {
+    adjustedAmount = Math.round(amount * multiplier);
+  } else {
+    adjustedAmount = Math.round(amount * resistance);
+  }
+  
+  // Step 4: Call handleCardResourceEffect to finalize the change
+  await handleCardResourceEffect({
+    fromPlayer: player,
+    toPlayer: null,
+    resourceType: resourceType,
+    amount: adjustedAmount,
+    source: source
+  });
+  
+  // Get updated resources after the change
+  const updatedResources = player.resources || {};
+  const newValue = updatedResources[resourceType] || 0;
+  
   const logEntry = {
     timestamp: new Date().toISOString(),
     playerId: player.id,
     playerName: player.name,
     playerRole: player.role,
     resourceType,
-    originalAmount: originalAmount,  // Amount from card effect
-    finalAmount: adjustedAmount,     // Amount after multipliers
-    multiplierApplied: multiplierType !== 'none' ? multiplierApplied : 1,
-    multiplierType,
+    originalAmount: amount,
+    finalAmount: adjustedAmount,
+    multiplierApplied: multiplier,
+    multiplierType: isGain ? 'gain' : 'resistance',
     previousValue,
-    newValue: newValue,
+    newValue,
     source,
     isGain
   };
 
-  // Add to resource log
   resourceLog.push(logEntry);
-  
-  // Log the complete transaction with more details
+
   console.group(`[RESOURCE] ${player.name} (${player.role}) - ${resourceType} Change`);
   console.log('=== TRANSACTION DETAILS ===');
   console.log('Source:', source);
-  console.log('Original Amount:', originalAmount);
-  console.log('Multiplier Type:', multiplierType);
-  console.log('Multiplier Applied:', multiplierApplied);
-  if (multiplierType !== 'none') {
-    console.log(`Applied ${multiplierType} multiplier: ${multiplierApplied}x`);
+  console.log('Original Amount:', amount);
+  console.log('Multiplier Type:', isGain ? 'gain' : 'resistance');
+  console.log('Multiplier Applied:', multiplier);
+  if (multiplier !== 1) {
+    console.log(`Applied ${isGain ? 'gain' : 'resistance'} multiplier: ${multiplier}x`);
   }
   console.log('Final Amount After Multipliers:', adjustedAmount);
   console.log('Previous Value:', previousValue);
   console.log('New Value:', newValue);
   console.log('=== RESOURCE STATE ===');
-  console.log('All Resources Before Update:', JSON.parse(JSON.stringify(currentResources)));
-  console.log('=== STACK TRACE ===');
-  console.trace('Resource change call stack');
+  console.log('All Resources After Update:', JSON.parse(JSON.stringify(updatedResources)));
   console.groupEnd();
 
-  // Update UI and trigger any event listeners
   if (typeof logEvent === 'function') {
     logEvent(logEntry);
   }
-  
-  // Log the actual updatePlayerResources call
-  const changes = { [resourceType]: adjustedAmount }; // Use adjustedAmount to reflect the actual change
-  console.log('Calling updatePlayerResources with:', {
-    player: player.name,
-    changes: changes,
-    source: 'applyResourceChange',
-    timestamp: new Date().toISOString()
-  });
-  
-  try {
-    // Ensure we pass both required parameters
-    updatePlayerResources(player, changes);
-    console.log('Successfully updated player resources');
-  } catch (error) {
-    console.error('Error in updatePlayerResources:', error);
-  }
-  
-  console.log('Final resources after update:', JSON.parse(JSON.stringify(player.resources || {})));
-  console.groupEnd();
-  
-  return logEntry; // Return the log entry for further processing if needed
-}
 
-/**
- * Checks if a player can steal from another player based on their roles
- * @param {string} sourceRole - Role of the stealing player
- * @param {string} targetRole - Role of the target player
- * @returns {boolean} True if stealing is allowed, false otherwise
- */
-export function canStealFrom(sourceRole, targetRole) {
-  const canSteal = !(stealRestrictions[sourceRole]?.includes(targetRole));
-  console.log(`[STEAL] ${sourceRole} can${!canSteal ? 'not' : ''} steal from ${targetRole}`);
-  return canSteal;
+  console.log(`[RESOURCE] Chain completed: ${player.name} ${isGain ? 'gained' : 'lost'} ${Math.abs(adjustedAmount)} ${resourceType}`);
+  console.log('---------applyResourceChange END---------');
+
+  return logEntry;
 }
 
 /**
@@ -519,11 +452,38 @@ export function canStealFrom(sourceRole, targetRole) {
  * @returns {Array} List of valid targets
  */
 export function getValidStealTargets(currentPlayer, players, cardEffect) {
-  const validTargets = players.filter(p => 
-    p.id !== currentPlayer.id &&
-    canStealFrom(currentPlayer.role, p.role) &&
-    (cardEffect.target === 'ALL' || cardEffect.target === 'OTHER' || p.role.toUpperCase() === cardEffect.target)
-  );
+  console.log('---------getValidStealTargets---------');
+  
+  const validTargets = players.filter(p => {
+    // Can't steal from self
+    if (p.id === currentPlayer.id) return false;
+    
+    // Check if target's role is restricted from being stolen from by current player's role
+    const currentRole = currentPlayer.role?.toUpperCase();
+    const targetRole = p.role?.toUpperCase();
+    
+    if (!currentRole || !targetRole) {
+      console.warn(`[STEAL] Invalid roles - current: ${currentRole}, target: ${targetRole}`);
+      return false;
+    }
+    
+    // Check if target's role is in the current role's restricted roles
+    const restrictedRoles = stealRestrictions[currentRole] || [];
+    const isRestricted = restrictedRoles.includes(targetRole);
+    
+    if (isRestricted) {
+      console.log(`[STEAL] ${currentRole} cannot steal from ${targetRole} due to role restrictions`);
+      return false;
+    }
+    
+    // Check if target matches the card's target filter
+    const matchesTargetFilter = 
+      cardEffect.target === 'ALL' || 
+      cardEffect.target === 'OTHER' || 
+      p.role.toUpperCase() === cardEffect.target.toUpperCase();
+      
+    return matchesTargetFilter;
+  });
   
   console.log(`[STEAL] ${currentPlayer.name} (${currentPlayer.role}) has ${validTargets.length} valid steal targets`);
   validTargets.forEach((target, index) => {
@@ -533,56 +493,20 @@ export function getValidStealTargets(currentPlayer, players, cardEffect) {
   return validTargets;
 }
 
-/**
- * Gets the resistance rate for a player's resource
- * @param {Object} targetPlayer - The target player
- * @param {string} resource - The resource type
- * @returns {number} The resistance multiplier (1 = no resistance)
- */
-export function getResistanceRate(targetPlayer, resource) {
-  const role = targetPlayer.role.toUpperCase();
-  const resist = resistanceRates[role];
-  const rate = resist && resist[resource.toLowerCase()] ? resist[resource.toLowerCase()] : 1;
-  
-  if (rate !== 1) {
-    console.log(`[RESISTANCE] ${targetPlayer.name} (${role}) has resistance ${rate} against ${resource} theft`);
-  }
-  
-  return rate;
-}
 // Full change history log
 const resourceLog = [];
-
-// ========== Utility Functions ==========
-
-function isValidResource(resource) {
-  return RESOURCE_TYPES.includes(resource);
-}
-
-function canStealBetween(fromRole, toRole) {
-  return !(
-    stealRestrictions[fromRole]?.includes(toRole) ||
-    stealRestrictions[toRole]?.includes(fromRole)
-  );
-}
-
-export function getMultiplier(player, resource, isGain) {
-  const role = player.role;
-  if (isGain && roleMultipliers.gain[role]?.[resource]) {
-    return roleMultipliers.gain[role][resource];
-  }
-  if (!isGain && roleMultipliers.loss[role]?.[resource]) {
-    return roleMultipliers.loss[role][resource];
-  }
-  return 1;
-}
-
-// ========== Core Handlers ==========
 
 /**
  * Log every change with full metadata
  */
-export function logChange({ player, resourceType, baseAmount, adjustedAmount, source, actionType }) {
+export function logChange({ resourceType, baseAmount, adjustedAmount, source, actionType }) {
+  console.log('---------logChange---------');
+  const player = getCurrentPlayer();
+  if (!player) {
+    console.error('logChange: No current player found');
+    return;
+  }
+
   const entry = {
     playerId: player.id,
     playerName: player.name,
@@ -598,29 +522,6 @@ export function logChange({ player, resourceType, baseAmount, adjustedAmount, so
   resourceLog.push(entry);
   console.log(`[RESOURCE LOG]`, entry);
 }
-/**
- * Steal resources between two players with restrictions and role adjustments
- */
-function stealResource(fromPlayer, toPlayer, resourceType, amount) {
-  if (!isValidResource(resourceType)) {
-    console.error(`Invalid resource type "${resourceType}" passed to stealResource`);
-    return;
-  }
-
-  if (!canStealBetween(fromPlayer.role, toPlayer.role)) {
-    console.warn(`Stealing blocked between ${fromPlayer.role} and ${toPlayer.role}`);
-    return;
-  }
-
-  const availableAmount = Math.min(fromPlayer.resources[resourceType], amount);
-  if (availableAmount <= 0) {
-    console.warn(`No resources available to steal from ${fromPlayer.name}`);
-    return;
-  }
-
-  applyResourceChange(fromPlayer, resourceType, -availableAmount, `stolenBy:${toPlayer.name}`);
-  applyResourceChange(toPlayer, resourceType, availableAmount, `stoleFrom:${fromPlayer.name}`);
-}
 
 /**
  * Handles movement effects triggered by cards.
@@ -628,139 +529,367 @@ function stealResource(fromPlayer, toPlayer, resourceType, amount) {
  * Exported for use by cards.js
  * @param {object} player - The player object to move.
  * @param {object} effect - The movement effect details from the card.
+ * @returns {Promise} Resolves when movement is complete
  */
-export function handleCardMovement(player, effect) {
-    console.log('---------handleCardMovement---------');
-    console.log(`GAME: Handling card movement for ${player.name}:`, effect);
+export async function handleCardMovement(effect) {
+  console.log('---------handleCardMovement---------')
+  
+  const player = getCurrentPlayer();
+  if (!player) {
+      console.error("handleCardMovement: No current player found.");
+      return Promise.reject("No current player");
+  }
+  
+  console.log(`GAME: Handling card movement for ${player.name}:`, effect);
+  
+  // Set flag to prevent Age of card draws when moved by a card
+  updateGameState({
+    preventCardDraw: true
+  });
 
-    if (!player) {
-        console.error("handleCardMovement: Invalid player object received.");
-        return;
-    }
-
+  try {
     if (effect.spaces) {
-        // Handle moving a specific number of spaces (positive or negative)
-        const steps = parseInt(effect.spaces, 10);
-        if (isNaN(steps)) {
-            console.error(`handleCardMovement: Invalid 'spaces' value: ${effect.spaces}`);
+      // Handle moving a specific number of spaces (positive or negative)
+      const steps = parseInt(effect.spaces, 10);
+      if (isNaN(steps)) {
+        console.error(`handleCardMovement: Invalid 'spaces' value: ${effect.spaces}`);
+        return;
+      }
+
+      console.log(`GAME: Moving ${player.name} ${steps} spaces via card effect.`);
+      ensurePlayerPath(player);
+
+      // Check if moving backward past start - if so, clamp to start and ignore choicepoints
+      if (steps < 0) {
+        const paths = [ageOfExpansionPath, ageOfResistancePath, ageOfReckoningPath, ageOfLegacyPath];
+        const currentPath = paths.find(p => p.pathName === player.currentPath);
+        if (currentPath && currentPath.segments?.length > 0) {
+          const startSegment = currentPath.segments[0];
+          if (startSegment?.coordinates?.[0]) {
+            const startCoords = {
+              x: startSegment.coordinates[0][0],
+              y: startSegment.coordinates[0][1]
+            };
+            console.log(`Moving back to start at:`, startCoords);
+            player.currentCoords = { ...startCoords };
+            drawBoard();
             return;
+          }
         }
-        console.log(`GAME: Moving ${player.name} ${steps} spaces via card effect.`);
-        ensurePlayerPath(player);
-        animateTokenToPosition(player, steps, (result) => {
-            console.log(`GAME: Card movement (spaces: ${steps}) animation completed for ${player.name}. Reason: ${result.reason}`);
-            // No extra action needed here, animateTokenToPosition handles end state.
+      }
+
+      // For forward movement
+      updateGameState({
+        currentPhase: 'MOVING'
+      });
+      console.log(`Moving ${steps} spaces for ${player.name}`);
+
+      const token = document.querySelector(`[data-player-id="${player.id}"]`);
+      if (!token) {
+        console.warn("Token not found for player:", player);
+        return;
+      }
+
+      const paths = [ageOfExpansionPath, ageOfResistancePath, ageOfReckoningPath, ageOfLegacyPath];
+      let pathData = paths.find(path => path.pathName === player.currentPath);
+
+      if (!pathData || !pathData.segments) {
+        console.warn("No path data found for player's current path.");
+        return;
+      }
+
+      let remainingSteps = steps;
+      let currentCoord = { ...player.currentCoords };
+      const duration = 1000;
+
+      const findSegmentByCoord = (coord, targetPathData = pathData) => {
+        return targetPathData.segments.find(segment => {
+          const segCoord = segment.coordinates?.[0];
+          return segCoord?.[0] === coord.x && segCoord?.[1] === coord.y;
         });
+      };
+
+      // Function to search for a coordinate across all paths with tolerance
+      const findPathByChosenCoord = (chosenCoord, tolerance = 5) => {
+        console.log('-----------------findPathByChosenCoord-----------------');
+        for (const path of paths) {
+          for (const segment of path.segments) {
+            const segCoord = segment.coordinates?.[0];
+            if (segCoord) {
+              const dx = Math.abs(segCoord[0] - chosenCoord.x);
+              const dy = Math.abs(segCoord[1] - chosenCoord.y);
+              if (dx <= tolerance && dy <= tolerance) {
+                console.log(`Found matching coords in path ${path.pathName} with tolerance ${tolerance}`);
+                return { path, segment, exactCoord: { x: segCoord[0], y: segCoord[1] } };
+              }
+            }
+          }
+        }
+        console.warn("No path found for chosen coordinates:", chosenCoord);
+        return null;
+      };
+
+      const animatePosition = (element, start, end, duration = 1000) => {
+        return new Promise(resolve => {
+          const startTime = performance.now();
+
+          const update = (currentTime) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            const eased = progress < 0.5
+              ? 4 * progress * progress * progress
+              : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+
+            const currentX = start.x + (end.x - start.x) * eased;
+            const currentY = start.y + (end.y - start.y) * eased;
+
+            const [scaledX, scaledY] = scaleCoordinates(currentX, currentY);
+            element.style.transform = `translate(${scaledX}px, ${scaledY}px)`;
+
+            if (progress < 1) {
+              requestAnimationFrame(update);
+            } else {
+              resolve();
+            }
+          };
+
+          requestAnimationFrame(update);
+        });
+      };
+
+      const animateNextSegment = async () => {
+        if (remainingSteps <= 0) {
+          // Movement complete
+          token.classList.remove('enlarged');
+          token.classList.add('normal');
+          console.log(`GAME: Card movement (${steps} spaces) completed for ${player.name}`);
+          return;
+        }
+
+        const segment = findSegmentByCoord(currentCoord);
+        if (!segment || !segment.Next || segment.Next.length === 0) {
+          console.warn("Invalid or incomplete segment found at", currentCoord);
+          return;
+        }
+
+        // Check if this is a choicepoint (multiple Next coordinates)
+        if (segment.Next.length > 1) {
+          // Store interrupted move data
+          state.interruptedMove = {
+            remainingSteps,
+            duration
+          };
+
+          // Ensure game state is set to wait for choice
+          updateGameState({
+            pendingActionData: {
+              choiceOptions: segment.Next
+            }
+          });
+
+          // Prepare path names for the choice point
+          let pathNames = [];
+          if (Array.isArray(segment.pathNames) && segment.pathNames[0]) {
+            pathNames = segment.pathNames[0].split(',').map(name => name.trim());
+          }
+
+          const options = segment.Next.map((coords, index) => ({
+            coords,
+            pathName: pathNames[index] || 'UNKNOWN_PATH'
+          }));
+
+          return new Promise(resolve => {
+            promptForChoicepoint(options, (chosenOption) => {
+              // Search for the chosen coordinates across all paths
+              const match = findPathByChosenCoord({ x: chosenOption.coords[0], y: chosenOption.coords[1] });
+              if (match) {
+                player.currentPath = match.path.pathName;
+                player.currentCoords = match.exactCoord;
+                currentCoord = { ...match.exactCoord };
+                pathData = match.path; // Update pathData to the new path
+              } else {
+                console.warn("Could not match chosen coords exactly, using provided coords:", chosenOption.coords);
+                player.currentCoords = { x: chosenOption.coords[0], y: chosenOption.coords[1] };
+                currentCoord = { ...player.currentCoords };
+              }
+
+              remainingSteps--;
+              updateGameState({ remainingSteps });
+
+              // Clear the interrupted move data
+              delete state.interruptedMove;
+              updateGameState({
+                currentPhase: 'MOVING',
+                pendingActionData: null
+              });
+
+              // Continue movement
+              animateNextSegment().then(resolve);
+            });
+          });
+        }
+
+        // Regular movement (single Next coordinate)
+        const nextCoord = {
+          x: segment.Next[0][0],
+          y: segment.Next[0][1]
+        };
+
+        // Count step as we leave the currentCoord
+        remainingSteps--;
+        updateGameState({ remainingSteps });
+
+        // Animate visual movement
+        await animatePosition(token, currentCoord, nextCoord, duration);
+
+        // Update to exact coordinates from the path segment
+        const nextSegment = findSegmentByCoord(nextCoord);
+        if (nextSegment) {
+          const exactCoord = nextSegment.coordinates[0];
+          player.currentCoords = { x: exactCoord[0], y: exactCoord[1] };
+          currentCoord = { ...player.currentCoords };
+        } else {
+          player.currentCoords = nextCoord;
+          currentCoord = nextCoord;
+        }
+
+        await animateNextSegment();
+      };
+
+      token.classList.add('animating-token', 'enlarged');
+      token.classList.remove('normal');
+
+      await animateNextSegment();
 
     } else if (effect.targetSpaceId) {
-        // Handle moving to a specific space ID (e.g., 'START', 'FINISH')
-        let targetCoords = null;
-        const spaceId = effect.targetSpaceId.toUpperCase();
-        
-        if (spaceId === 'START' && START_SPACE) {
-            targetCoords = { x: START_SPACE.coordinates[0][0], y: START_SPACE.coordinates[0][1] };
-        } else if (spaceId === 'FINISH' && FINISH_SPACE) {
-            targetCoords = { x: FINISH_SPACE.coordinates[0][0], y: FINISH_SPACE.coordinates[0][1] };
-        } else {
-            console.warn(`handleCardMovement: Unsupported 'targetSpaceId': ${effect.targetSpaceId}`);
-            // TODO: Implement lookup for other potential named space IDs if needed
-            return; 
-        }
+      // Handle moving to a specific space ID (e.g., 'START', 'FINISH')
+      let targetCoords = null;
+      const spaceId = effect.targetSpaceId.toUpperCase();
 
-        if(targetCoords) {
-            console.log(`GAME: Moving ${player.name} directly to ${spaceId} (${targetCoords.x}, ${targetCoords.y}) via card effect.`);
-            console.log(`${player.role} moves directly to ${spaceId}!`);
-            player.currentCoords = { ...targetCoords }; 
-            drawBoard(); // Redraw board
-            
-            if (spaceId === 'FINISH') {
-                console.log(`Player ${player.name} reached FINISH via card effect.`);
-                markPlayerFinished(player); // Use existing function
-                // Check if game ends after marking finished
-                if (allPlayersFinished(getPlayers())) {
-                    triggerGameOver();
-                    return; // Stop further processing if game over
-                }
-            }
-            updatePlayerInfo(); // Corrected UI update call
+      if (spaceId === 'START' && START_SPACE) {
+        targetCoords = { x: START_SPACE.coordinates[0][0], y: START_SPACE.coordinates[0][1] };
+      } else if (spaceId === 'FINISH' && FINISH_SPACE) {
+        targetCoords = { x: FINISH_SPACE.coordinates[0][0], y: FINISH_SPACE.coordinates[0][1] };
+      } else {
+        console.warn(`handleCardMovement: Unsupported 'targetSpaceId': ${effect.targetSpaceId}`);
+        return;
+      }
+
+      if (targetCoords) {
+        console.log(`GAME: Moving ${player.name} directly to ${spaceId} (${targetCoords.x}, ${targetCoords.y})`);
+        player.currentCoords = { ...targetCoords };
+        drawBoard();
+
+        if (spaceId === 'FINISH') {
+          console.log(`Player ${player.name} reached FINISH via card effect.`);
+          markPlayerFinished(player);
+          if (allPlayersFinished(getPlayers())) {
+            triggerGameOver();
+          }
         }
+      }
 
     } else if (effect.moveToAge) {
-        // Handle moving to the start of a specific Age
-        console.log(`GAME: Moving ${player.name} to start of Age: ${effect.moveToAge}`);
-        console.log(`${player.role} jumps to ${effect.moveToAge}!`);
-        
-        // Debug log the actual path names
-        console.log("Available path names:", {
-            ageOfExpansionPath: ageOfExpansionPath.name,
-            ageOfResistancePath: ageOfResistancePath.name,
-            ageOfReckoningPath: ageOfReckoningPath.name,
-            ageOfLegacyPath: ageOfLegacyPath.name
-        });
-        
-        let targetPath = null;
-        // Case-insensitive matching for more robustness
-        const ageNameKey = effect.moveToAge;
-        if (ageNameKey.includes("expansion")) {
-            targetPath = ageOfExpansionPath;
-        } else if (ageNameKey.includes("resistance") || ageNameKey.includes("resistence")) {
-            targetPath = ageOfResistancePath;
-        } else if (ageNameKey.includes("reckoning")) {
-            targetPath = ageOfReckoningPath;
-        } else if (ageNameKey.includes("legacy")) {
-            targetPath = ageOfLegacyPath;
-        } else {
-            console.error(`handleCardMovement: Unknown Age name in moveToAge: ${effect.moveToAge}`);
-            return;
-        }
-        
-        console.log(`Selected targetPath:`, targetPath.name);
+      // Handle moving to the start of a specific Age
+      console.log(`GAME: Moving ${player.name} to start of Age: ${effect.moveToAge}`);
 
-        if (targetPath && targetPath.segments && targetPath.segments.length > 0) {
-            // Get the coordinates of the very first space in the target path
-            const targetCoords = {
-                x: targetPath.segments[0].coordinates[0][0],
-                y: targetPath.segments[0].coordinates[0][1]
-            };
-            console.log(` Target coordinates for ${effect.moveToAge}: (${targetCoords.x}, ${targetCoords.y})`);
-            player.currentCoords = { ...targetCoords };
-            drawBoard(); // Redraw board
-            updatePlayerInfo(); // Corrected UI update call
-        } else {
-            console.error(`handleCardMovement: Could not find path data for Age: ${effect.moveToAge}`);
-        }
+      let targetPath = null;
+      const pathKey = effect.moveToAge.toLowerCase();
+
+      if (pathKey.includes("expansion")) {
+        targetPath = ageOfExpansionPath;
+      } else if (pathKey.includes("resistance") || pathKey.includes("resistence")) {
+        targetPath = ageOfResistancePath;
+      } else if (pathKey.includes("reckoning")) {
+        targetPath = ageOfReckoningPath;
+      } else if (pathKey.includes("legacy")) {
+        targetPath = ageOfLegacyPath;
+      }
+
+      if (targetPath?.segments?.[0]?.coordinates?.[0]) {
+        const targetCoords = {
+          x: targetPath.segments[0].coordinates[0][0],
+          y: targetPath.segments[0].coordinates[0][1]
+        };
+        console.log(`Moving to ${effect.moveToAge} at:`, targetCoords);
+
+        // Update player's path and position
+        player.currentPath = targetPath.pathName;
+        player.currentCoords = { ...targetCoords };
+
+        drawBoard();
+      } else {
+        console.error(`Could not find path data for Age: ${effect.moveToAge}`);
+      }
 
     } else {
-        console.warn("handleCardMovement: Unknown movement effect structure:", effect);
+      console.warn("handleCardMovement: Unknown movement effect structure:", effect);
     }
-};
 
+  } catch (error) {
+    console.error('Error in handleCardMovement:', error);
+  }
+}
 // ========== Public Interface ==========
 
 /**
  * Handles any resource change triggered by a card
  */
-export function handleCardResourceEffect({
+export async function handleCardResourceEffect({
   fromPlayer,
   toPlayer = null,
   resourceType,
   amount,
   source = 'cardEffect'
 }) {
+  console.log('---------handleCardResourceEffect---------');
   if (!isValidResource(resourceType)) {
     console.error(`Invalid resource type in card effect: ${resourceType}`);
     return;
   }
 
-  if (!fromPlayer || typeof fromPlayer.resources !== 'object') {
-    console.error(`Invalid fromPlayer object`, fromPlayer);
-    return;
-  }
-
   if (toPlayer) {
-    stealResource(fromPlayer, toPlayer, resourceType, amount);
+    // This is a steal - subtract from fromPlayer, add to toPlayer
+    console.log(`Transferring ${amount} ${resourceType} from ${fromPlayer.name} to ${toPlayer.name}`);
+    
+    // Subtract from source (with resistance applied)
+    const resistance = getResistanceRate(fromPlayer, resourceType);
+    const actualLoss = Math.floor(amount * resistance);
+    
+    // Update fromPlayer resources directly
+    if (!fromPlayer.resources) fromPlayer.resources = {};
+    fromPlayer.resources[resourceType] = (fromPlayer.resources[resourceType] || 0) - actualLoss;
+    
+    // Add to target (with multipliers applied)
+    const multiplier = getMultiplier(resourceType, true); // true for gain
+    const actualGain = Math.floor(amount * multiplier);
+    
+    if (!toPlayer.resources) toPlayer.resources = {};
+    toPlayer.resources[resourceType] = (toPlayer.resources[resourceType] || 0) + actualGain;
+    
+    // Update UI for both players
+    updatePlayerResources(fromPlayer.id, fromPlayer.resources);
+    updatePlayerResources(toPlayer.id, toPlayer.resources);
+    
+    console.log(`Transfer complete: ${fromPlayer.name} lost ${actualLoss}, ${toPlayer.name} gained ${actualGain}`);
   } else {
-    applyResourceChange(fromPlayer, resourceType, amount, source);
+    // This is a regular resource change - update resources and call processAgeCardEffects for validation
+    const newResources = { ...fromPlayer.resources };
+    newResources[resourceType] = (newResources[resourceType] || 0) + amount;
+    
+    try {
+      updatePlayerResources(fromPlayer.id, newResources);
+      console.log('Successfully updated player resources');
+      
+      // Call processAgeCardEffects for validation
+      const currentCard = window.currentCard; // Assuming this is available globally
+      if (currentCard) {
+        await processAgeCardEffects(currentCard, []);
+      }
+    } catch (error) {
+      console.error('Error in updatePlayerResources or processAgeCardEffects:', error);
+    }
   }
 }
 
@@ -768,67 +897,148 @@ export function handleCardResourceEffect({
  * Returns deep copy of the full log
  */
 export function getResourceLog() {
+  console.log('---------getResourceLog---------');
   return JSON.parse(JSON.stringify(resourceLog));
 }
 
-export function showStealPopover(effect, currentPlayer, allPlayers) {
-  const validTargets = getValidStealTargets(currentPlayer, allPlayers, effect);
-  const popover = document.createElement('div');
-  popover.classList.add('steal-popover');
+export async function showStealPopover(effect, currentPlayer, validTargets, delayMs = 5000) {
+  console.log('---------showStealPopover---------');
   
-  const title = document.createElement('h3');
-  title.textContent = 'Choose a player to steal from:';
-  popover.appendChild(title);
+  return new Promise((resolve) => {
+    // If current player is AI, auto-choose a target after delay
+    if (!currentPlayer.isHuman) {
+      setTimeout(async () => {
+        const randomIndex = Math.floor(Math.random() * validTargets.length);
+        const target = validTargets[randomIndex];
+        const rate = await getResistanceRate(target, effect.resource);
+        const actualAmount = Math.floor(effect.amount * rate);
+        await handleStealEffect(effect, target, currentPlayer, actualAmount);
+        resolve();
+      }, delayMs);
+      return;
+    }
 
-  validTargets.forEach(target => {
-    const btn = document.createElement('button');
-    btn.textContent = `${target.name} (${target.role})`;
+    // Human player - use existing HTML popover
+    const popover = document.getElementById('steal-Popover');
+    const optionsContainer = document.getElementById('player-Choice-Options');
+    
+    if (!popover || !optionsContainer) {
+      console.error('Steal popover elements not found in DOM');
+      resolve();
+      return;
+    }
+    
+    // Clear existing buttons
+    optionsContainer.innerHTML = '';
+    
+    // Create button for each valid target with role token images
+    validTargets.forEach(target => {
+      const button = document.createElement('button');
+      button.className = 'steal-target-button';
+      
+      // Create role token image
+      const tokenImg = document.createElement('img');
+      tokenImg.src = `../assets/tokens/${target.role.toLowerCase()}-token.png`;
+      tokenImg.alt = `${target.name} (${target.role})`;
+      tokenImg.className = 'role-token-image';
+      
+      // Add player name text
+      const nameText = document.createElement('span');
+      nameText.textContent = target.name;
+      nameText.className = 'player-name-text';
+      
+      button.appendChild(tokenImg);
+      button.appendChild(nameText);
+      
+      // Add click listener that calls handleStealEffect
+      button.onclick = async () => {
+        const rate = await getResistanceRate(target, effect.resource);
+        const isResistant = rate < 1;
+        const actualAmount = Math.floor(effect.amount * rate);
 
-    btn.onclick = () => {
-      const rate = getResistanceRate(target, effect.resource);
-      const isResistant = rate < 1;
-      const actualAmount = Math.floor(effect.amount * rate);
+        const confirmText = isResistant
+          ? `${target.name} is resistant to ${effect.resource}. You'll only steal ${actualAmount} instead of ${effect.amount}. Proceed?`
+          : `Steal ${effect.amount} ${effect.resource} from ${target.name}?`;
 
-      const confirmText = isResistant
-        ? `${target.name} is resistant to ${effect.resource}. You'll only steal ${actualAmount} instead of ${effect.amount}. Proceed?`
-        : `Steal ${effect.amount} ${effect.resource} from ${target.name}?`;
-
-      if (confirm(confirmText)) {
-        applyStealEffect(effect, target, currentPlayer, actualAmount);
-        closePopover();
-      }
-    };
-
-    popover.appendChild(btn);
+        if (confirm(confirmText)) {
+          popover.close();
+          await handleStealEffect(effect, target, currentPlayer, actualAmount);
+          resolve();
+        }
+      };
+      
+      optionsContainer.appendChild(button);
+    });
+    
+    // Show the popover
+    popover.showModal();
   });
-
-  document.body.appendChild(popover);
 }
 
-function closePopover() {
-  const popover = document.querySelector('.steal-popover');
-  if (popover) popover.remove();
+export async function applyStealEffect(effect, sourcePlayer) {
+  console.log('---------applyStealEffect---------');
+  console.log(`Starting steal chain: applyStealEffect → getValidStealTargets → showStealPopover → handleStealEffect`);
+  
+  try {
+    // Step 1: Get valid steal targets
+    const allPlayers = getPlayers();
+    const validTargets = getValidStealTargets(sourcePlayer, allPlayers, effect);
+    
+    if (validTargets.length === 0) {
+      console.warn('No valid steal targets found');
+      return;
+    }
+    
+    // Step 2: Show steal popover (this will call handleStealEffect when user clicks)
+    await showStealPopover(effect, sourcePlayer, validTargets);
+    
+  } catch (error) {
+    console.error('Error in applyStealEffect:', error);
+  }
+  
+  console.log('---------applyStealEffect END---------');
 }
 
-function applyStealEffect(effect, targetPlayer, sourcePlayer, adjustedAmount) {
+// This function actually performs the resource transfer (called after user selects target)
+export async function handleStealEffect(effect, targetPlayer, sourcePlayer, adjustedAmount) {
+  console.log('---------handleStealEffect---------');
   console.log(`${sourcePlayer.name} steals ${adjustedAmount} ${effect.resource} from ${targetPlayer.name}`);
   
-  // Subtract from target
-  targetPlayer.resources[effect.resource.toLowerCase()] -= adjustedAmount;
-  // Add to source
-  sourcePlayer.resources[effect.resource.toLowerCase()] += adjustedAmount;
-
-  // Log or update UI
-  updatePlayerUI(targetPlayer);
-  updatePlayerUI(sourcePlayer);
+  try {
+    const resourceType = effect.resource.toLowerCase();
+    
+    // Validate that target has enough resources
+    const targetResources = targetPlayer.resources || {};
+    const availableAmount = targetResources[resourceType] || 0;
+    
+    const actualAmount = Math.min(adjustedAmount, availableAmount);
+    
+    if (actualAmount <= 0) {
+      console.warn(`Target ${targetPlayer.name} has no ${effect.resource} to steal`);
+      return;
+    }
+    
+    // Use handleCardResourceEffect to properly apply the steal with multipliers and resistance
+    await handleCardResourceEffect({
+      fromPlayer: targetPlayer,
+      toPlayer: sourcePlayer,
+      resourceType: resourceType,
+      amount: actualAmount,
+      source: 'steal'
+    });
+    
+    console.log(`Steal completed: ${sourcePlayer.name} gained ${actualAmount} ${effect.resource} from ${targetPlayer.name}`);
+    
+  } catch (error) {
+    console.error('Error in handleStealEffect:', error);
+  }
+  
+  console.log('---------handleStealEffect END---------');
 }
 
-
-export function handleStealFromAll(effect, sourcePlayer, allPlayers) {
-  const validTargets = allPlayers.filter(p => 
-    p.id !== sourcePlayer.id &&
-    canStealFrom(sourcePlayer.role, p.role)
-  );
+export async function handleStealFromAll(effect, sourcePlayer, allPlayers) {
+  console.log('---------handleStealFromAll---------');
+  const validTargets = getValidStealTargets(sourcePlayer, allPlayers, effect);
 
   if (validTargets.length === 0) {
     console.warn('No valid players to steal from.');
@@ -840,31 +1050,66 @@ export function handleStealFromAll(effect, sourcePlayer, allPlayers) {
     return;
   }
 
-  validTargets.forEach(target => {
-    const resistance = getResistanceRate(target, effect.resource);
+  // Process each target sequentially to avoid resource conflicts
+  for (const target of validTargets) {
+    const resistance = await getResistanceRate(target, effect.resource);
     const adjustedAmount = Math.floor(effect.amount * resistance);
     
     if (adjustedAmount > 0) {
-      applyStealEffect(effect, target, sourcePlayer, adjustedAmount);
+      await handleStealEffect(effect, target, sourcePlayer, adjustedAmount);
     } else {
       console.log(`${target.name} resisted the entire ${effect.resource} steal.`);
     }
-  });
-}
-
-
-export function applySkipTurn(effect, player) {
-  if (!player) {
-    console.warn('applySkipTurn: No player provided.');
-    return;
+  }
   }
 
-  player.skipNextTurn = true;
-
-  console.log(`${player.name}'s next turn will be skipped.`);
+/**
+ * Applies a skip turn effect to a player
+ * @param {Object} effect - The skip turn effect
+ * @param {Object} player - The player to skip
+ * @returns {Promise} Resolves when the skip turn is processed
+ */
+export async function applySkipTurn(effect, player) {
+  console.log('---------applySkipTurn---------')
   
-  // Optionally update UI or log
-  if (typeof updatePlayerStatus === 'function') {
-    updatePlayerStatus(player, 'SKIPPED');
-  }
+  return new Promise((resolve) => {
+    try {
+      if (!player) {
+        console.warn('applySkipTurn: No player provided.');
+        resolve();
+        return;
+      }
+
+      // Apply the skip turn effect
+      const skipTurns = effect.turns || 1;
+      player.skipTurns = (player.skipTurns || 0) + skipTurns;
+
+      console.log(`[SKIP TURN] ${player.name} will skip ${skipTurns} turn(s). Total skips: ${player.skipTurns}`);
+      
+      // Update UI if the updatePlayerStatus function exists
+      if (typeof updatePlayerStatus === 'function') {
+        updatePlayerStatus(player, `SKIPPED (${skipTurns} turn${skipTurns > 1 ? 's' : ''})`);
+      }
+
+      // Resolve after a short delay to allow UI updates
+      setTimeout(() => {
+        resolve({
+          success: true,
+          playerId: player.id,
+          playerName: player?.name,
+          turnsSkipped: skipTurns,
+          totalSkips: player.skipTurns
+        });
+      }, 500);
+      
+    } catch (error) {
+      console.error('Error in applySkipTurn:', error);
+      resolve({
+        success: false,
+        error: error.message,
+        playerId: player?.id,
+        playerName: player?.name
+      });
+    }
+  });
 }

@@ -76,6 +76,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Handle path selection-
     function handlePathSelection(coords, pathName) {
+        console.log('---------handlePathSelectionmain----------');
         console.log(`Path selected: ${pathName} at`, coords);
         // Hide the path choice Popover
         if (ui.pathChoicePopover) {

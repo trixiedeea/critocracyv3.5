@@ -2,6 +2,7 @@
 
 // --- Imports ---
 import { getPlayers } from './players.js';
+import { isActionAllowed } from './state.js';
 import { 
     animateDiceRoll, 
     clearHighlights, 
@@ -12,12 +13,12 @@ import {
 
 import { 
     state,
+    getCurrentPlayer,
     updateGameState,
     updateUIState,
 } from './state.js';
 
 import { 
-    getCurrentPlayer, 
     advanceToNextPlayer,
     handlePathChoice,
     handlePlayerAction,
@@ -25,18 +26,17 @@ import {
 
 import { drawCard } from './cards.js';
 
-import { applyAgeCardEffects, applyCardEffects } from './resourceManagement.js';
+import { applyCardEffect } from './resourceManagement.js';
 
 import { 
     fullDeckRegionPathMap, 
-    choicepoints
 } from './board-data.js';
 
 /**
  * Initializes the entire UI module. Should be called once the DOM is fully loaded.
  */
 export function initializeUI() {
-    console.log("Initializing UI module...");
+    //console.log("Initializing UI module...");
 
     // Ensure state.ui is initialized
     if (!state.ui) {
@@ -79,7 +79,7 @@ export function initializeUI() {
         return false;
     }
 
-    console.log("UI Initialized Successfully.");
+    //console.log("UI Initialized Successfully.");
     return true;
 };
 
@@ -108,10 +108,10 @@ function initializeElementReferences() {
                     boardContainer: document.getElementById('board-Container'),
                     playerInfoPanel: document.getElementById('player-Info-Panel'),
                     resourceDisplayContainer: document.getElementById('resource-Display-Container'),
-                    currentPlayer: document.getElementById('current-Player'),
-                    knowledgeCount: document.getElementById('knowledge-Count'),
-                    moneyCount: document.getElementById('money-Count'),
-                    influenceCount: document.getElementById('influence-Count'),
+                    currentPlayer: document.getElementById('currentPlayer'),
+                    KNOWLEDGE_COUNT: document.getElementById('KNOWLEDGE_COUNT'),
+                    MONEY_COUNT: document.getElementById('MONEY_COUNT'),
+                    INFLUENCE_COUNT: document.getElementById('INFLUENCE_COUNT'),
                     diceAnimationArea: document.getElementById('dice-Animation-Area'),
                     dice: document.getElementById('dice'),
                     endTurnButton: document.getElementById('end-Turn-Button'),
@@ -186,11 +186,10 @@ function setupEventListeners() {
     // --- Game Board Buttons ---
     gameBoard.endTurnButton.addEventListener('click', () => {
         console.log("End Turn button clicked.");
-        startDiceShake();
+        gameBoard.endTurnButton.classList.remove('pulse');
         advanceToNextPlayer();
     });
-
-    // Attach once — during game init or when board screen loads
+    // Dice Roll
     gameBoard.dice.addEventListener('click', () => {
         if (state.currentPhase !== 'ROLLING') return; // Only act during ROLLING phase
     
@@ -201,9 +200,8 @@ function setupEventListeners() {
         animateDiceRoll(2000); // Your full animation + logic
     });
   
-      
-      
     popovers.showCardDetailsButton?.addEventListener('click', () => {
+        console.log('---------showCardDetailsButton clicked---------');
         if (popovers.cardEffects) {
             const currentDisplay = popovers.cardEffects.style.display;
             popovers.cardEffects.style.display = currentDisplay === 'none' ? 'block' : 'none';
@@ -212,10 +210,12 @@ function setupEventListeners() {
 
     // Set up event listeners for all close age card buttons
     if (popovers.closeAgeCardButtons) {
+        
         popovers.closeAgeCardButtons.forEach(button => {
             button.addEventListener('click', () => {
                 // Clear deck highlights
                 clearDeckHighlights();
+                console.log('--------closeAgeCardButtons clicked---------')
                 
                 // Close the dialog
                 const dialog = button.closest('dialog');
@@ -232,7 +232,7 @@ function setupEventListeners() {
                         try {
                             const card = JSON.parse(cardData);
                             // Apply the age card effects
-                            applyAgeCardEffects(Player);
+                            applyCardEffect(player, card);
                         } catch (error) {
                             console.error('Error parsing card data:', error);
                         }
@@ -246,93 +246,27 @@ function setupEventListeners() {
 
     // --- End Game Screen Button ---
     endGame.newGameButton.addEventListener('click', () => {
-        console.log("New Game button clicked. Reloading page.");
+        console.log("--------New Game button clicked. Reloading page.--------");
         window.location.reload();
     });
 
     // --- Canvas Click Listener ---
+    // --- Canvas Click Listener ---
     gameBoard.boardCanvas.addEventListener('click', (event) => {
+        console.log('--------Canvas clicked--------');
         const player = getCurrentPlayer();
+        console.log('Current player:', player);
+        console.log('Current phase:', state.currentPhase);
         
-        if (state.currentPhase === 'AWAITING_CARD_CLICK' && player?.isHuman) {
+        if (state.currentPhase === 'AWAITING_CARD_ACTION' && player?.isHuman) {
             handleCanvasCardClick(event);
         } else {
-            console.log(`Canvas click ignored in phase: ${state.currentPhase}`);
+            //console.log(`Canvas click ignored in phase: ${state.currentPhase}`);
         }
     });
 
     gameBoard.boardTokenCanvas.addEventListener('click', (event) => {
     });
-
-    // Set up end turn button
-    const endTurnButton = document.getElementById('end-Turn-Button');
-        if (endTurnButton) {
-            console.log("Setting up End Turn button event listener");
-            endTurnButton.onclick = null; // Clear any existing handlers
-            endTurnButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log("End turn button clicked - DEBUG START");
-                console.log("Button disabled state:", endTurnButton.disabled);
-                console.log("Current game phase:", state.currentPhase);
-                console.log("Current player:", getCurrentPlayer());
-                
-                // Play sound effect
-                //playSound('endTurn');
-                
-                // Remove shake animation
-                endTurnButton.style.animation = '';
-                
-                // Call advance to next player
-                console.log("About to call advanceToNextPlayer()");
-                advanceToNextPlayer();
-                console.log("advanceToNextPlayer() called - DEBUG END");
-            });
-            console.log("End Turn button event listener attached successfully");
-        } else {
-            console.error("End Turn button not found!");
-        }
-
-        // --- Close Card Button (End of Turn Cards Only) ---
-    if (popovers.closeCardButton) {
-            console.log("Setting up Close Card button event listener");
-
-            popovers.closeCardButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log("Close card button clicked");
-
-                // Clear deck highlights
-                clearDeckHighlights();
-
-                // Close the dialog
-                const dialog = popovers.closeCardButton.closest('dialog');
-                if (dialog) {
-                    dialog.close();
-
-                    // Trigger canvas redraw after dialog is closed
-                    const event = new CustomEvent('redrawCanvas');
-                    document.dispatchEvent(event);
-                }
-
-                // Apply card effects
-                const currentPlayer = getCurrentPlayer();
-                if (currentPlayer) {
-                    const cardData = dialog?.dataset?.cardData;
-                    if (cardData) {
-                        try {
-                            const card = JSON.parse(cardData);
-                            state.currentCard = card; // Set the current card in state
-                            applyCardEffects(currentPlayer); // Pass only the player object
-                        } catch (error) {
-                            console.error('Error parsing card data:', error);
-                        }
-                    } else {
-                        console.error('No card data found in dialog');
-                    }
-                }
-            });
-        }
 };
     // --- Option A Button ---
 
@@ -371,7 +305,7 @@ export function handleCanvasCardClick(event, coords = null, player = null) {
         return;
     }
 
-    console.log(`Canvas clicked for card draw at board coords: (${boardX.toFixed(0)}, ${boardY.toFixed(0)})`);
+    //console.log(`Canvas clicked for card draw at board coords: (${boardX.toFixed(0)}, ${boardY.toFixed(0)})`);
 
     // Check which deck region was clicked using fullDeckRegionPathMap positions.
     let clickedDeckType = null;
@@ -383,7 +317,7 @@ export function handleCanvasCardClick(event, coords = null, player = null) {
                 if (boardX >= pos.topleft && boardX <= pos.bottomrightx && 
                     boardY >= pos.toplefty && boardY <= pos.bottomright) {
                     clickedDeckType = region.deckType;
-                    console.log(`Clicked on ${region.pathName} deck: ${clickedDeckType}`);
+                    //console.log(`Clicked on ${region.pathName} deck: ${clickedDeckType}`);
                     break;
                 }
             }
@@ -398,19 +332,7 @@ export function handleCanvasCardClick(event, coords = null, player = null) {
     } else {
         console.log(`No valid deck region clicked at coordinates (${boardX}, ${boardY})`);
     }
-};
-
-/**
- * Enables the End Turn button after a player has taken their action
- */
-export function enableEndTurnButton() {
-    console.log("enableEndTurnButton called");
-    if (state.ui.elements.endTurnButton) {
-        state.ui.elements.endTurnButton.disabled = false;
-        console.log("End Turn button enabled");
-    } else {
-        console.error("End Turn button not found in state.ui.elements");
-    }
+    console.log('---------handleCanvasCardClick END---------');
 };
 
 // --- UI Update Functions ---
@@ -420,20 +342,32 @@ export function enableEndTurnButton() {
  * @param {string|Object} playerId - The ID of the player to display, or a player object.
  */
 export function updatePlayerInfo(playerId) {
-    console.log('---------updatePlayerInfo---------');
-    console.log('[UI] updatePlayerInfo called with:', playerId);
+    console.log('--------updatePlayerInfo---------')
+    //console.log('[UI] updatePlayerInfo called with:', playerId);
     
     try {
+        // If no player ID provided, try to get current player from game state
+        if (playerId === undefined || playerId === null) {
+            console.log('updatePlayerInfo: No player ID provided, trying to get current player from game state');
+            if (state.game?.currentPlayerIndex !== undefined && state.players?.[state.game.currentPlayerIndex]) {
+                playerId = state.players[state.game.playersIndex].id;
+                //console.log('updatePlayerInfo: Using current player ID:', playerId);
+            } else {
+                console.warn('updatePlayerInfo: Could not determine current player');
+                return;
+            }
+        }
+        
         // Handle case where playerId is an object (should be string)
-        const playerIdStr = typeof playerId === 'object' ? (playerId.id || '') : (playerId || '');
+        const playerIdStr = typeof playerId === 'object' ? (playerId.id || '') : String(playerId || '');
         
         if (!playerIdStr) {
-            console.error('updatePlayerInfo: Invalid player ID provided:', playerId);
+            console.warn('updatePlayerInfo: Empty player ID provided');
             return;
         }
 
         const players = getPlayers();
-        console.log('[UI] All players:', players);
+        //console.log('[UI] All players:', players);
         
         if (!Array.isArray(players)) {
             console.error('updatePlayerInfo: Players data is not an array');
@@ -455,21 +389,21 @@ export function updatePlayerInfo(playerId) {
             isHuman: player.isHuman
         });
 
-        const { currentPlayer, knowledgeCount, moneyCount, influenceCount } = state.ui.elements.gameBoard || {};
+        const { currentPlayer, KNOWLEDGE_COUNT, MONEY_COUNT, INFLUENCE_COUNT } = state.ui.elements.gameBoard || {};
         
         // Log the UI elements for debugging
-        console.log('[UI] UI Elements:', {
+       console.log('[UI] UI Elements:', {
             currentPlayer: !!currentPlayer,
-            knowledgeCount: !!knowledgeCount,
-            moneyCount: !!moneyCount,
-            influenceCount: !!influenceCount
+            KNOWLEDGE_COUNT: !!KNOWLEDGE_COUNT,
+            MONEY_COUNT: !!MONEY_COUNT,
+            INFLUENCE_COUNT: !!INFLUENCE_COUNT
         });
         
-        if (!currentPlayer || !knowledgeCount || !moneyCount || !influenceCount) {
+        if (!getCurrentPlayer() || !KNOWLEDGE_COUNT || !MONEY_COUNT || !INFLUENCE_COUNT) {
             console.error('updatePlayerInfo: Missing required UI elements');
             // Try to re-initialize UI elements if they're missing
             if (initializeElementReferences) {
-                console.log('Attempting to re-initialize UI elements...');
+               // console.log('Attempting to re-initialize UI elements...');
                 initializeElementReferences();
             }
             return;
@@ -481,24 +415,24 @@ export function updatePlayerInfo(playerId) {
         const money = resources.money ?? 0;
         const influence = resources.influence ?? 0;
         
-        console.log('[UI] Updating UI with resources:', { knowledge, money, influence });
+        //console.log('[UI] Updating UI with resources:', { knowledge, money, influence });
         
         // Update the UI elements
         currentPlayer.textContent = `${player.name} (${player.role || 'No Role'})`;
-        knowledgeCount.textContent = knowledge;
-        moneyCount.textContent = money;
-        influenceCount.textContent = influence;
+        KNOWLEDGE_COUNT.textContent = knowledge;
+        MONEY_COUNT.textContent = money;
+        INFLUENCE_COUNT.textContent = influence;
         
         // Force a reflow to ensure the UI updates
         void currentPlayer.offsetHeight;
         
-        console.log(`[UI] Successfully updated UI for ${player.name}'s turn`);
+        //console.log(`[UI] Successfully updated UI for ${player.name}'s turn`);
         
     } catch (error) {
         console.error('Error in updatePlayerInfo:', error);
         // Try a full UI refresh on error
         try {
-            console.log('Attempting full UI refresh...');
+            //console.log('Attempting full UI refresh...');
             if (initializeUI) initializeUI();
             if (updateGameControls) updateGameControls();
         } catch (e) {
@@ -515,26 +449,20 @@ export function showMessage(message) {
 }; 
 
 export function promptForPathChoice(pathOptions, player, aiChosenOption = null) {
+    if (!isActionAllowed('promptForPathChoice')) return;
     if (!state) {
         console.error('Game state not initialized');
         return;
     }
-
-    if (state.currentPhase !== 'AWAITING_PATH_CHOICE') {
-        updateGameState({ currentPhase: 'AWAITING_PATH_CHOICE' });
-    }
+    updateGameState({
+        currentPhase: 'AWAITING_PATH_CHOICE'
+    });
 
     console.log('---------promptForPathChoice---------');
-    console.log('Path options:', pathOptions);
+    //console.log('Path options:', pathOptions);
     console.log('Player:', player);
     
     updateGameControls(); // Sync UI with game state
-
-    // Update phase if needed
-    if (state.currentPhase !== 'AWAITING_PATH_CHOICE') {
-        updateGameState({ currentPhase: 'AWAITING_PATH_CHOICE' });
-        console.warn('GAMEPHASE UPDATED TO AWAITING_PATH_CHOICE');
-    }
 
     const popover = document.getElementById('path-Choice-Popover');
     if (!popover) {
@@ -570,7 +498,7 @@ export function promptForPathChoice(pathOptions, player, aiChosenOption = null) 
                 newButton.onclick = () => {
                     const option = pathOptions.find(opt => opt.pathName === key);
                     if (option) {
-                        console.log(`Path chosen: ${key}`, option);
+                        //console.log(`Path chosen: ${key}`, option);
                         popover.close();
                         handlePathChoice(option.coords, key);
                     }
@@ -583,7 +511,7 @@ export function promptForPathChoice(pathOptions, player, aiChosenOption = null) 
 
     if (player && !player.isHuman && aiChosenOption) {
         // AI Logic: Show popover and run the 8-second animation sequence
-        console.log('Showing modal for AI player');
+        //console.log('Showing modal for AI player');
         try {
             popover.showModal();
         } catch (err) {
@@ -618,7 +546,7 @@ export function promptForPathChoice(pathOptions, player, aiChosenOption = null) 
     } else if (player && player.isHuman) {
         // Human Logic: Attach listeners and show popover
         if (Array.isArray(pathOptions) && pathOptions.length > 0) {
-            console.log('Setting up path choice buttons for human player');
+            //console.log('Setting up path choice buttons for human player');
             
             // Clear any existing event listeners first
             Object.values(idMap).forEach(id => {
@@ -641,9 +569,9 @@ export function promptForPathChoice(pathOptions, player, aiChosenOption = null) 
                 const button = document.getElementById(idMap[pathKey]);
                 
                 if (button) {
-                    console.log(`Setting up button for ${option.pathName}`);
+                    //console.log(`Setting up button for ${option.pathName}`);
                     button.addEventListener('click', () => {
-                        console.log(`Path chosen: ${option.pathName}`, option.coords);
+                        //console.log(`Path chosen: ${option.pathName}`, option.coords);
                         try {
                             if (typeof popover.close === 'function') {
                                 popover.close();
@@ -660,7 +588,7 @@ export function promptForPathChoice(pathOptions, player, aiChosenOption = null) 
             
             // Show the modal after setting up the buttons
             try {
-                console.log('Showing path choice modal');
+                //console.log('Showing path choice modal');
                 popover.showModal();
             } catch (err) {
                 console.error('Failed to show path choice modal:', err);
@@ -674,10 +602,16 @@ export function promptForPathChoice(pathOptions, player, aiChosenOption = null) 
             console.error('Failed to show modal:', err);
         }
     }
+    console.log('---------promptForPathChoice END---------');
 };
 
-export function promptForChoicepoint(options, onChoice) {
+export function promptForChoicepoint(options, onChoice, delayMs = 3000) {
     console.log('---------promptForChoicepoint---------');
+    if (!isActionAllowed('promptForChoicepoint')) return;
+    updateGameState({ currentPhase: 'AWAITING_PATH_CHOICE' });
+    updateUIState({ currentPhase: 'AWAITING_PATH_CHOICE' });
+    console.warn('game phase updated to AWAITING_PATH_CHOICE');
+
     const popover = document.getElementById('choicepoint-Popover');
     const container = document.getElementById('choicepoint-Options');
 
@@ -747,7 +681,7 @@ export function promptForChoicepoint(options, onChoice) {
                 if (step < scaleSequence.length) {
                     button.style.transform = `scale(${scaleSequence[step]})`;
                     step++;
-                    setTimeout(animateScale, 600); // 600ms per step approx
+                    setTimeout(animateScale, 500); // 600ms per step approx
                 } else {
                     // After scaling animation finishes, close popover and call onChoice after 2s delay
                     setTimeout(() => {
@@ -759,9 +693,10 @@ export function promptForChoicepoint(options, onChoice) {
             }
 
             // Initial delay before starting animation
-            setTimeout(animateScale, 2000);
+            setTimeout(animateScale, delayMs);
         }
     }
+    console.log('---------promptForChoicepoint END---------');
 }
   
 export function updateGameControls() {
@@ -810,19 +745,19 @@ export function updateGameControls() {
 /**
  * Update player's resource panel with current values.
  */
-export function updateResourcePanel(player) {
-    console.log('---------updateResourcePanel---------');
+export function updateResourceDisplayContainer(player) {
+    console.log('---------updateResourceDisplayContainer---------');
     // Try to find (or freshly create) the panel again
-    const panelUpdated = document.getElementById(`player-Resource-Panel-${player.id}`);
+    const panelUpdated = document.getElementById(`resource-Display-Container-${player.id}`);
     if (!panelUpdated) {
-      console.error(`No resource panel found for player ID: ${player.id}`);
+      console.error(`No resource display container found for player ID: ${player.id}`);
       return;
     }
   
     panelUpdated.querySelector('.player-name').textContent = player.name;
-    panelUpdated.querySelector('.money').textContent = `Knowledge ${player.resources.money}`;
-    panelUpdated.querySelector('.knowledge').textContent = `Money ${player.resources.knowledge}`;
-    panelUpdated.querySelector('.influence').textContent = `Influence ${player.resources.influence}`;
+    panelUpdated.querySelector('.KNOWLEDGE_COUNT').textContent = `Knowledge ${player.resources.money}`;
+    panelUpdated.querySelector('.MONEY_COUNT').textContent = `Money ${player.resources.knowledge}`;
+    panelUpdated.querySelector('.INFLUENCE_COUNT').textContent = `Influence ${player.resources.influence}`;
 };
   
   /**
@@ -839,8 +774,8 @@ export function showResourceChangeFeedback(playerId, resourceType, amount) {
     const sign = amount > 0 ? '+' : '';
     const emoji = {
       money: '💰',
-      knowledge: '📚',
-      influence: '🗳️'
+      knowledge: '🧠',
+      influence: '⚡'
     }[resourceType] || '';
   
     feedbackEl.textContent = `${emoji} ${sign}${amount}`;
@@ -854,3 +789,4 @@ export function showResourceChangeFeedback(playerId, resourceType, amount) {
       feedbackEl.style.transform = 'translateY(0px)';
     }, 1000);
 }
+  

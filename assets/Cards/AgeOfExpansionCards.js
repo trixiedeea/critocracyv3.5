@@ -60,13 +60,13 @@ export const ageOfExpansionDeck = [
                 optionB: {
                   text: "Expose the abuse publicly",
                   effects: [
-                    { type: 'RESOURCE_CHANGE', changes: { knowledge: 4 } },
+                    { type: 'SKIP_TURN', target: 'SELF' },
                     { type: 'STEAL', target: 'OTHER', resource: 'MONEY', amount: 3 }
                   ]
                 }
             }
-        },
-        {
+    },
+    {
     deck: "Age of Expansion",
     name: "Colonial Enterprise",
     description: "A joint venture with colonial partners promises great returns. Do you invest or critique the system?",
@@ -86,8 +86,8 @@ export const ageOfExpansionDeck = [
             ]
         }
     }
-        },
-        {
+    },
+    {
     deck: "Age of Expansion",
     name: "Missionary Influence",
     description: "Missionaries offer to help with outreach. Do you support their schools, or focus on secular education?",
@@ -107,8 +107,8 @@ export const ageOfExpansionDeck = [
             ]
         }
     }
-        },
-        {
+    },
+    {
     deck: "Age of Expansion",
     name: "Revolt Suppression",
     description: "An armed uprising has begun. Do you deploy troops or try to address the grievances?",
@@ -126,8 +126,8 @@ export const ageOfExpansionDeck = [
             ]
         }
     }
-        },
-        {
+    },
+    {
     deck: "Age of Expansion",
     name: "Commodification of Labor",
     description: "You can hire cheap local labor or follow new labor laws. Which path do you choose?",
@@ -147,8 +147,8 @@ export const ageOfExpansionDeck = [
             ]
         }
     }
-        },
-        {
+    },
+    {
     deck: "Age of Expansion",
     name: "Indigenous Displacement",
     description: "An indigenous group requests protection of their lands. Do you honor the request or clear the area for settlement?",
@@ -157,7 +157,7 @@ export const ageOfExpansionDeck = [
             text: "Clear the area for settlement",
             effects: [
                 { type: 'STEAL', target: 'OTHER', resource: 'MONEY', amount: 4 },
-                { type: 'RESOURCE_CHANGE', changes: { influence: -6 } }
+                { type: 'MOVEMENT', target: 'SELF', spaces: -2 }
             ]
         },
         optionB: {
@@ -168,8 +168,8 @@ export const ageOfExpansionDeck = [
             ]
         }
     }
-        },
-        {
+    },
+    {
     deck: "Age of Expansion",
     name: "Control the Narrative",
     description: "Your writers propose a sweeping history of expansion. Do you fund it or include indigenous voices?",
@@ -189,8 +189,8 @@ export const ageOfExpansionDeck = [
             ]
         }
     }
-        },
-        {
+    },
+    {
     deck: "Age of Expansion",
     name: "Mercantile Expansion",
     description: "A foreign firm proposes a trading agreement. Do you enforce local taxes or give them a free hand?",
@@ -198,8 +198,8 @@ export const ageOfExpansionDeck = [
         optionA: {
             text: "Give free trade access",
             effects: [
-                { type: 'STEAL', target: 'OTHER', resource: 'MONEY', amount: 2 },
-                { type: 'RESOURCE_CHANGE', changes: { money: -2 } }
+                { type: 'STEAL', target: 'OTHER', resource: 'MONEY', amount: 7 },
+                { type: 'MOVEMENT', target: 'SELF', spaces: -2 }
             ]
         },
         optionB: {
@@ -210,8 +210,8 @@ export const ageOfExpansionDeck = [
             ]
         }
     }
-        },
-        {
+    },
+    {
     deck: "Age of Expansion",
     name: "Plantation Economy",
     description: "Plantation owners seek new subsidies. Do you support them or redirect funds to smallholders?",
@@ -231,8 +231,8 @@ export const ageOfExpansionDeck = [
             ]
         }
     }
-        },
-        {
+    },
+    {
     deck: "Age of Expansion",
     name: "Imperial Propaganda",
     description: "Your press office wants to launch a new campaign. Do you celebrate national glory or promote critical literacy?",
@@ -241,7 +241,7 @@ export const ageOfExpansionDeck = [
             text: "Celebrate glory",
             effects: [
                 { type: 'STEAL', target: 'OTHER', resource: 'INFLUENCE', amount: 4 },
-                { type: 'RESOURCE_CHANGE', changes: { influence: -4 } }
+                { type: 'MOVEMENT', target: 'SELF', spaces: 3 }
             ]
         },
         optionB: {
@@ -252,8 +252,8 @@ export const ageOfExpansionDeck = [
             ]
         }
     }
-        },
-        {
+    },
+    {
     deck: "Age of Expansion",
     name: "Expedition or Extraction?",
     description: "A remote region is rich in resources and history. Do you fund archaeological work or send mining teams?",
@@ -273,8 +273,8 @@ export const ageOfExpansionDeck = [
             ]
         }
     }
-        },
-        {
+    },
+    {
     deck: "Age of Expansion",
     name: "Colonial Currency Reform",
     description: "You're asked to replace local currencies with standardized coin. Do you approve or oppose it?",
@@ -282,13 +282,15 @@ export const ageOfExpansionDeck = [
         optionA: {
             text: "Standardize currency",
             effects: [
-            { type: 'RESOURCE_CHANGE', changes: { money: 4, knowledge: -2 } }
+                { type: 'RESOURCE_CHANGE', changes: { knowledge: 5 } },
+                { type: 'RESOURCE_CHANGE', changes: { influence: 2 } }
             ]
         },
         optionB: {
             text: "Preserve local systems",
             effects: [
-            { type: 'RESOURCE_CHANGE', changes: { influence: 3, knowledge: 2 } }
+                { type: 'RESOURCE_CHANGE', changes: { money: 5 } },
+                { type: 'RESOURCE_CHANGE', changes: { knowledge: -2 } }
             ]
         }
     }
@@ -301,19 +303,19 @@ export const ageOfExpansionDeck = [
         optionA: {
             text: "Showcase imperial strength",
             effects: [
-            { type: 'RESOURCE_CHANGE', changes: { money: 4 } },
-            { type: 'RESOURCE_CHANGE', changes: { influence: -2 } }
+                { type: 'RESOURCE_CHANGE', changes: { money: 4 } },
+                { type: 'MOVEMENT', target: 'SELF', spaces: 3 }
             ]
         },
         optionB: {
             text: "Highlight cultural diversity",
             effects: [
-            { type: 'RESOURCE_CHANGE', changes: { influence: 4 } },
-            { type: 'RESOURCE_CHANGE', changes: { money: -1 } }
+                { type: 'RESOURCE_CHANGE', changes: { influence: 4 } },
+                { type: 'RESOURCE_CHANGE', changes: { money: -1 } }
             ]
         }
     }}
-    ];
+];
           
 
 // Export the cards array directly

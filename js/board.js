@@ -50,7 +50,7 @@ export const boardState = {
  * @returns {object|null} - The path object or null if not found.
  */
 export function findPathForCoordinate(coords) {
-    console.log('---------findPathForCoordinate---------');
+   // console.log('---------findPathForCoordinate---------');
     const allPaths = {
         ageOfExpansion: ageOfExpansionPath,
         ageOfResistance: ageOfResistancePath,
@@ -89,7 +89,7 @@ export function calculateDestination(startCoords, steps) {
         // Process the result from getNextStepOptions
         if (moveInfo && moveInfo.type) {
             switch (moveInfo.type) {
-                case 'Regular':
+                case 'regular':
                 case 'Finish':
                     if (moveInfo.nextCoords) {
                         nextOptions.push({ coords: { x: moveInfo.nextCoords[0], y: moveInfo.nextCoords[1] } });
@@ -309,7 +309,7 @@ function drawCardRectangles() {
 };
 
 export function findSpaceDetailsByCoords(targetCoords, tolerance = 5, player = null) {
-    console.log('---------findSpaceDetailsByCoords---------');
+   // console.log('---------findSpaceDetailsByCoords---------');
     console.log('Searching for coords:', targetCoords);
   
     if (!targetCoords || typeof targetCoords.x !== 'number' || typeof targetCoords.y !== 'number') {
@@ -317,12 +317,21 @@ export function findSpaceDetailsByCoords(targetCoords, tolerance = 5, player = n
       return null;
     }
   
-    const allPaths = [
-      ageOfExpansionPath,
-      ageOfResistancePath,
-      ageOfReckoningPath,
-      ageOfLegacyPath
-    ];
+    const allPaths = {
+        ageOfExpansion: ageOfExpansionPath,
+        ageOfResistance: ageOfResistancePath,
+        ageOfReckoning: ageOfReckoningPath,
+        ageOfLegacy: ageOfLegacyPath
+    };
+
+    for (const pathName in allPaths) {
+        const path = allPaths[pathName];
+        for (const segment of path.segments) {
+            if (segment.coordinates.some(c => c[0] === targetCoords.x && c[1] === targetCoords.y)) {
+                return path;
+            }
+        }
+    }
   
     // Check START space
     const startCoord = START_SPACE.coordinates[0];
@@ -335,7 +344,7 @@ export function findSpaceDetailsByCoords(targetCoords, tolerance = 5, player = n
         ...START_SPACE,
         pathName: 'none',
         pathColor: 'none',
-        Type: 'start',
+        Type: 'START_SPACE',
         Next: Object.values(START_SPACE.nextCoordOptions)
       };
   
@@ -354,7 +363,7 @@ export function findSpaceDetailsByCoords(targetCoords, tolerance = 5, player = n
         ...FINISH_SPACE,
         pathName: 'none',
         pathColor: 'none',
-        Type: 'finish',
+        Type: 'FINISH_SPACE',
         Next: []
       };
   
@@ -376,22 +385,30 @@ export function findSpaceDetailsByCoords(targetCoords, tolerance = 5, player = n
         const dy = Math.abs(targetCoords.y - coords[1]);
   
         if (dx <= tolerance && dy <= tolerance) {
-          console.log(`Found matching space at (${coords[0]},${coords[1]}) in path ${path.name || 'unknown'}`);
-          const space = {
-            ...segment,
-            pathName: segment.pathName || path.pathName || path.name,
-            pathColor: segment.pathColor || path.color,
-            Type: segment.Type || 'regular', 
-            coordinates: [coords] // Ensure coordinates are properly set
-          };
-        if (space.Type === 'draw') {
-            handleSpaceAction(player, spaceType, pathName);
-        }else{(space.Type === 'regular')
-            handleEndTurn(player, space);
-        }
-  
-          updateSpaceInState(space, targetCoords);
-          return space;
+            console.log(`Found matching space at (${coords[0]},${coords[1]}) in path ${path.name || 'unknown'}`);
+            
+            // Create space object with normalized type
+            const space = {
+              ...segment,
+              pathName: segment.pathName || path.pathName || path.name || 'unknown',
+              pathColor: segment.pathColor || path.color,
+              Type: (segment.Type || 'regular').toLowerCase(), // Normalize type to lowercase
+              coordinates: [coords],
+              spaceId: segment.spaceId || null
+            };
+            
+            console.log(`Space type: ${space.Type}, path: ${space.pathName}`);
+            
+            // Handle space action based on type
+            if (space.Type === 'draw' || space.Type === 'choicepoint' || space.Type === 'start' || space.Type === 'finish') {
+                handleSpaceAction(player, space.Type, space.pathName);
+            } else {
+                // For regular spaces, we might still want to trigger some default behavior
+                handleSpaceAction(player, 'regular', space.pathName);
+            }
+            
+            updateSpaceInState(space, targetCoords);
+            return space;
         }
       }
     }
@@ -401,7 +418,7 @@ export function findSpaceDetailsByCoords(targetCoords, tolerance = 5, player = n
 };
 
 function updateSpaceInState(space, coords) {
-    console.log('---------updateSpaceInState---------');
+ //   console.log('---------updateSpaceInState---------');
     gameState.currentPath = space.pathName;
     gameState.currentCoords = coords;
     gameState.pathColorKey = space.pathColor;
@@ -412,7 +429,7 @@ function updateSpaceInState(space, coords) {
  * Determines the next coordinate options based on the current coordinates.
  */
 export function getNextStepOptions(currentCoords) {
-    console.log("---------getNextStepOptions---------");
+   // console.log("---------getNextStepOptions---------");
     console.log(`PATH DEBUG: Finding next step from (${currentCoords.x}, ${currentCoords.y})`);
     
     // Find current space details
@@ -428,10 +445,10 @@ export function getNextStepOptions(currentCoords) {
     const currentType = (spaceDetails.Type );
 
     // SPECIAL CASE: Start space handling
-    if (currentType === 'start') {
+    if (currentType === 'START_SPACE') {
         console.log(`PATH DEBUG: On Start space. Available paths:`, Object.keys(START_SPACE.nextCoordOptions));
         // For debugging only - don't return options since this should be handled by path choice UI
-        return { type: 'Start', message: 'At Start - path choice needed' };
+        return { type: 'START_SPACE', message: 'At Start - path choice needed' };
     }
 
     if (currentType === 'choicepoint' || currentType === 'junction') {
@@ -447,9 +464,9 @@ export function getNextStepOptions(currentCoords) {
         return { type: 'Choicepoint', options: spaceDetails.Next };
     } 
     else if (spaceDetails.Next && spaceDetails.Next.length > 0) {
-        // Regular space with a defined Next step
+        // regular space with a defined Next step
         const nextCoords = spaceDetails.Next[0];
-        console.log(`PATH DEBUG: Regular space with Next: [${nextCoords[0]}, ${nextCoords[1]}]`);
+        console.log(`PATH DEBUG: regular space with Next: [${nextCoords[0]}, ${nextCoords[1]}]`);
         
         // Safety check for valid coordinates
         if (!Array.isArray(nextCoords) || nextCoords.length < 2) {
@@ -477,20 +494,20 @@ export function getNextStepOptions(currentCoords) {
             const alternativePath = findAlternativePathFrom(currentCoords);
             if (alternativePath) {
                 console.log(`PATH DEBUG: Found alternative path: [${alternativePath[0]}, ${alternativePath[1]}]`);
-                return { type: 'Regular', nextCoords: alternativePath };
+                return { type: 'regular', nextCoords: alternativePath };
             }
             
             return { type: 'Error', message: 'Next coordinates too close to current' };
         }
         
         // Otherwise, it's a regular next step
-        return { type: 'Regular', nextCoords: nextCoords };
+        return { type: 'regular', nextCoords: nextCoords };
     } 
     else {
         // No 'Next' defined. Check if we are *already* at the finish space.
         const finishCoords = FINISH_SPACE.coordinates[0];
         const tolerance = 10; // Increased tolerance
-        if (currentType === 'finish' || (Math.abs(currentCoords.x - finishCoords[0]) < tolerance && Math.abs(currentCoords.y - finishCoords[1]) < tolerance)) {
+        if (currentType === 'FINISH_SPACE' || (Math.abs(currentCoords.x - finishCoords[0]) < tolerance && Math.abs(currentCoords.y - finishCoords[1]) < tolerance)) {
             console.log(`PATH DEBUG: Already on Finish space.`);
             return { type: 'LandedOnFinish' }; // Indicate currently at finish
         }
@@ -499,7 +516,7 @@ export function getNextStepOptions(currentCoords) {
         const alternativePath = findAlternativePathFrom(currentCoords);
         if (alternativePath) {
             console.log(`PATH DEBUG: Found alternative path: [${alternativePath[0]}, ${alternativePath[1]}]`);
-            return { type: 'Regular', nextCoords: alternativePath };
+            return { type: 'regular', nextCoords: alternativePath };
         }
         
         // Otherwise, it's potentially the end of a path without a defined next step
@@ -565,7 +582,6 @@ export async function setupBoard() {
  * Draws the game board, spaces, connections, and player tokens.
  */
 export function drawBoard() {
-    console.log('---------drawBoard---------');
     // ... (ctx check) ...
     if (!state.board.ctx) { /* ... */ return; }
     const ctx = state.board.ctx;
@@ -655,14 +671,14 @@ function drawPathSpaces() {
     state.board.clickableSpaces.push({
         x: START_SPACE.coordinates[0][0],
         y: START_SPACE.coordinates[0][1],
-        type: 'start',
-        pathColor: 'START'
+        type: 'START_SPACE',
+        pathColor: 'START_SPACE'
     });
     
     state.board.clickableSpaces.push({
         x: FINISH_SPACE.coordinates[0][0],
         y: FINISH_SPACE.coordinates[0][1],
-        type: 'finish',
+        type: 'FINISH_SPACE',
         pathColor: 'FINISH'
     });
 
@@ -718,7 +734,7 @@ function drawPathSpaces() {
                     state.board.clickableSpaces.push({
                         x: x, 
                         y: y,
-                        type: type || 'regular',
+                        type: type || 'regular' || 'draw',
                         pathColor: space.pathColor
                     });
                 }
@@ -771,6 +787,7 @@ export function drawTokens() {
         token.style.transform = `translate(${scaledX}px, ${scaledY}px)`;
 
         function updateAllTokenPositions() {
+            //console.log('-----------------updateAllTokenPositions-----------------');
             const tokens = document.querySelectorAll('.token');
           
             tokens.forEach(token => {
@@ -795,7 +812,6 @@ export function drawTokens() {
 export function drawDebugOverlay() {
     if (!DEBUG_MODE) return;
     
-    console.log('---------drawDebugOverlay---------');
     const ctx = state.board.ctx;
     if (!ctx) {
         console.warn('No canvas context available for debug overlay');
@@ -847,8 +863,8 @@ export function drawDebugOverlay() {
                     case 'regular': letter = 'R'; break;
                     case 'draw': letter = 'D'; break;
                     case 'choicepoint': letter = 'C'; break;
-                    case 'start': letter = 'S'; break;
-                    case 'finish': letter = 'F'; break;
+                    case 'START_SPACE': letter = 'S'; break;
+                    case 'FINISH': letter = 'F'; break;
                     default: letter = '?';
                 }
                 
@@ -863,11 +879,11 @@ export function drawDebugOverlay() {
             // Convert CSS class to canvas color
             let canvasColor;
             switch (deckInfo.cssClass) {
-                case 'path-purple': canvasColor = 'rgba(128, 0, 128, 0.3)'; break;
-                case 'path-blue': canvasColor = 'rgba(0, 0, 255, 0.3)'; break;
-                case 'path-cyan': canvasColor = 'rgba(0, 255, 255, 0.3)'; break;
-                case 'path-pink': canvasColor = 'rgba(255, 192, 203, 0.3)'; break;
-                default: canvasColor = 'rgba(128, 128, 128, 0.3)';
+                case 'path-purple': canvasColor = 'rgba(124, 14, 175, 0.35)'; break;
+                case 'path-blue': canvasColor = 'rgba(7, 19, 242, 0.33)'; break;
+                case 'path-cyan': canvasColor = 'rgba(3, 244, 244, 0.33)'; break;
+                case 'path-pink': canvasColor = 'rgba(249, 8, 241, 0.5)'; break;
+                default: canvasColor = 'rgba(246, 255, 0, 0.46)';
             }
             
             for (const position of deckInfo.positions) {
@@ -881,7 +897,7 @@ export function drawDebugOverlay() {
                 );
                 
                 // NEW: Draw clickable area border in bright green
-                ctx.strokeStyle = 'lime';
+                ctx.strokeStyle = 'rgba(246, 255, 0, 0.11)';
                 ctx.lineWidth = 2;
                 ctx.strokeRect(
                     position.topleft,

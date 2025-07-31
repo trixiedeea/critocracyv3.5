@@ -221,7 +221,7 @@ let playerArray = [];
     function updatePlayerPrompt() {
         const prompt = document.getElementById("role-prompt");
         if (prompt) {
-            prompt.textContent = `Human Player ${currentHumanPlayer + 1}, choose your role:`;
+            prompt.textContent = `Player ${currentHumanPlayer + 1} (Human), choose your role:`;
         }
     }
 
@@ -249,8 +249,8 @@ let playerArray = [];
         for (let i = 0; i < totalPlayers; i++) {
             const isHuman = i < humanPlayers;
             playerConfigs.push({
-                id: isHuman ? `player_${i + 1}` : `ai_${i - humanPlayers + 1}`,
-                name: isHuman ? `Human Player ${i + 1}` : `AI Player ${i - humanPlayers + 1}`,
+                id: isHuman ? `player_${i}` : `ai_${i - humanPlayers}`,
+                name: isHuman ? `${selectedRoles[i]} (Human)` : `${selectedRoles[i]} (AI)`,
                 role: selectedRoles[i],
                 isHuman
             });

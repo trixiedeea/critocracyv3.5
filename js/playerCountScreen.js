@@ -89,20 +89,20 @@ playerCountConfirmButton.addEventListener("click", () => {
     // Add human players
     for (let i = 0; i < humanCount; i++) {
         playerArray.push({
-            id: `player_${i + 1}`,
+            id: `Human${i+1}`,
             type: "human",
             role: null, // Will be assigned in role selection
-            name: `Human Player ${i+1}`
+            name: `Human ${i+1}`
         });
     }
     
     // Add AI players
     for (let i = 0; i < aiCount; i++) {
         playerArray.push({
-            id: `ai_${i + 1}`,
+            id: `AI${i+1}`,
             type: "ai",
             role: null, // Will be assigned in role selection
-            name: `AI Player ${i+1}`
+            name: `AI ${i+1}`
         });
     }
     

@@ -152,7 +152,74 @@ function getCallingFileClean() {
     return 'unknown';
 }
 
-// Example 6: Console with clean file detection
+// Log Export Functionality
+const logExporter = {
+    logBuffer: [],
+    
+    async exportLogs() {
+        try {
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            const filename = `debuglog-${timestamp}.txt`;
+            const content = this.logBuffer.join('\n');
+            
+            // For browser environments, download the file
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            console.log(`Debug log exported as ${filename}`);
+        } catch (error) {
+            console.error('Failed to export logs:', error);
+        }
+    },
+    
+    addLog(level, message, file) {
+        const timestamp = new Date().toISOString();
+        const logEntry = `[${timestamp}] [${level}] [${file}] ${message}`;
+        this.logBuffer.push(logEntry);
+        
+        // Keep only last 1000 entries to prevent memory issues
+        if (this.logBuffer.length > 1000) {
+            this.logBuffer.shift();
+        }
+    },
+    
+    clearLogs() {
+        this.logBuffer = [];
+    }
+};
+
+// Color coding function
+function getColorForMessage(message) {
+    const msg = message.toLowerCase();
+    
+    // Check for keywords and return appropriate color
+    if (msg.includes('movement') || msg.includes('board') || msg.includes('coords')) {
+        return '#9932CC'; // Purple
+    }
+    if (msg.includes('players') || msg.includes('player') || msg.includes('role')) {
+        return '#FFD700'; // Yellow
+    }
+    if (msg.includes('game')) {
+        return '#4169E1'; // Blue
+    }
+    if (msg.includes('card') || msg.includes('effects') || msg.includes('deck')) {
+        return '#FF8C00'; // Orange
+    }
+    if (msg.includes('--------')) {
+        return '#FF69B4'; // Pink
+    }
+    
+    return '#FFFFFF'; // Default white
+}
+
+// Example 6: Console with clean file detection and log export
 function createFileBasedConsoleClean() {
     const original = {
         log: console.log,
@@ -174,24 +241,34 @@ function createFileBasedConsoleClean() {
     
     function wrapConsoleMethod(method, level) {
         return function(...args) {
-            // For Error objects, pass through unchanged
+            // For Error objects, pass through unchanged but still log
             if (args[0] instanceof Error) {
+                const file = getCallingFileClean();
+                logExporter.addLog(level.toUpperCase(), args[0].stack || args[0].message, file);
                 return original[method].apply(console, args);
             }
             
-            // For styled messages, pass through unchanged
+            // For styled messages, pass through unchanged but still log
             if (typeof args[0] === 'string' && args[0].startsWith('%c')) {
+                const file = getCallingFileClean();
+                logExporter.addLog(level.toUpperCase(), args[0], file);
                 return original[method].apply(console, args);
             }
             
             // Get calling file and apply styling
             const file = getCallingFileClean();
-            const color = colors[file] || '#FFFFFF';
             const message = args[0] || '';
             
+            // Add to log buffer
+            logExporter.addLog(level.toUpperCase(), message, file);
+            
+            // Get color based on message content (overrides file-based color)
+            const messageColor = getColorForMessage(message.toString());
+            const fileColor = colors[file] || '#FFFFFF';
+            
             const styledMessage = `%c[${file}] %c${message}`;
-            const prefixStyle = `color: ${color}; font-weight: bold;`;
-            const messageStyle = `color: ${color};`;
+            const prefixStyle = `color: ${fileColor}; font-weight: bold;`;
+            const messageStyle = `color: ${messageColor};`;
             
             return original[method](styledMessage, prefixStyle, messageStyle, ...args.slice(1));
         };
@@ -205,7 +282,9 @@ function createFileBasedConsoleClean() {
     return {
         restore: () => {
             Object.assign(console, original);
-        }
+        },
+        exportLogs: () => logExporter.exportLogs(),
+        clearLogs: () => logExporter.clearLogs()
     };
 }
 
@@ -229,6 +308,15 @@ function testStackManipulation() {
     console.log("Detected file:", getCallingFileClean());
 }
 
+// Test color coding
+function testColorCoding() {
+    console.log("Testing movement and board coordinates");
+    console.log("Player role assignment completed");
+    console.log("Game state updated successfully");
+    console.log("Card effects applied to deck");
+    console.log("-------- Debug Separator --------");
+}
+
 // Export for testing
 window.stackTraceUtils = {
     demonstrateStackModification,
@@ -237,5 +325,7 @@ window.stackTraceUtils = {
     getCallingFileClean,
     createCleanConsoleOverride,
     createFileBasedConsoleClean,
-    test: testStackManipulation
+    logExporter,
+    test: testStackManipulation,
+    testColorCoding
 };

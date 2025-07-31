@@ -6,8 +6,11 @@
 
 import { SPACE_TYPE } from './board-data.js';
 
+// ===== Global Variables =====
+window.hasDrawnEndOfTurnCard = false;
+
 // ===== State Objects =====
-const _state = {
+export const _state = {
     // Track player resources by player ID
     playerResources: {},
     
@@ -53,7 +56,7 @@ const _state = {
         aiPlayerCount: 0,
         totalPlayerCount: 0,
         humanPlayerCount: 0,
-        debugMode: false,
+        debugMode: true,
         currentPlayerIndex: -1,
         turnOrder: [],
         currentPath: null,
@@ -67,6 +70,7 @@ const _state = {
         turnNumber: 0,
         hasRolled: false,
         drawnCard: false,
+        deckType: null,
         phase: 'setup',
         gameStarted: false,
         gameOver: false,
@@ -78,7 +82,7 @@ const _state = {
         board: {},
         settings: {
             maxPlayers: 6,
-            minPlayers: 2,
+            minPlayers: 4,
             enableSpecialAbilities: true
         },
         spaceType: { ...SPACE_TYPE }, // Add spaceType to global state.
@@ -115,6 +119,7 @@ window.getCurrentPlayer = getCurrentPlayer;
  * @returns {Object} Immutable copy of the game state
  */
 export function getGameState() {
+   // console.log('---------getGameState---------');
     return JSON.parse(JSON.stringify(_state.game));
 }
 
@@ -123,38 +128,8 @@ export function getGameState() {
  * @returns {Object} Immutable copy of the UI state
  */
 export function getUIState() {
+   // console.log('---------getUIState---------');
     return JSON.parse(JSON.stringify(_state.ui));
-}
-
-/**
- * Get a player's resources from global state
- * @param {string} playerId - The ID of the player
- * @returns {Object} Player's resources or null if not found
- */
-export function getPlayerResources(playerId) {
-    if (!playerId || !_state.playerResources[playerId]) return null;
-    return JSON.parse(JSON.stringify(_state.playerResources[playerId]));
-}
-
-/**
- * Update a player's resources in global state
- * @param {string} playerId - The ID of the player
- * @param {Object} resources - The new resource values
- */
-export function updatePlayerResources(playerId, resources) {
-    if (!playerId || !resources) return;
-    _state.playerResources[playerId] = JSON.parse(JSON.stringify(resources));
-    notifySubscribers();
-}
-
-/**
- * Initialize player resources in global state
- * @param {string} playerId - The ID of the player
- * @param {Object} initialResources - Initial resource values
- */
-export function initPlayerResources(playerId, initialResources) {
-    if (!playerId || !initialResources) return;
-    _state.playerResources[playerId] = JSON.parse(JSON.stringify(initialResources));
 }
 
 /**
@@ -163,10 +138,22 @@ export function initPlayerResources(playerId, initialResources) {
  */
 export function getCurrentPlayer() {
     const { game } = _state;
-    if (game.currentPlayerIndex >= 0 && game.currentPlayerIndex < game.players.length) {
-        return { ...game.players[game.currentPlayerIndex] };
+    
+    // Check if players array exists and has players
+    if (!Array.isArray(game.players) || game.players.length === 0) {
+        console.warn("No players available");
+        return null;
     }
-    return null;
+    
+    // Check if currentPlayerIndex is valid
+    if (game.currentPlayerIndex < 0 || game.currentPlayerIndex >= game.players.length) {
+        console.warn("Invalid currentPlayerIndex:", game.currentPlayerIndex, "- defaulting to first player");
+        updateGameState({ currentPlayerIndex: 0 });
+        return { ...game.players[0] };
+    }
+    
+    // Return current player
+    return { ...game.players[game.currentPlayerIndex] };
 }
 
 /**
@@ -175,8 +162,21 @@ export function getCurrentPlayer() {
  * @returns {Object|null} Player object or null if not found
  */
 export function getPlayerById(playerId) {
+    console.log('---------getPlayerById---------');
     const player = _state.game.players.find(p => p.id === playerId);
     return player ? { ...player } : null;
+}
+
+/**
+ * Update a player's resources in global state
+ * @param {string} playerId - The ID of the player
+ * @param {Object} resources - The new resource values
+ */
+export function updatePlayerResources(playerId, resources) {
+    console.log('---------updatePlayerResources---------');
+    if (!playerId || !resources) return;
+    _state.playerResources[playerId] = JSON.parse(JSON.stringify(resources));
+    notifySubscribers();
 }
 
 // ===== State Setters =====
@@ -189,11 +189,13 @@ const subscribers = new Set();
  * @returns {Function} Unsubscribe function
  */
 export function subscribe(callback) {
+   // console.log('---------subscribe---------');
     subscribers.add(callback);
     return () => subscribers.delete(callback);
 }
 
 function notifySubscribers() {
+   // console.log('---------notifySubscribers---------');
     const state = {
         game: getGameState(),
         ui: getUIState()
@@ -202,19 +204,44 @@ function notifySubscribers() {
 }
 
 /**
- * Update the game state
+ * Update the game state atomically
  * @param {Object} updates - Partial state update
  */
+let isUpdating = false;
+let updateQueue = [];
+
 export function updateGameState(updates) {
-    // Set flag to enable notifications during this update
-    _state.game._notifyOnChange = true;
-    Object.assign(_state.game, updates);
-    notifySubscribers();
-    // Reset flag after update
-    _state.game._notifyOnChange = false;
+   // console.log('---------updateGameState---------');
+    // If we're already processing updates, queue this one
+    if (isUpdating) {
+        updateQueue.push(updates);
+        return;
+    }
+
+    try {
+        isUpdating = true;
+        
+        // Apply the update
+        _state.game._notifyOnChange = true;
+        Object.assign(_state.game, updates);
+        
+        // Notify subscribers
+        notifySubscribers();
+        
+        // Process any queued updates
+        while (updateQueue.length > 0) {
+            const nextUpdate = updateQueue.shift();
+            Object.assign(_state.game, nextUpdate);
+            notifySubscribers();
+        }
+    } finally {
+        _state.game._notifyOnChange = false;
+        isUpdating = false;
+    }
 }
 
 export function animationState(updates) {
+    console.log('---------animationState---------');
     Object.assign(_state.ui.animation, updates);
     notifySubscribers();
 }
@@ -224,6 +251,7 @@ export function animationState(updates) {
  * @param {Object} updates - Partial UI state update
  */
 export function updateUIState(updates) {
+   // console.log('---------updateUIState---------');
     Object.assign(_state.ui, updates);
     notifySubscribers();
 }
@@ -235,6 +263,7 @@ export function updateUIState(updates) {
  * @returns {boolean} True if player was found and updated
  */
 export function updatePlayer(playerId, updates) {
+    console.log('---------updatePlayer---------');
     const playerIndex = _state.game.players.findIndex(p => p.id === playerId);
     if (playerIndex !== -1) {
         _state.game.players[playerIndex] = { 
@@ -252,6 +281,7 @@ export function updatePlayer(playerId, updates) {
  * @param {Object} [settings] - Optional game settings
  */
 export function resetGameState(settings = {}) {
+    console.log('---------resetGameState---------');
     Object.assign(_state.game, {
         players: [],
         currentPlayerIndex: 0,
@@ -306,11 +336,13 @@ export function resetGameState(settings = {}) {
 }
 
 export function addPlayer(playerData) {
+    console.log('---------addPlayer---------');
     _state.game.players.push(playerData);
     notifySubscribers();
 }
 
 export function startGame() {
+    console.log('---------startGame---------');
     _state.game.gameStarted = true;
     _state.game.phase = 'PLAYING';
     notifySubscribers();
@@ -321,6 +353,7 @@ export let currentDeck = null;
 export let currentOnComplete = null;
 
 export function setCurrentCardState(card, deck, onComplete) {
+    console.log('---------setCurrentCardState---------');
     currentCard = card;
     currentDeck = deck;
     currentOnComplete = onComplete;
@@ -328,6 +361,7 @@ export function setCurrentCardState(card, deck, onComplete) {
 
 // ONE single lookup table (object) holding the parsers
 export const EFFECT_PARSERS = {
+    
     RESOURCE_CHANGE: ({ changes }) =>
         Object.entries(changes).map(([res, amt]) => {
             const verb = amt >= 0 ? 'Gain' : 'Lose';
@@ -348,8 +382,40 @@ export const EFFECT_PARSERS = {
     }
 };
 
+// Action validation system
+const FORBIDDEN_ACTIONS = {
+    'ROLLING': ['advanceToNextPlayer', 'animateTokenToPosition', 'drawCard', 'showCard'],
+    'MOVING': ['advanceToNextPlayer', 'animateDiceRoll', 'drawCard', 'showCard'],
+    'PLAYING': ['advanceToNextPlayer', 'animateDiceRoll', 'animateTokenToPosition'],
+    'AWAITING_PATH_CHOICE': ['advanceToNextPlayer', 'animateDiceRoll', 'animateTokenToPosition', 'drawCard'],
+    'AWAITING_CARD_ACTION': ['advanceToNextPlayer', 'animateDiceRoll', 'animateTokenToPosition, processEndPlayerTurn', 'handlePlayerAction'],
+    'TURN_TRANSITION': ['animateTokenToPosition', 'processEndPlayerTurn', 'handleEndOfMove, handleEndTurn, handlePlayerAction', 'drawCard', 'showCard'],
+};
+
+export function isActionAllowed(action) {
+   // console.log('---------isActionAllowed---------');
+    // During initialization, allow all actions until game state is fully set up
+    if (!state.game) {
+        return true;
+    }
+    
+    const currentPhase = state.game.currentPhase;
+    if (!currentPhase) return true; // No phase set yet, allow action
+    
+    const forbiddenActions = FORBIDDEN_ACTIONS[currentPhase] || [];
+    const isForbidden = forbiddenActions.includes(action);
+    
+    if (isForbidden) {
+        console.warn(`[Action Blocked] "${action}" is not allowed during "${currentPhase}" phase`);
+        return false;
+    }
+    
+    return true;
+}
+
 // SINGLE function that everybody calls
 export function getEffectDescription(effect) {
+    console.log('---------getEffectDescription---------');
     const parser = EFFECT_PARSERS[effect.type];
     if (!parser) return [`Unknown effect type: ${effect.type}`];
 

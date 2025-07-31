@@ -5,14 +5,40 @@ import { ageOfLegacyDeck } from '../assets/Cards/AgeOfLegacyCards.js';
 import { ageOfReckoningDeck } from '../assets/Cards/AgeOfReckoningCards.js';
 import { ageOfResistanceDeck } from '../assets/Cards/AgeOfResistanceCards.js';
 
-import { applyCardEffects, applyAgeCardEffects } from './resourceManagement.js';
+// Import game modules
+import { 
+    state, 
+    isActionAllowed 
+} from './state.js';
 
-import { state, getEffectDescription } from './state.js';
-import { TIMING, clearDeckHighlights } from './animations.js';
+import { 
+    updatePlayerInfo 
+} from './ui.js';
 
+import { 
+    fullDeckRegionPathMap 
+} from './board-data.js';
 
-import { fullDeckRegionPathMap } from './board-data.js';
-import { drawBoard } from './board.js';
+import { 
+    drawBoard 
+} from './board.js';
+
+import { 
+    handleEndTurn, 
+    processEndPlayerTurn, 
+    getCurrentPlayer, 
+} from './game.js';
+import { 
+    applyCardEffect, 
+    applyResourceChange, 
+    handleCardMovement,
+    applyAgeCardEffect,
+} from './resourceManagement.js';
+
+// Helper function for promise-based delays
+export function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 // Combine path Card decks into one structure for easier access by color
 const CARD_DATA = {
@@ -190,44 +216,38 @@ function shuffleDeck(deckType) {
 };
 
 /**
- * Animates a card being drawn with proper timing for CPU vs Human
- * @param {string} deckType - The type of deck to animate from
- * @returns {Promise} Resolves when animation and card display completes
- */
-/**
  * Draws a card from the specified deck and displays it
  * @param {string} deckType - Type of deck to draw from (e.g., 'ageOfExpansion', 'endOfTurn')
  * @param {Object} player - Player drawing the card
  * @returns {Promise} Resolves when card is drawn and displayed
  */
-export async function drawCard(deckType, player) {
+export function drawCard(deckType) {
     console.log('---------drawCard---------');
-    console.log(`Drawing card from ${deckType} deck for player:`, player?.name || 'Unknown');
-    
+    if (!isActionAllowed('PLAYING, MOVING, TURN_TRANSITION, AWAITING_PATH_CHOICE')) return;
+        
+    const player = getCurrentPlayer();
+    if (!player) {
+        console.error('No current player found');
+        return;
+    }
     // Clear any existing card first
     if (state.currentCard) {
         console.log('Clearing current card before drawing new one:', state.currentCard.name);
-        discardCard(state.currentCard, state.currentDeck);
     }
-    
-    const ctx = state.board.ctx;
-    if (!ctx) {
-        console.warn('No canvas context available for animation');
-        return Promise.resolve(); // fail-safe fallback
-    }
+    console.log(`Drawing card from ${deckType} deck for player:`, player.name);
 
     // Get deck region configuration
     const deckConfig = Object.values(fullDeckRegionPathMap).find(r => r.deckType === deckType);
     if (!deckConfig) {
         console.warn(`No deck configuration found for type: ${deckType}`);
-        return Promise.resolve(); // fail-safe fallback
+        return; // fail-safe fallback
     }
 
     // Pick a position (random for endOfTurnDeck)
     const positions = deckConfig.positions;
     const position = (deckType === 'endOfTurnDeck')
         ? positions[Math.floor(Math.random() * positions.length)]
-        : positions[0];
+        : positions[0];6
 
     // Get coordinates
     const { topleft, toplefty, bottomrightx, bottomright } = position;
@@ -236,81 +256,52 @@ export async function drawCard(deckType, player) {
     const cardWidth = bottomrightx - topleft;
     const cardHeight = bottomright - toplefty;
 
-    // Animation logic
-    return new Promise((resolve) => {
-        let startTime = null;
+    // Draw the actual card from the deck
+    if (!cardState.initialized || !cardState.decks[deckType]) {
+        console.log(`Cannot draw card: Deck type ${deckType} not initialized or invalid.`);
+        return;
+    }
 
-        function animate(currentTime) {
-            if (!startTime) startTime = currentTime;
-            const elapsed = currentTime - startTime;
+    let deck = cardState.decks[deckType];
+    let discardPile = cardState.discardPiles[deckType];
 
-            ctx.clearRect(cardX, cardY, cardWidth, cardHeight);
-
-            if (elapsed < TIMING.CARD_DRAW) {
-                const progress = elapsed / TIMING.CARD_DRAW;
-                const scale = 1 + (0.2 * Math.sin(progress * Math.PI));
-                const scaledWidth = cardWidth * scale;
-                const scaledHeight = cardHeight * scale;
-                const offsetX = (scaledWidth - cardWidth) / 2;
-                const offsetY = (scaledHeight - cardHeight) / 2;
-
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-                ctx.fillRect(
-                    cardX - offsetX,
-                    cardY - offsetY,
-                    scaledWidth,
-                    scaledHeight
-                );
-
-                requestAnimationFrame(animate);
-            } else {
-                resolve();
-            }
-        }
-
-        requestAnimationFrame(animate);
-    }).then(() => {
-        // Draw the actual card from the deck
-        if (!cardState.initialized || !cardState.decks[deckType]) {
-            console.log(`Cannot draw card: Deck type ${deckType} not initialized or invalid.`);
+    if (deck.length === 0) {
+        console.log(`${deckType} deck empty. Reshuffling discard pile...`);
+        if (discardPile.length === 0) {
+            console.warn(`Cannot draw card: ${deckType} deck and discard pile are both empty.`);
             return;
         }
+        // Move discard pile to deck and shuffle
+        cardState.decks[deckType] = [...discardPile];
+        cardState.discardPiles[deckType] = [];
+        shuffleDeck(deckType);
+        deck = cardState.decks[deckType]; // Update reference
+    }
 
-        let deck = cardState.decks[deckType];
-        let discardPile = cardState.discardPiles[deckType];
-
-        if (deck.length === 0) {
-            console.log(`${deckType} deck empty. Reshuffling discard pile...`);
-            if (discardPile.length === 0) {
-                console.warn(`Cannot draw card: ${deckType} deck and discard pile are both empty.`);
-                return;
-            }
-            // Move discard pile to deck and shuffle
-            cardState.decks[deckType] = [...discardPile];
-            cardState.discardPiles[deckType] = [];
-            shuffleDeck(deckType);
-            deck = cardState.decks[deckType]; // Update reference
-        }
-
-        const drawnCard = deck.pop(); // Draw from the end (top) of the deck
-        
-        if (!drawnCard) {
-            console.log(`Popped an undefined card from ${deckType}. Deck state:`, deck);
-            return;
-        }
-        
-        console.log(`Drawn card from ${deckType}: ${drawnCard.name}`);
-        
-        // Store the current deck type in state
-        state.currentDeckType = deckType;
-        
-        if (drawnCard && typeof showCard === 'function') {
-            showCard(drawnCard, player);
-        } else {
-            console.warn('showCard function not defined or no card drawn');
-        }
-    });
-};
+    const card = deck.pop(); // Draw from the end (top) of the deck
+    
+    if (!card) {
+        console.log(`Popped an undefined card from ${deckType}. Deck state:`, deck);
+        return;
+    }
+    
+    console.log(`Drawn card from ${deckType}: ${card.name}`);
+    
+    // Store the current deck type in state
+    state.currentDeck = deckType;
+    
+    // Set flag if this is an end-of-turn card
+    if (deckType === 'endOfTurnDeck') {
+        // No longer setting window.hasDrawnEndOfTurnCard here
+    }
+    
+    if (card && typeof showCard === 'function') {
+        showCard(card);
+       
+    } else {
+        console.warn('showCard function not defined or no card drawn');
+    }
+}
 
 /**
  * Discards a card to the appropriate discard pile and cleans up UI elements
@@ -320,6 +311,14 @@ export async function drawCard(deckType, player) {
 export function discardCard(card, deckType) {
     console.log('---------discardCard---------')
     console.log(`Discarding card: ${card?.name || 'Unknown'}`);
+    
+    // Try to determine deck type if not provided
+    if (!deckType && card) {
+        // First try to get deck type from the card object
+        deckType = card.deckType || state.currentDeck;
+        console.log(`Deck type not provided, using: ${deckType || 'Unknown'}`);
+    }
+    
     console.log(`Target deck: ${deckType || 'Unknown'}`);
     
     // Clear card data from all dialogs
@@ -330,9 +329,22 @@ export function discardCard(card, deckType) {
         }
     });
     
+    // If we still don't have a valid deck type, try to find it from card state
+    if (!deckType && card) {
+        // Try to find which deck this card came from
+        for (const [type, deck] of Object.entries(cardState.decks)) {
+            if (deck.includes(card)) {
+                deckType = type;
+                console.log(`Found card in ${type} deck`);
+                break;
+            }
+        }
+    }
+    
     // Add card to discard pile if valid
     if (!cardState.initialized || !deckType || !cardState.discardPiles[deckType]) {
         console.warn(`Cannot discard card: Deck type ${deckType} not initialized or invalid.`);
+        console.log('Available discard piles:', Object.keys(cardState.discardPiles || {}));
         return;
     }
     
@@ -342,7 +354,7 @@ export function discardCard(card, deckType) {
     }
     
     cardState.discardPiles[deckType].push(card);
-    console.log(`Card ${card.name} discarded to ${deckType}. Pile size: ${cardState.discardPiles[deckType].length}`);
+    //console.log(`Card ${card.name} discarded to ${deckType}. Pile size: ${cardState.discardPiles[deckType].length}`);
     
     // Clear current card from state
     if (state.currentCard) {
@@ -356,32 +368,37 @@ export function discardCard(card, deckType) {
     document.dispatchEvent(event);
 };
 
-    /**
+/**
  * Displays a card in the UI with appropriate animations and interactions
  * @param {Object} card - The card to display
  * @param {Object} player - The player viewing the card
  * @param {Function} onComplete - Callback when card is closed
  */
-export async function showCard(card, player, onComplete) {
+export async function showCard(card) {
     console.log('---------showCard---------')
     
-    // Get deck type from state
-    const deckType = state.currentDeckType || 'unknown';
-    console.log(`Displaying card: ${card?.name || 'Unknown'} from ${deckType} deck`);
+    // Get current player
+    const player = getCurrentPlayer();
+    if (!player) {
+        console.error('No current player found');
+        return;
+    }
     
+    // Get deck type from state
+    const deckType = state.currentDeck || 'unknown';
     const deckMeta = deckInfo[deckType];
-    const isAI = player && !player.isHuman;
+    const isAI = !player.isHuman;
     const isEndOfTurnCard = deckType === 'endOfTurnDeck' || 
         (card.type && card.type.includes('endOfTurn')) ||
         (card.deck && card.deck.includes('endOfTurn'));
     const isAgeDeck = /^ageOf/i.test(deckType);
     
     // Enhanced logging for deck type detection
-    console.log(`[showCard] Deck Type Analysis:`);
-    console.log(`- deckType: ${deckType}`);
-    console.log(`- isEndOfTurnCard: ${isEndOfTurnCard} (deckType match: ${deckType === 'endOfTurnDeck'}, card.type: ${card?.type}, card.deck: ${card?.deck})`);
-    console.log(`- isAgeDeck: ${isAgeDeck} (regex test: ${/^age-Of/i.test(deckType)})`);
-    console.log(`- Card has choice: ${!!card?.choice}`);
+    //console.log(`[showCard] Deck Type Analysis:`);
+    //console.log(`- deckType: ${deckType}`);
+    //console.log(`- isEndOfTurnCard: ${isEndOfTurnCard} (deckType match: ${deckType === 'endOfTurnDeck'}, card.type: ${card?.type}, card.deck: ${card?.deck})`);
+    //console.log(`- isAgeDeck: ${isAgeDeck} (regex test: ${/^age-Of/i.test(deckType)})`);
+    //console.log(`- Card has choice: ${!!card?.choice}`);
     if (card?.choice) {
         console.log(`  - Option A effects: ${card.choice.optionA?.effects ? 'Present' : 'None'}`);
         console.log(`  - Option B effects: ${card.choice.optionB?.effects ? 'Present' : 'None'}`);
@@ -403,9 +420,13 @@ export async function showCard(card, player, onComplete) {
         }
     }, null, 2));
     
-    // Store current card in state
+    // Store current card and deck type in state
     state.currentCard = card;
     state.currentDeck = deckType;
+    // Also store deck type on the card for reference
+    if (card) {
+        card.deckType = deckType;
+    }
 
     document.querySelectorAll('[data-deck-id]').forEach(popover => {
         popover.style.display = 'none';
@@ -441,7 +462,7 @@ export async function showCard(card, player, onComplete) {
     if (Array.isArray(card.effects)) {
         card.effects.forEach(effect => {
             if (effect.type === 'RESOURCE_CHANGE' && effect.changes) {
-                const formatted = getEffectDescription(effect.changes);
+                const formatted = formatResourceChanges(effect.changes);
                 if (formatted) {
                     let target = effect.target === 'OTHER' ? ' (Target: Other)' :
                                  (effect.target && effect.target !== 'SELF' ? ` (Target: ${effect.target})` : '');
@@ -477,7 +498,7 @@ export async function showCard(card, player, onComplete) {
         showDetailsButton.onclick = () => {
             let explanationHTML = '';
             if (isEndOfTurnCard && player?.role) {
-                const allRoles = ['Colonialist', 'Revolutionary', 'Historian', 'Entrepreneur', 'Politician', 'Artist'];
+                const allRoles = ['COLONIALIST', 'REVOLUTIONARY', 'HISTORIAN', 'ENTREPRENEUR', 'POLITICIAN', 'ARTIST'];
                 explanationHTML += "<div class='role-effects-container'><h3>Effects for All Roles:</h3><ul class='role-effects-list'>";
                 allRoles.forEach(role => {
                     const roleEffect = card.effects[role];
@@ -486,14 +507,18 @@ export async function showCard(card, player, onComplete) {
                         const changeText = [
                             changes.money !== undefined ? `${changes.money >= 0 ? '+' : ''}${changes.money} Money` : '',
                             changes.knowledge !== undefined ? `${changes.knowledge >= 0 ? '+' : ''}${changes.knowledge} Knowledge` : '',
-                            changes.influence !== undefined ? `${changes.influence >= 0 ? '+' : ''}${changes.influence} Influence` : ''
+                            changes.influence !== undefined ? `${changes.influence >= 0 ? '+' : ''}${changes.influence} influence` : ''
                         ].filter(Boolean).join(', ');
 
-                        const fullText = `<span class='role-name'>${role}:</span> <span class='resource-changes'>[${changeText}]</span> <span class='effect-explanation'>${roleEffect.explanation || ''}</span>`;
+                        // Convert role to display format (PascalCase for display)
+                        const displayRole = role.charAt(0) + role.slice(1).toLowerCase();
+                        const fullText = `<span class='role-name'>${displayRole}:</span> <span class='resource-changes'>[${changeText}]</span> <span class='effect-explanation'>${roleEffect.explanation || ''}</span>`;
                         const currentClass = role === player.role ? 'current-role' : '';
                         explanationHTML += `<li class="role-effect ${currentClass}">${fullText}</li>`;
                     } else {
-                        explanationHTML += `<li class='role-effect'><span class='role-name'>${role}:</span> No effect defined.</li>`;
+                        // Convert role to display format (PascalCase for display)
+                        const displayRole = role.charAt(0) + role.slice(1).toLowerCase();
+                        explanationHTML += `<li class='role-effect'><span class='role-name'>${displayRole}:</span> No effect defined.</li>`;
                     }
                 });
                 explanationHTML += "</ul></div>";
@@ -516,8 +541,10 @@ export async function showCard(card, player, onComplete) {
     if (closeCardButton) {
         closeCardButton.onclick = () => {
             dialog.close();
-            state.currentCard = card; // Ensure current card is set
-            applyCardEffects(player);
+            drawBoard();
+            // Apply card effect with the card's deck type
+            console.log(`Applying card effect from ${card.deckType} deck`);
+            applyCardEffect(card);
             if (typeof onComplete === 'function') onComplete();
         };
     }
@@ -558,32 +585,34 @@ export async function showCard(card, player, onComplete) {
             freshOptionAButton.style.display = 'inline-block';
             freshOptionAButton.disabled = false;
             
-            freshOptionAButton.onclick = () => {
+            freshOptionAButton.onclick = async () => {
                 console.log('Age Deck Option A selected');
                 freshOptionAButton.style.display = 'none';
                 
-                if (card.choice.optionA.effects?.length) {
+                if (card.choice.optionA.effects && Array.isArray(card.choice.optionA.effects)) {
                     card.choice.optionA.effects.forEach(effect => {
-                        getEffectDescription(effect).forEach(desc => {
-                            const p = document.createElement('p');
-                            p.textContent = desc;
-                            cardChoiceColumnA.appendChild(p);
-                        });
+                        const p = document.createElement('p');
+                        if (effect.type === 'RESOURCE_CHANGE' && effect.changes) {
+                            const changeText = [
+                                effect.changes.money !== undefined ? `${effect.changes.money >= 0 ? '+' : ''}${effect.changes.money} Money` : '',
+                                effect.changes.knowledge !== undefined ? `${effect.changes.knowledge >= 0 ? '+' : ''}${effect.changes.knowledge} Knowledge` : '',
+                                effect.changes.influence !== undefined ? `${effect.changes.influence >= 0 ? '+' : ''}${effect.changes.influence} influence` : ''
+                            ].filter(Boolean).join(', ');
+                            p.textContent = `Resource Change: ${changeText}`;
+                        } else if (effect.type === 'MOVEMENT') {
+                            p.textContent = `Movement: ${effect.spaces} spaces ${effect.target ? `(${effect.target})` : ''}`;
+                        } else {
+                            p.textContent = effect.type;
+                        }
+                        cardChoiceColumnA.appendChild(p);
                     });
                 }
                 
-                // Set the player's choice before applying effects
-                player.choice = 'A';
-                
-                // Close the dialog and apply effects
+                await delay(3000);
                 dialog.close();
-                applyAgeCardEffects(player, () => {
-                    // Clear the choice after effects are applied
-                    delete player.choice;
-                    if (typeof onComplete === 'function') {
-                        onComplete();
-                    }
-                });
+                state.currentCard = card;
+                applyAgeCardEffect(card, 'optionA');
+                if (typeof onComplete === 'function') onComplete();
             };
         }
         
@@ -593,37 +622,34 @@ export async function showCard(card, player, onComplete) {
             freshOptionBButton.style.display = 'inline-block';
             freshOptionBButton.disabled = false;
             
-            freshOptionBButton.onclick = () => {
+            freshOptionBButton.onclick = async () => {
                 console.log('Age Deck Option B selected');
-                // Set the player's choice before applying effects
-                player.choice = 'B';
-                
-                // Close the dialog and apply effects
-                dialog.close();
-                applyAgeCardEffects(player, () => {
-                    // Clear the choice after effects are applied
-                    delete player.choice;
-                    if (typeof onComplete === 'function') {
-                        onComplete();
-                    }
-                });
                 freshOptionBButton.style.display = 'none';
-
-                if (card.choice.optionB.effects?.length) {
+                
+                if (card.choice.optionB.effects && Array.isArray(card.choice.optionB.effects)) {
                     card.choice.optionB.effects.forEach(effect => {
-                        getEffectDescription(effect).forEach(desc => {
-                            const p = document.createElement('p');
-                            p.textContent = desc;
-                            cardChoiceColumnB.appendChild(p);
-                        });
+                        const p = document.createElement('p');
+                        if (effect.type === 'RESOURCE_CHANGE' && effect.changes) {
+                            const changeText = [
+                                effect.changes.money !== undefined ? `${effect.changes.money >= 0 ? '+' : ''}${effect.changes.money} Money` : '',
+                                effect.changes.knowledge !== undefined ? `${effect.changes.knowledge >= 0 ? '+' : ''}${effect.changes.knowledge} Knowledge` : '',
+                                effect.changes.influence !== undefined ? `${effect.changes.influence >= 0 ? '+' : ''}${effect.changes.influence} influence` : ''
+                            ].filter(Boolean).join(', ');
+                            p.textContent = `Resource Change: ${changeText}`;
+                        } else if (effect.type === 'MOVEMENT') {
+                            p.textContent = `Movement: ${effect.spaces} spaces ${effect.target ? `(${effect.target})` : ''}`;
+                        } else {
+                            p.textContent = effect.type;
+                        }
+                        cardChoiceColumnB.appendChild(p);
                     });
                 }
                 
-                setTimeout(() => {
-                    dialog.close();
-                    applyAgeCardEffects(card.choice.optionB.effects, player);
-                    if (typeof onComplete === 'function') onComplete();
-                }, 5000);
+                await delay(3000);
+                dialog.close();
+                state.currentCard = card;
+                applyAgeCardEffect(card, 'optionB');
+                if (typeof onComplete === 'function') onComplete();
             };
         }
     }
@@ -635,115 +661,271 @@ export async function showCard(card, player, onComplete) {
             if (!dialog.open) return;
             
             console.log('AI making choice for card:', card.name);
-            dialog.close();
             
-            if (isEndOfTurnCard) {
-                console.log('Applying end of turn card effects');
-                state.currentCard = card; // Ensure current card is set
-                drawBoard();
-                applyCardEffects(player);
-            } else if (card.choice) {
-                // AI always chooses option A for now
-                console.log('AI choosing option A');
-                if (isAgeDeck) {
-                    drawBoard();
-                    applyAgeCardEffects(card.choice.optionA.effects, player);
-                } else {
-                    state.currentCard = { ...card, effects: card.choice.optionA.effects };
-                    drawBoard();
-                    applyCardEffects(player);
-                }
-            } else if (card.effects) {
-                console.log('Applying direct effects');
-                if (isAgeDeck) {
-                    drawBoard();
-                    applyAgeCardEffects(card.effects, player);
-                } else {
-                    state.currentCard = card; // Ensure current card is set
-                    drawBoard();
-                    applyCardEffects(player);
-                }
+            if (isAgeDeck) {
+                // Wait 3 seconds before clicking
+                setTimeout(() => {
+                    if (!dialog.open) return;
+                    const optionAButton = dialog.querySelector('.optionAButton');
+                    if (optionAButton) {
+                        optionAButton.click(); // This will show effects for 3 seconds
+                    }
+                }, 3000);
+            } else {
+                // For non-choice cards, just close after 3 seconds
+                setTimeout(() => {
+                    if (dialog.open) dialog.close();
+                    state.currentCard = card;
+                    if (isEndOfTurnCard) {
+                        applyCardEffect(card);
+                    }
+                    if (typeof onComplete === 'function') onComplete();
+                }, 3000);
             }
-            
-            if (typeof onComplete === 'function') {
-                onComplete();
-            }
-        }, 5000); // 5 second delay for AI
-    } else if (card.effects && !card.choice) {
-        // For non-choice cards with effects, apply them immediately for human players
-        console.log('Applying immediate effects for non-choice card');
-        if (isAgeDeck) {
-            drawBoard();
-            applyAgeCardEffects(card.effects, player);
-        } else {
-            drawBoard();
-            // Ensure we're passing the player object, not the effects
-            state.currentCard = card; // Make sure the card is set in state
-            applyCardEffects(player);
-        }
+        }, 100); // Small delay to ensure dialog is rendered
     }
-    
     return dialog;
 }
 
-// Hide card popover
-export function hideCard() {
-    console.log('---------hideCard---------')
-    const { ui } = state;
-    const popoverContainer = ui.elements.cardPopoverContainer;
-    const popover = ui.elements.popover;
-    const effectsEl = ui.elements.cardEffects;
-    const showDetailsButton = ui.elements.showCardDetailsButton;
-
-    if (!popover) return;
-    console.log("Hiding card popover");
-    
-    // Add reverse animation
-    const cardPopover = popover.querySelector('.card-Popover');
-    if (cardPopover) {
-        cardPopover.style.animation = 'cardFlip 0.3s reverse';
-        // Wait for animation to complete before hiding
-        setTimeout(() => {
-            popover.style.display = 'none';
-            // Reset animation for next time
-            cardPopover.style.animation = '';
-            // Redraw the canvas after hiding the popover
-            redrawCanvas();
-        }, 500);
-    } else {
-        popover.style.display = 'none';
-        // Redraw the canvas immediately if no animation
-        redrawCanvas();
-    }
-    
-    // Reset effects visibility for next time
-    if (effectsEl) {
-        effectsEl.style.display = 'none';
-        effectsEl.innerHTML = '';
-    }
-    if (showDetailsButton) {
-        showDetailsButton.style.display = 'block'; // Or 'inline-block'
-    }
-    
-    // Stop any deck highlighting
-    clearDeckHighlights();
-    
-    // Ensure canvas is redrawn
-    function redrawCanvas() {
-        const canvas = document.getElementById('gameCanvas');
-        if (canvas) {
-            const ctx = canvas.getContext('2d');
-            // Trigger a redraw by dispatching a custom event that the board will listen for
-            const event = new CustomEvent('redrawCanvas');
-            document.dispatchEvent(event);
-        }
-    }
-};
+function formatResourceChanges(changes) {
+    console.log('---------formatResourceChanges---------');
+    const result = [];
+    if (changes.money !== undefined) result.push(`${changes.money >= 0 ? '+' : ''}${changes.money}💰`);
+    if (changes.knowledge !== undefined) result.push(`${changes.knowledge >= 0 ? '+' : ''}${changes.knowledge}📚`);
+    if (changes.influence !== undefined) result.push(`${changes.influence >= 0 ? '+' : ''}${changes.influence}🎭`);
+    return result.join(', ');
+}
 
 export function isEndOfTurnCard(card) {
-    console.log('---------isEndOfTurnCard---------');
+   // console.log('---------isEndOfTurnCard---------');
     return card && (
-        (card.type && card.type.includes('endOfTurn')) ||
-        (card.deck && card.deck.includes('endOfTurn'))
+        (card.type && card.type.toLowerCase().includes('endofturn')) ||
+        (card.deck && card.deck.replace(/\s+/g, '').toLowerCase().includes('endofturn'))
     );
 }
+
+export async function processCardEffects(card, targetPlayer = null) {
+    console.log('---------processCardEffects---------')
+    // Use provided player or get current player
+    const currentPlayer = targetPlayer || getCurrentPlayer();
+    
+    if (!currentPlayer) {
+        console.error('No current player found');
+        processEndPlayerTurn(card);
+        return;
+    }
+    
+    console.log(`Processing card effects for player ${currentPlayer.name} with role ${currentPlayer.role || 'N/A'}`);
+    
+    // If the card parameter is already an effect (not a card object with effects property)
+    if (card && (card.type || card.changes || card.effect)) {
+        console.log('Processing direct effect:', card);
+        // Handle the effect directly
+        if (card.type === 'RESOURCE_CHANGE') {
+            console.log(`Applying resource change effect to ${currentPlayer.name}:`, card.changes);
+            // Apply each resource change individually
+            if (card.changes.money !== undefined) {
+                await applyResourceChange('money', card.changes.money, 'cardEffect', currentPlayer.id);
+            }
+            if (card.changes.knowledge !== undefined) {
+                await applyResourceChange('knowledge', card.changes.knowledge, 'cardEffect', currentPlayer.id);
+            }
+            if (card.changes.influence !== undefined) {
+                await applyResourceChange('influence', card.changes.influence, 'cardEffect', currentPlayer.id);
+            }
+        } else if (card.type === 'MOVEMENT') {
+            console.log(`Applying movement effect to ${currentPlayer.name}:`, card);
+            handleCardMovement(currentPlayer, card);
+        } else if (card.type === 'SKIP_TURN') {
+            console.log(`Skipping turn for ${currentPlayer.name}`);
+            skipPlayerTurn(currentPlayer, card.turns || 1);
+        } else {
+            console.warn(`Unknown effect type: ${card.type}`, card);
+        }
+        return;
+    }
+    
+    // Handle case where we have a card object with effects
+    if (!card.effects) {
+        console.error('Card has no effects property');
+        processEndPlayerTurn(card);
+        return;
+    }
+    
+    // If effects is an array, process each effect
+    if (Array.isArray(card.effects)) {
+        for (const effect of card.effects) {
+            if (effect.type === 'RESOURCE_CHANGE') {
+                console.log(`Applying resource change effect to ${currentPlayer.name}:`, effect.changes);
+                // Apply each resource change individually
+                if (effect.changes.money !== undefined) {
+                    await applyResourceChange('money', effect.changes.money, 'cardEffect', currentPlayer.id);
+                }
+                if (effect.changes.knowledge !== undefined) {
+                    await applyResourceChange('knowledge', effect.changes.knowledge, 'cardEffect', currentPlayer.id);
+                }
+                if (effect.changes.influence !== undefined) {
+                    await applyResourceChange('influence', effect.changes.influence, 'cardEffect', currentPlayer.id);
+                }
+            } else if (effect.type === 'MOVEMENT') {
+                console.log(`Applying movement effect to ${currentPlayer.name}:`, effect);
+                handleCardMovement(currentPlayer, effect);
+            } else if (effect.type === 'SKIP_TURN') {
+                console.log(`Skipping turn for ${currentPlayer.name}`);
+                skipPlayerTurn(currentPlayer, effect.turns || 1);
+            } else {
+                console.warn(`Unknown effect type: ${effect.type}`, effect);
+            }
+        }
+        return;
+    }
+    
+    // Handle role-based effects
+    if (typeof card.effects === 'object') {
+        const playerRole = currentPlayer.role;
+        if (!playerRole) {
+            console.error('Player has no role assigned');
+            processEndPlayerTurn(card);
+            return;
+        }
+        
+        // Try different case variants of the role name
+        const roleVariants = [
+            playerRole,
+            playerRole.toUpperCase(),
+            playerRole.toLowerCase(),
+            playerRole.charAt(0).toUpperCase() + playerRole.slice(1).toLowerCase()
+        ];
+        
+        let roleEffect = null;
+        let matchedRole = null;
+        
+        for (const roleVariant of roleVariants) {
+            if (card.effects[roleVariant]) {
+                roleEffect = card.effects[roleVariant];
+                matchedRole = roleVariant;
+                break;
+            }
+        }
+        
+        if (roleEffect) {
+            console.log(`Found effects for role variant: ${matchedRole}`);
+            if (Array.isArray(roleEffect)) {
+                roleEffect.forEach(effect => handleEffect(effect, currentPlayer, card));
+            } else {
+                handleEffect(roleEffect, currentPlayer, card);
+            }
+        } else {
+            console.log(`No effects found for role: ${playerRole} (tried variants: ${roleVariants.join(', ')})`);
+            console.log('Available roles in card effects:', Object.keys(card.effects));
+            processEndPlayerTurn(card);
+        }
+    }
+    
+    console.log(`Found effects for role variant: ${matchedRole}`);
+    console.log(`Processing effect: ${roleEffect.type}`);
+    
+    if (roleEffect.explanation) {
+        console.log(`Effect explanation: ${roleEffect.explanation}`);
+    }
+    
+    // Verify this is a resource change effect
+    if (roleEffect.type !== 'RESOURCE_CHANGE' || !roleEffect.changes) {
+        console.warn(`Effect for ${matchedRole} is not a resource change or has no changes`);
+        console.log('Available effect:', roleEffect);
+        console.log('------------processCardEffects END------------')
+        updatePlayerInfo(currentPlayer);
+        processEndPlayerTurn(card);
+        return;
+    }
+    
+    // Apply the resource changes using your existing applyResourceChange function
+    const changes = roleEffect.changes;
+    
+    console.log(`Applying resource changes:`, changes);
+    
+    // Apply each resource change individually using your existing function
+    if (changes.money !== undefined) {
+        console.log(`Applying money change: ${changes.money}`);
+        await applyResourceChange('money', changes.money, 'cardEffect', currentPlayer.id);
+    }
+    
+    if (changes.knowledge !== undefined) {
+        console.log(`Applying knowledge change: ${changes.knowledge}`);
+        await applyResourceChange('knowledge', changes.knowledge, 'cardEffect', currentPlayer.id);
+    }
+    
+    if (changes.influence !== undefined) {
+        console.log(`Applying influence change: ${changes.influence}`);
+        await applyResourceChange('influence', changes.influence, 'cardEffect', currentPlayer.id);
+    }
+    
+    // Log the changes for debugging/feedback
+    console.log(`Applied effects for ${matchedRole}:`);
+    console.log(`- Money: ${changes.money || 0}`);
+    console.log(`- Knowledge: ${changes.knowledge || 0}`);
+    console.log(`- influence: ${changes.influence || 0}`);
+    console.log(`- Explanation: ${roleEffect.explanation}`);
+    
+    console.log('---------processCardEffects END---------');
+    // Call processEndPlayerTurn when complete, passing the card
+    updatePlayerInfo(currentPlayer);
+    processEndPlayerTurn(card);
+  }
+  
+  /**
+   * Validates and finalizes all age card effects, then calls handleEndTurn
+   * This is the guard function that ensures all effects were properly applied
+   * @param {Object} card - The original card object
+   * @param {Array} effects - Array of effects that were processed
+   */
+  export async function processAgeCardEffects(card, effects) {
+    console.log('---------processAgeCardEffects---------');
+    console.log('Validating effects for card:', card.name);
+      
+      // Validate that all effects were processed
+      let allEffectsApplied = true;
+      const validationErrors = [];
+      
+      if (effects.length === 0) {
+        console.warn('No effects were found on this card');
+        validationErrors.push('No effects found');
+        allEffectsApplied = false;
+      }
+      
+      // Check each effect type was handled appropriately
+      effects.forEach((effect, index) => {
+        if (!effect || !effect.type) {
+          validationErrors.push(`Effect ${index + 1}: Missing or invalid effect type`);
+          allEffectsApplied = false;
+        }
+      });
+      
+      // Log validation results
+      if (!allEffectsApplied) {
+        console.warn('Some age card effects may not have been properly applied:', validationErrors);
+      } else {
+        console.log('All age card effects have been successfully processed');
+      }
+      
+      // Update player resources and UI (this ensures all changes are reflected)
+      const currentPlayer = getCurrentPlayer();
+      if (currentPlayer) {
+        // Force update of resource panel
+        const resourceEvent = new CustomEvent('resourcesUpdated', {
+          detail: { playerId: currentPlayer.id }
+        });
+        document.dispatchEvent(resourceEvent);
+      }
+      
+      // Reset game state flags
+      state.preventCardDraw = false;
+      
+      console.log('processAgeCardEffects validation complete - calling handleEndTurn');
+      
+      // Always call handleEndTurn regardless of validation results
+      updatePlayerInfo(currentPlayer);
+      // This ensures the game doesn't get stuck
+      console.log('---------processAgeCardEffects END---------');
+      handleEndTurn();
+  }

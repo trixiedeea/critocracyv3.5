@@ -29,7 +29,7 @@ export const ageOfResistanceDeck = [
       text: "Confront the protestors",
       effects: [
         { type: 'STEAL', target: 'OTHER', resource: 'INFLUENCE', amount: 5 },
-        { type: 'RESOURCE_CHANGE', changes: { influence: -5 } }
+        { type: 'MOVEMENT', target: 'SELF', spaces: -3 }
       ]
     },
     optionB: {
@@ -133,14 +133,15 @@ export const ageOfResistanceDeck = [
       text: "Fund police removal",
       effects: [
         { type: 'STEAL', target: 'OTHER', resource: 'MONEY', amount: 6 },
-        { type: 'RESOURCE_CHANGE', changes: { money: -6 } }
+        { type: 'SKIP_TURN', target: 'SELF' }
       ]
     },
 
     optionB: {
       text: "Host a public debate",
       effects: [
-        { type: 'RESOURCE_CHANGE', changes: { influence: 4, knowledge: 2 } }
+        { type: 'RESOURCE_CHANGE', changes: { influence: 4 } },
+        { type: 'RESOURCE_CHANGE', changes: { knowledge: 2 } }
       ]
     }
   }
@@ -153,7 +154,8 @@ export const ageOfResistanceDeck = [
     optionA: {
       text: "Release the manifesto",
       effects: [
-        { type: 'RESOURCE_CHANGE', changes: { knowledge: 6, influence: -5 } }
+        { type: 'RESOURCE_CHANGE', changes: { knowledge: 6 } },
+        { type: 'RESOURCE_CHANGE', changes: { influence: -5 } }
       ]
     },
     optionB: {
@@ -174,14 +176,14 @@ export const ageOfResistanceDeck = [
       text: "Fund the release",
       effects: [
         { type: 'MOVEMENT', target: 'SELF', spaces: 2 },
-        { type: 'DRAW_CARD', deckType: 'END_OF_TURN' }
+        { type: 'RESOURCE_CHANGE', changes: { money: -2 } }
       ]
     },
     optionB: {
       text: "Block distribution",
       effects: [
-        { type: 'RESOURCE_CHANGE', changes: { money: 2 } },
-        { type: 'RESOURCE_CHANGE', changes: { influence: -2 } }
+        { type: 'RESOURCE_CHANGE', changes: { knowledge: -2 } },
+        { type: 'RESOURCE_CHANGE', changes: { influence: -4 } }
       ]
     }
     }
@@ -194,13 +196,15 @@ export const ageOfResistanceDeck = [
     optionA: {
       text: "Declare martial law",
       effects: [
-        { type: 'MOVEMENT', target: 'OTHER', spaces: -3 }
+        { type: 'MOVEMENT', target: 'SELF', spaces: -3 },
+        { type: 'STEAL', target: 'OTHER', resource: 'INFLUENCE', amount: 4 }
       ]
     },
     optionB: {
       text: "Open dialogue",
       effects: [
-        { type: 'RESOURCE_CHANGE', changes: { knowledge: 4, influence: 2 } }
+        { type: 'RESOURCE_CHANGE', changes: { knowledge: 4 } },
+        { type: 'RESOURCE_CHANGE', changes: { influence: 2 } }
       ]
     }
     }
@@ -261,8 +265,8 @@ export const ageOfResistanceDeck = [
     optionB: {
       text: "Order arrests",
       effects: [
-        { type: 'RESOURCE_CHANGE', changes: { influence: -4 } },
-        { type: 'STEAL', target: 'OTHER', resource: 'MONEY', amount: 2 }
+        { type: 'SKIP_TURN', target: 'SELF' },
+        { type: 'STEAL', target: 'OTHER', resource: 'MONEY', amount: 4 }
       ]
     }
     }
@@ -275,7 +279,8 @@ export const ageOfResistanceDeck = [
     optionA: {
       text: "Support the boycott",
       effects: [
-        { type: 'RESOURCE_CHANGE', changes: { knowledge: 4, influence: 2 } }
+        { type: 'RESOURCE_CHANGE', changes: { knowledge: 4 } },
+        { type: 'RESOURCE_CHANGE', changes: { influence: 2 } }
       ]
     },
     optionB: {
