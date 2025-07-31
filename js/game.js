@@ -628,13 +628,13 @@ export function processEndPlayerTurn() {
         console.log('Enabling end turn button for human player');
         if (endTurnButton) {
             // First, remove any existing pulse animation
-            endTurnButton.classList.remove('pulse');
+            endTurnButton.classList.remove('shake');
             // Force reflow to ensure the animation restarts
             void endTurnButton.offsetWidth;
             
             // Enable the button and add pulse effect
             endTurnButton.disabled = false;
-            endTurnButton.classList.add('pulse');
+            endTurnButton.classList.add('shake');
             endTurnButton.style.pointerEvents = 'auto';
             
             console.log('End turn button enabled and pulsing for human player');
@@ -645,7 +645,7 @@ export function processEndPlayerTurn() {
         console.log('AI player turn ended, ensuring end turn button is disabled');
         if (endTurnButton) {
             endTurnButton.disabled = true;
-            endTurnButton.classList.remove('pulse');
+            endTurnButton.classList.remove('shake');
             endTurnButton.style.pointerEvents = 'none';
         }
         updateGameState({ currentPhase: 'TURN_TRANSITION' });

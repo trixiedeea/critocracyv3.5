@@ -186,7 +186,7 @@ function setupEventListeners() {
     // --- Game Board Buttons ---
     gameBoard.endTurnButton.addEventListener('click', () => {
         console.log("End Turn button clicked.");
-        gameBoard.endTurnButton.classList.remove('pulse');
+        gameBoard.endTurnButton.classList.remove('shake');
         advanceToNextPlayer();
     });
     // Dice Roll
