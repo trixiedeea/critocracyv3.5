@@ -177,6 +177,7 @@ export function updatePlayerResources(playerId, resources) {
     if (!playerId || !resources) return;
     _state.playerResources[playerId] = JSON.parse(JSON.stringify(resources));
     notifySubscribers();
+    
 }
 
 // ===== State Setters =====

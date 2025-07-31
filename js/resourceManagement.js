@@ -3,6 +3,7 @@
 
 import { 
   getPlayers, 
+  updatePlayerResources,
 } from './players.js';
 
 import { 
@@ -10,8 +11,7 @@ import {
   processEndPlayerTurn,
 } from './game.js';
 
-import { 
-  updatePlayerResources, 
+import {
   updateGameState,
   getCurrentPlayer,
   isActionAllowed
