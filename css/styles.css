@@ -1306,8 +1306,6 @@ dialog.popover::backdrop {
     justify-content: center;
     align-items: center;
     width: 100%;
-
-
 }
 
 .popover-Container {
@@ -1474,6 +1472,41 @@ canvas {
 
 canvas:focus {
     outline: none !important;
+}
+
+.role-Card-Popover {
+    display: flexbox;
+    background-color: rgba(203, 205, 175, 0.9);
+    padding: 0.5em;
+    justify-content: center;
+    align-items: center;
+    border-radius: 0.3cm;
+    color: #fff;
+    width:90%;
+}
+
+.steal-target-button {
+  background-color:inherit;
+  padding: 10px;
+  border-radius:5px;
+  justify-content: center;
+  cursor: pointer;
+  margin: 5%;
+  align-items: center;
+  color:white;
+}
+
+.player-Popover {
+  display: flexbox;
+  position: relative;
+  justify-content: space-between;
+  background-color: rgb(32, 134, 145);
+  padding: 10px;
+  border-radius: 10px;
+  margin:10px;
+  color: white;
+  align-items: center;
+
 }
 
 

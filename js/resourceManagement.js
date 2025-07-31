@@ -905,20 +905,7 @@ export async function showStealPopover(effect, currentPlayer, validTargets, dela
   console.log('---------showStealPopover---------');
   
   return new Promise((resolve) => {
-    // If current player is AI, auto-choose a target after delay
-    if (!currentPlayer.isHuman) {
-      setTimeout(async () => {
-        const randomIndex = Math.floor(Math.random() * validTargets.length);
-        const target = validTargets[randomIndex];
-        const rate = await getResistanceRate(target, effect.resource);
-        const actualAmount = Math.floor(effect.amount * rate);
-        await handleStealEffect(effect, target, currentPlayer, actualAmount);
-        resolve();
-      }, delayMs);
-      return;
-    }
-
-    // Human player - use existing HTML popover
+    // Use existing HTML popover for both human and AI players
     const popover = document.getElementById('steal-Popover');
     const optionsContainer = document.getElementById('player-Choice-Options');
     
@@ -931,23 +918,16 @@ export async function showStealPopover(effect, currentPlayer, validTargets, dela
     // Clear existing buttons
     optionsContainer.innerHTML = '';
     
-    // Create button for each valid target with role token images
+    // Create button for each valid target
     validTargets.forEach(target => {
       const button = document.createElement('button');
       button.className = 'steal-target-button';
-      
-      // Create role token image
-      const tokenImg = document.createElement('img');
-      tokenImg.src = `../assets/tokens/${target.role.toLowerCase()}-token.png`;
-      tokenImg.alt = `${target.name} (${target.role})`;
-      tokenImg.className = 'role-token-image';
       
       // Add player name text
       const nameText = document.createElement('span');
       nameText.textContent = target.name;
       nameText.className = 'player-name-text';
       
-      button.appendChild(tokenImg);
       button.appendChild(nameText);
       
       // Add click listener that calls handleStealEffect
@@ -955,11 +935,11 @@ export async function showStealPopover(effect, currentPlayer, validTargets, dela
         const rate = await getResistanceRate(target, effect.resource);
         const isResistant = rate < 1;
         const actualAmount = Math.floor(effect.amount * rate);
-
+        
         const confirmText = isResistant
           ? `${target.name} is resistant to ${effect.resource}. You'll only steal ${actualAmount} instead of ${effect.amount}. Proceed?`
           : `Steal ${effect.amount} ${effect.resource} from ${target.name}?`;
-
+        
         if (confirm(confirmText)) {
           popover.close();
           await handleStealEffect(effect, target, currentPlayer, actualAmount);
@@ -972,6 +952,50 @@ export async function showStealPopover(effect, currentPlayer, validTargets, dela
     
     // Show the popover
     popover.showModal();
+    
+    // If current player is human, wait for user interaction
+    if (currentPlayer.isHuman) {
+      return;
+    }
+    
+    // AI player logic - auto-choose a target after delay with animation
+    setTimeout(async () => {
+      const randomIndex = Math.floor(Math.random() * validTargets.length);
+      const targetButton = optionsContainer.children[randomIndex];
+      
+      if (targetButton) {
+        // Apply CSS animation to the selected button
+        targetButton.style.transition = 'transform 0.1s ease-in-out';
+        
+        // Animation sequence: 1.0 -> 0.9 -> 0.8 -> 0.9 -> 1.0 over 1.5 seconds
+        setTimeout(() => {
+          targetButton.style.transform = 'scale(0.9)';
+        }, 100);
+        
+        setTimeout(() => {
+          targetButton.style.transform = 'scale(0.8)';
+        }, 200);
+        
+        setTimeout(() => {
+          targetButton.style.transform = 'scale(0.9)';
+        }, 300);
+        
+        setTimeout(() => {
+          targetButton.style.transform = 'scale(1.0)';
+        }, 400);
+        
+        // Wait 0.5 seconds after animation completes, then execute
+        setTimeout(async () => {
+          const target = validTargets[randomIndex];
+          const rate = await getResistanceRate(target, effect.resource);
+          const actualAmount = Math.floor(effect.amount * rate);
+          
+          popover.close();
+          await handleStealEffect(effect, target, currentPlayer, actualAmount);
+          resolve();
+        }, 900); // Total: 500ms delay + 400ms animation + 500ms after = 1400ms
+      }
+    }, delayMs + 500); // 0.5 seconds before animation starts
   });
 }
 
