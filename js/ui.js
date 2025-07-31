@@ -201,7 +201,7 @@ function setupEventListeners() {
     });
   
     popovers.showCardDetailsButton?.addEventListener('click', () => {
-        console.log('---------showCardDetailsButton clicked---------');
+        console.log('=============showCardDetailsButton clicked=============');
         if (popovers.cardEffects) {
             const currentDisplay = popovers.cardEffects.style.display;
             popovers.cardEffects.style.display = currentDisplay === 'none' ? 'block' : 'none';
@@ -215,7 +215,7 @@ function setupEventListeners() {
             button.addEventListener('click', () => {
                 // Clear deck highlights
                 clearDeckHighlights();
-                console.log('--------closeAgeCardButtons clicked---------')
+                console.log('--------closeAgeCardButtons clicked=============')
                 
                 // Close the dialog
                 const dialog = button.closest('dialog');
@@ -277,7 +277,7 @@ function setupEventListeners() {
  * @param {Object} player - Optional player object for programmatic calls
  */
 export function handleCanvasCardClick(event, coords = null, player = null) {
-    console.log('---------handleCanvasCardClick---------');
+    console.log('=============handleCanvasCardClick=============');
     const { boardCanvas } = state.ui.elements.gameBoard;
     
     // Use provided player or get current player
@@ -332,7 +332,7 @@ export function handleCanvasCardClick(event, coords = null, player = null) {
     } else {
         console.log(`No valid deck region clicked at coordinates (${boardX}, ${boardY})`);
     }
-    console.log('---------handleCanvasCardClick END---------');
+    console.log('=============handleCanvasCardClick END=============');
 };
 
 // --- UI Update Functions ---
@@ -342,7 +342,7 @@ export function handleCanvasCardClick(event, coords = null, player = null) {
  * @param {string|Object} playerId - The ID of the player to display, or a player object.
  */
 export function updatePlayerInfo(playerId) {
-    console.log('--------updatePlayerInfo---------')
+    console.log('--------updatePlayerInfo=============')
     //console.log('[UI] updatePlayerInfo called with:', playerId);
     
     try {
@@ -426,7 +426,8 @@ export function updatePlayerInfo(playerId) {
         // Force a reflow to ensure the UI updates
         void currentPlayer.offsetHeight;
         
-        //console.log(`[UI] Successfully updated UI for ${player.name}'s turn`);
+        console.log(`[UI] Successfully updated UI for ${player.name}'s turn`);
+        console.log('=============updatePlayerInfo END=============');
         
     } catch (error) {
         console.error('Error in updatePlayerInfo:', error);
@@ -458,7 +459,7 @@ export function promptForPathChoice(pathOptions, player, aiChosenOption = null) 
         currentPhase: 'AWAITING_PATH_CHOICE'
     });
 
-    console.log('---------promptForPathChoice---------');
+    console.log('=============promptForPathChoice=============');
     //console.log('Path options:', pathOptions);
     console.log('Player:', player);
     
@@ -602,11 +603,11 @@ export function promptForPathChoice(pathOptions, player, aiChosenOption = null) 
             console.error('Failed to show modal:', err);
         }
     }
-    console.log('---------promptForPathChoice END---------');
+    console.log('=============promptForPathChoice END=============');
 };
 
 export function promptForChoicepoint(options, onChoice, delayMs = 3000) {
-    console.log('---------promptForChoicepoint---------');
+    console.log('=============promptForChoicepoint=============');
     if (!isActionAllowed('promptForChoicepoint')) return;
     updateGameState({ currentPhase: 'AWAITING_PATH_CHOICE' });
     updateUIState({ currentPhase: 'AWAITING_PATH_CHOICE' });
@@ -696,10 +697,11 @@ export function promptForChoicepoint(options, onChoice, delayMs = 3000) {
             setTimeout(animateScale, delayMs);
         }
     }
-    console.log('---------promptForChoicepoint END---------');
+    console.log('=============promptForChoicepoint END=============');
 }
   
 export function updateGameControls() {
+    console.log('=============updateGameControls=============');
     const player = getCurrentPlayer();
     let rollEnabled = false;
     let endTurnEnabled = false;
@@ -740,13 +742,14 @@ export function updateGameControls() {
     }
 
     console.log(`UI Controls Updated: Roll=${rollEnabled}, EndTurn=${endTurnEnabled}, Phase=${state.currentPhase}`);
+    console.log('=============updateGameControls END=============');
 };
         
 /**
  * Update player's resource panel with current values.
  */
 export function updateResourceDisplayContainer(player) {
-    console.log('---------updateResourceDisplayContainer---------');
+    console.log('=============updateResourceDisplayContainer=============');
     // Try to find (or freshly create) the panel again
     const panelUpdated = document.getElementById(`resource-Display-Container-${player.id}`);
     if (!panelUpdated) {
@@ -764,7 +767,7 @@ export function updateResourceDisplayContainer(player) {
    * Flash a feedback animation near the resource panel for the player
    */
 export function showResourceChangeFeedback(playerId, resourceType, amount) {
-    console.log('---------showResourceChangeFeedback---------');
+    console.log('=============showResourceChangeFeedback=============');
     const panel = document.getElementById(`resource-Display-Container-${playerId}`);
     if (!panel) return;
   

@@ -65,7 +65,7 @@ const DEBUG_MODE = false;
  * @param {boolean} [options.debugMode=false] - Enable debug mode
  */
 export function startGame(playerConfigs, turnOrder, { debugMode = false } = {}) {
-    console.log('---------startGame---------');
+    console.log('=============startGame=============');
     console.log('[Game] startGame called with:', { playerConfigs, turnOrder, debugMode });
     
     if (!playerConfigs || !turnOrder || playerConfigs.length === 0 || turnOrder.length === 0) {
@@ -207,7 +207,7 @@ export async function initGame() {
  * Gets the player object whose turn it currently is.
  */
 export function getCurrentPlayer() {
-   // console.log('---------getCurrentPlayer---------');
+   // console.log('=============getCurrentPlayer=============');
     // If players array is empty or invalid, return null
     if (!Array.isArray(state.players) || state.players.length === 0) {
         console.warn("No players available");
@@ -228,7 +228,7 @@ export const rollResult = state.rollResult;
 
 export async function handlePlayerAction() {
     if (!isActionAllowed('handlePlayerAction')) return;
-    console.log('-----------handlePlayerAction-----------')
+    console.log('=============--handlePlayerAction=============--')
     updateGameState({
         currentPhase: 'PLAYING'
     });
@@ -329,9 +329,8 @@ export async function handlePlayerAction() {
 };
 
 export function handlePathChoice(chosenCoords, chosenPath) {
-    console.log('--------- handlePathChoice ---------');
+    console.log('============= handlePathChoice =============');
     if (!isActionAllowed('handlePathChoice')) return;
-    console.log('--------- handlePathChoice ---------');
   
     const player = getCurrentPlayer();
     if (!player) {
@@ -374,7 +373,7 @@ export async function handleEndOfMove(completionData = { reason: 'unknown', step
         currentPhase: 'AWAITING_CARD_ACTION',
     });
     console.warn('game state updated to AWAITING_CARD_ACTION')
-    console.log('---------handleEndOfMove---------');
+    console.log('=============handleEndOfMove=============');
     console.log(`Player ${player.name} completed movement to coords:`, player.currentCoords);
 
     const spaceDetails = findSpaceDetailsByCoords(player.currentCoords);
@@ -457,7 +456,7 @@ export async function handleEndOfMove(completionData = { reason: 'unknown', step
  * @param {string} pathName - The path name the player is on (e.g., 'Age of Resistance Path')
  */
 export async function handleSpaceAction(player, spaceType, pathName) {
-    console.log('---------handleSpaceAction---------');
+    console.log('=============handleSpaceAction=============');
     console.log(`Handling space type: ${spaceType}, pathName: ${pathName}, player: ${player.name}`);
   
     if (preventAgeCardDraw) {
@@ -520,7 +519,7 @@ export function handleEndTurn() {
         console.log('handleEndTurn action not allowed');
         return;
     }
-    console.log('---------handleEndTurn---------');
+    console.log('=============handleEndTurn=============');
   
     const player = getCurrentPlayer();
     if (!player) {
@@ -576,7 +575,7 @@ export function processEndPlayerTurn() {
         console.log('processEndPlayerTurn action not allowed');
         return;
     }
-    console.log('---------processEndPlayerTurn---------');
+    console.log('=============processEndPlayerTurn=============');
     
     try {
         // Discard the current card with proper deck type
@@ -682,7 +681,7 @@ state.aiTurnInProgress = state.aiTurnInProgress || false;
  */
 export function handleAITurn(aiPlayer) {
     if (!isActionAllowed('handleAITurn')) return;
-    console.log('---------handleAITurn---------');
+    console.log('=============handleAITurn=============');
     
     // Debug guard: detect if player is both isHuman and isAI or has both properties
     if (aiPlayer.isHuman) {
@@ -731,7 +730,7 @@ export function handleAITurn(aiPlayer) {
  */
 export function simulateCpuChoicepoint(player) {
     if (!isActionAllowed('simulateCpuChoicepoint')) return;
-    console.log('---------simulateCpuChoicepoint---------');
+    console.log('=============simulateCpuChoicepoint=============');
     console.log(`[AI] Simulating path choice choice for ${player.name} in phase: ${state.currentPhase}`);
     updateGameState({ currentPhase: 'AWAITING_PATH_CHOICE' });
     console.warn('gamestate updated to AWAITING_PATH_CHOICE');
@@ -924,7 +923,7 @@ export function simulateCpuChoicepoint(player) {
  * Handles skipping finished players and looping back.
  */
 export async function advanceToNextPlayer() {
-    console.log("----------- advance To Next Player ------------");
+    console.log("=============-- advance To Next Player =============---");
     
     // Normal game flow for non-debug mode
     if (state.currentPlayerIndex === state.totalPlayerCount - 1) {

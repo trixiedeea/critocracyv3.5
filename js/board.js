@@ -50,7 +50,7 @@ export const boardState = {
  * @returns {object|null} - The path object or null if not found.
  */
 export function findPathForCoordinate(coords) {
-   // console.log('---------findPathForCoordinate---------');
+   // console.log('=============findPathForCoordinate=============');
     const allPaths = {
         ageOfExpansion: ageOfExpansionPath,
         ageOfResistance: ageOfResistancePath,
@@ -77,7 +77,7 @@ export function findPathForCoordinate(coords) {
  * @returns {object} - An object { destination, reason, remainingSteps }.
  */
 export function calculateDestination(startCoords, steps) {
-    console.log('---------calculateDestination---------');
+    console.log('=============calculateDestination=============');
     let currentCoords = { ...startCoords };
     let remainingSteps = steps;
     let stepsTaken = 0;
@@ -175,7 +175,7 @@ export function unscaleCoordinates(x, y) {
  * Loads player token images.
 */
 export async function loadTokenImages() {
-    console.log('---------loadTokenImages---------');
+    console.log('=============loadTokenImages=============');
     const roles = ['H', 'E', 'A', 'P', 'R', 'C']; // Example roles
     const promises = roles.map(role => new Promise((resolve, reject) => {
         const img = new Image();
@@ -212,7 +212,7 @@ function drawCardRectangles() {
     // Set global alpha for transparency
     ctx.globalAlpha = 0.3; // 50% transparency
     ctx.strokeStyle = "#000000";
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 0.1;
     
     // Gold rectangles for End of Turn cards
     ctx.fillStyle = "Gold"; // Gold color
@@ -250,6 +250,7 @@ function drawCardRectangles() {
     
     // Pink card rectangle
     ctx.fillStyle = "Pink"; // Pink hex color
+    ctx.globalAlpha = 0.5; // Make it more opaque than other cards
     ctx.beginPath();
     ctx.moveTo(692, 254);
     ctx.lineTo(804, 254);
@@ -272,7 +273,7 @@ function drawCardRectangles() {
     
     // Cyan card rectangle
     ctx.fillStyle = "Cyan";
-    ctx.globalAlpha = 0.4; // Make it more opaque than other cards
+    ctx.globalAlpha = 0.3; // Make it more opaque than other cards
     ctx.beginPath();
     ctx.moveTo(693, 699);
     ctx.lineTo(803, 699);
@@ -309,7 +310,7 @@ function drawCardRectangles() {
 };
 
 export function findSpaceDetailsByCoords(targetCoords, tolerance = 5, player = null) {
-   // console.log('---------findSpaceDetailsByCoords---------');
+   // console.log('=============findSpaceDetailsByCoords=============');
     console.log('Searching for coords:', targetCoords);
   
     if (!targetCoords || typeof targetCoords.x !== 'number' || typeof targetCoords.y !== 'number') {
@@ -418,7 +419,7 @@ export function findSpaceDetailsByCoords(targetCoords, tolerance = 5, player = n
 };
 
 function updateSpaceInState(space, coords) {
- //   console.log('---------updateSpaceInState---------');
+ //   console.log('=============updateSpaceInState=============');
     gameState.currentPath = space.pathName;
     gameState.currentCoords = coords;
     gameState.pathColorKey = space.pathColor;
@@ -429,7 +430,7 @@ function updateSpaceInState(space, coords) {
  * Determines the next coordinate options based on the current coordinates.
  */
 export function getNextStepOptions(currentCoords) {
-   // console.log("---------getNextStepOptions---------");
+   // console.log("=============getNextStepOptions=============");
     console.log(`PATH DEBUG: Finding next step from (${currentCoords.x}, ${currentCoords.y})`);
     
     // Find current space details
@@ -787,7 +788,7 @@ export function drawTokens() {
         token.style.transform = `translate(${scaledX}px, ${scaledY}px)`;
 
         function updateAllTokenPositions() {
-            //console.log('-----------------updateAllTokenPositions-----------------');
+            //console.log('=============--------updateAllTokenPositions=============--------');
             const tokens = document.querySelectorAll('.token');
           
             tokens.forEach(token => {

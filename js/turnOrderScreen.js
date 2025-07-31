@@ -43,13 +43,13 @@ window.turnOrderUI.initTurnOrderScreen = function(playerConfigs) {
     turnOrderGridContainer.classList.add("hidden");
     startGameButton.classList.add("hidden");
 
-    console.log('[TurnOrder] UI elements initialized and displayed');
+   // console.log('[TurnOrder] UI elements initialized and displayed');
     renderTurnOrderUI();
 };
 
 async function handleTurnOrderRoll() {
     if (window.turnOrderUI.isRolling || window.turnOrderUI.hasCompletedRolls) {
-        console.log('[TurnOrder] Roll skipped - isRolling:', window.turnOrderUI.isRolling, 'hasCompletedRolls:', window.turnOrderUI.hasCompletedRolls);
+       // console.log('[TurnOrder] Roll skipped - isRolling:', window.turnOrderUI.isRolling, 'hasCompletedRolls:', window.turnOrderUI.hasCompletedRolls);
         return;
     }
 
@@ -58,7 +58,7 @@ async function handleTurnOrderRoll() {
     if (!players || idx >= players.length) return;
 
     const player = players[idx];
-    console.log('[TurnOrder] Processing roll for player:', { id: player.id, name: player.name, index: idx });
+   // console.log('[TurnOrder] Processing roll for player:', { id: player.id, name: player.name, index: idx });
 
     window.turnOrderUI.isRolling = true;
 
@@ -89,11 +89,11 @@ async function handleTurnOrderRoll() {
     }
     // Add the new class to trigger the rotation.
     dice.classList.add(`show-${roll}`);
-    console.log(`[TurnOrder] Showing face ${roll} by rotating the dice.`);
+    //console.log(`[TurnOrder] Showing face ${roll} by rotating the dice.`);
 
     // Store roll result
     window.turnOrderUI.diceResult[player.id] = roll;
-    console.log('[TurnOrder] Roll result:', { playerId: player.id, roll });
+   // console.log('[TurnOrder] Roll result:', { playerId: player.id, roll });
 
     // Update UI with roll number
     const rollCell = document.getElementById(`roll-cell-${player.id}`);
@@ -109,22 +109,22 @@ async function handleTurnOrderRoll() {
     window.turnOrderUI.currentRollIndex++;
     window.turnOrderUI.isRolling = false;
 
-    console.log('[TurnOrder] Roll completed, current index:', window.turnOrderUI.currentRollIndex);
+   // console.log('[TurnOrder] Roll completed, current index:', window.turnOrderUI.currentRollIndex);
 
     // Move to next player or finalize turn order
     if (window.turnOrderUI.currentRollIndex < players.length) {
         if (!players[window.turnOrderUI.currentRollIndex].isHuman) {
-            console.log('[TurnOrder] Auto-rolling for next AI player');
+           // console.log('[TurnOrder] Auto-rolling for next AI player');
             handleTurnOrderRoll();
         }
     } else {
-        console.log('[TurnOrder] All players have rolled, finalizing order');
+       // console.log('[TurnOrder] All players have rolled, finalizing order');
         finalizeTurnOrder();
     }
 }
 
 function renderTurnOrderUI() {
-    console.log('[TurnOrder] Rendering turn order UI');
+   // console.log('[TurnOrder] Rendering turn order UI');
     
     const table = document.getElementById("turn-Order-Table");
     const tbody = document.getElementById("turn-Order-Table-Body");
@@ -152,7 +152,7 @@ function renderTurnOrderUI() {
         newTbody.appendChild(row);
     });
     
-    console.log('[TurnOrder] Rendered player table with', window.turnOrderUI.players.length, 'players');
+    //console.log('[TurnOrder] Rendered player table with', window.turnOrderUI.players.length, 'players');
     
     dice.style.display = "block";
     dice.classList.remove("rolling");
@@ -163,14 +163,14 @@ function renderTurnOrderUI() {
     const startGameButton = document.getElementById("start-Game-Button");
     if (startGameButton) {
         startGameButton.onclick = window.turnOrderUI.handleStartGame;
-        console.log('[TurnOrder] Start game button initialized');
+    
     } else {
-        console.log('[TurnOrder] Start game button not found');
+       
     }
 }
 
 function finalizeTurnOrder() {
-    console.log('[TurnOrder] Finalizing turn order');
+    //console.log('[TurnOrder] Finalizing turn order');
     
     const sorted = [...window.turnOrderUI.players].sort((a, b) => {
         const rollA = window.turnOrderUI.diceResult[a.id] || 0;
@@ -205,7 +205,7 @@ function finalizeTurnOrder() {
     document.getElementById("start-Game-Button").classList.remove("hidden");
 
     window.turnOrderUI.hasCompletedRolls = true;
-    console.log('[TurnOrder] Turn order finalized and UI updated');
+    //console.log('[TurnOrder] Turn order finalized and UI updated');
 }
 
 // Start game handler

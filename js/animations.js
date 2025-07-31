@@ -66,7 +66,7 @@ export const TIMING = {
  * @param {Function} callback - Callback function with current value
  */
 export const animateValue = (start, end, duration, callback) => {
-   // console.log('-----------------animateValue-----------------');
+   // console.log('=============--------animateValue=============--------');
     const startTime = performance.now();
     
     const update = (currentTime) => {
@@ -110,7 +110,7 @@ export const animateValue = (start, end, duration, callback) => {
  */
 export const animateDiceRoll = async (diceElement, finalValue, duration = 1500) => {
   if (!isActionAllowed('AWAITING_CARD_ACTION', 'AWAITING_PATH_CHOICE', 'PLAYING')) return;
-  console.log('---------animateDiceRoll---------');
+  console.log('=============animateDiceRoll=============');
 
   const player = getCurrentPlayer();
 
@@ -177,7 +177,7 @@ export const animateDiceRoll = async (diceElement, finalValue, duration = 1500) 
  * @returns {Array} Array of coordinates representing the path
  */
 export function getPathSegments(start, end, pathData) {
-   // console.log('---------getPathSegments---------');
+   // console.log('=============getPathSegments=============');
     // Find the closest segment to start
     let startSegment = null;
     let minStartDist = Infinity;
@@ -239,7 +239,7 @@ export function getPathSegments(start, end, pathData) {
 };
   
 export const ensurePlayerPath = (player) => {
-   // console.log('---------ensurePlayerPath---------');
+   // console.log('=============ensurePlayerPath=============');
     if (!player.currentPath) {
       player.currentPath = 'ageOfLegacyPath'; // or default based on your game state
     }
@@ -255,7 +255,7 @@ export const ensurePlayerPath = (player) => {
  * @param {function|null} onComplete - Callback after animation finishes.
  */
 export function animateTokenToPosition(player, newPosition, duration = 1000, skipSpaceAction = false, onComplete = null) {
-  console.log(`----------animateTokenToPosition---------: ${player.name} moving ${state.rollResult} spaces -----------`);
+  console.log(`=============-animateTokenToPosition=============: ${player.name} moving ${state.rollResult} spaces =============--`);
   player = getCurrentPlayer();
   const rollResult = state.rollResult;
   updateGameState({
@@ -294,7 +294,7 @@ export function animateTokenToPosition(player, newPosition, duration = 1000, ski
 
     // Function to search for a coordinate across all paths with tolerance
     const findPathByChosenCoord = (chosenCoord, tolerance = 5) => {
-      console.log('-----------------findPathByChosenCoord-----------------');
+      console.log('=============--------findPathByChosenCoord=============--------');
       for (const path of paths) {
         for (const segment of path.segments) {
           const segCoord = segment.coordinates?.[0];
@@ -315,7 +315,7 @@ export function animateTokenToPosition(player, newPosition, duration = 1000, ski
     const animatePosition = (element, start, end, duration = 1000) => {
       return new Promise(resolve => {
         const startTime = performance.now();
-        //console.log('-----------------animatePosition-----------------');
+        //console.log('=============--------animatePosition=============--------');
       
         const update = (currentTime) => {
           const elapsed = currentTime - startTime;
@@ -344,7 +344,7 @@ export function animateTokenToPosition(player, newPosition, duration = 1000, ski
     
 
     async function animateNextSegment() {
-      //console.log('-----------------animateNextSegment-----------------')
+      //console.log('=============--------animateNextSegment=============--------')
       if (remainingSteps <= 0) {
         // Movement complete
         //console.log(`[DEBUG] Movement complete. Final position: ${JSON.stringify(currentCoord)}`);
@@ -470,7 +470,7 @@ export function animateTokenToPosition(player, newPosition, duration = 1000, ski
  * Clears all highlights including deck highlights and move highlights
  */
 export function clearHighlights() {
-    //console.log('---------clearHighlights---------');
+    //console.log('=============clearHighlights=============');
     // Clear deck highlights
     clearDeckHighlights();
     
@@ -495,7 +495,7 @@ document.addEventListener('DOMContentLoaded', () => {
 export let diceShakeInterval = null;
 
 export function startDiceShake() {
-    //console.log('---------startDiceShake---------');
+    //console.log('=============startDiceShake=============');
     const dice = document.getElementById('dice');
     if (!dice) return;
     
@@ -519,7 +519,7 @@ export function startDiceShake() {
  * Stops the dice shake animation
  */
 export function stopDiceShake() {
-    //console.log('---------stopDiceShake---------');
+    //console.log('=============stopDiceShake=============');
     const dice = document.getElementById('dice');
     if (!dice) return;
     
@@ -576,7 +576,7 @@ export function animateCardDiscard(cardElement, onComplete) {
  */
 export function highlightDeckRegions(player, deckType, positions, duration = 3000) {
   return new Promise((resolve) => {
-    console.log('---------highlightDeckRegions---------')
+    console.log('=============highlightDeckRegions=============')
     //console.log('Highlighting deck regions for player:', player.name, 'deckType:', deckType, 'positions:', positions);
 
     const canvas = state.board?.Canvas || state.board?.canvas;
@@ -739,7 +739,7 @@ export function highlightDeckRegions(player, deckType, positions, duration = 300
  * Clears all active canvas-based deck highlights without affecting tokens.
  */
 export function clearDeckHighlights() {
- // console.log('---------clearDeckHighlights---------');
+ // console.log('=============clearDeckHighlights=============');
 
   // Clear all highlight data
   if (state.ui.dynamic?.deckHighlights) {

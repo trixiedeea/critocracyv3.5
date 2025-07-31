@@ -88,7 +88,7 @@ function isValidResource(resource) {
 // Helper function to get multiplier for a resource
 // Takes into account player role and resource type
 export async function getMultiplier(resource, isGain) {
-  console.log('---------getMultiplier---------');
+  console.log('=============getMultiplier=============');
   const player = getCurrentPlayer();
   if (!player?.role) {
     console.warn(`getMultiplier: No current player or role for ${resource} (${isGain ? 'gain' : 'loss'})`);
@@ -106,7 +106,7 @@ export async function getMultiplier(resource, isGain) {
     : (roleMultipliers.loss[role]?.[resource] || 1);
     
   console.log(`[MULTIPLIER] ${player.name}'s ${isGain ? 'gain' : 'loss'} multiplier for ${resource}: ${multiplier}x (${player.role})`);
-  console.log('---------getMultiplier END---------');
+  console.log('=============getMultiplier END=============');
   return multiplier;
 }
 
@@ -117,7 +117,7 @@ export async function getMultiplier(resource, isGain) {
  * @returns {number} The resistance multiplier (1 = no resistance)
  */
 export async function getResistanceRate(targetPlayer, resource) {
-  //console.log('---------getResistanceRate---------');
+  //console.log('=============getResistanceRate=============');
   
   if (!targetPlayer?.role) {
     console.warn(`getResistanceRate: No target player or role for ${resource}`);
@@ -130,7 +130,7 @@ export async function getResistanceRate(targetPlayer, resource) {
   const resistance = resistanceRates[role]?.[resourceLower] || 1;
   
   console.log(`[RESISTANCE] ${targetPlayer.name}'s resistance to ${resource} loss: ${resistance}x (${targetPlayer.role})`);
-  console.log('---------getResistanceRate END---------');
+  console.log('=============getResistanceRate END=============');
   return resistance;
 }
 
@@ -143,7 +143,7 @@ export async function getResistanceRate(targetPlayer, resource) {
 export function applyCardEffect(card) {
   updateGameState({ currentPhase: 'PLAYING' });
   if (!isActionAllowed('AWAITING_PATH_CHOICE', 'ROLLING', 'TURN_TRANSITION')) return;
-  console.log('---------applyCardEffect---------');
+  console.log('=============applyCardEffect=============');
   console.log('Full card object received:', JSON.stringify(card, null, 2));
 
   const player = getCurrentPlayer();
@@ -217,7 +217,7 @@ export function applyCardEffect(card) {
     });
     console.warn('game phase updated to PLAYING');
       // Call processEndPlayerTurn after applying effects
-      console.log('---------applyCardEffect END---------');
+      console.log('=============applyCardEffect END=============');
       processEndPlayerTurn();
       return;
   }
@@ -227,7 +227,7 @@ export function applyCardEffect(card) {
       card.effects.forEach(effect => processCardEffects(effect, player));
       
       // Call processEndPlayerTurn after applying effects
-      console.log('---------applyCardEffect END---------');
+      console.log('=============applyCardEffect END=============');
       processEndPlayerTurn();
       return;
   }
@@ -236,14 +236,14 @@ export function applyCardEffect(card) {
   console.log(`Card "${card.name}" effects has an unexpected format:`, card.effects);
   
   // Call processEndPlayerTurn even if effects format is unexpected
-  console.log('---------applyCardEffect END---------');
+  console.log('=============applyCardEffect END=============');
   processEndPlayerTurn();
 };
 
 export async function applyAgeCardEffect(card, optionName = null, playerId) {
   if (!isActionAllowed('AWAITING_PATH_CHOICE', 'ROLLING', 'TURN_TRANSITION')) return;
   updateGameState({ currentPhase: 'PLAYING' });
-  console.log('---------applyAgeCardEffect---------')
+  console.log('=============applyAgeCardEffect=============')
   console.log('Card:', card.name);
   console.log('Option:', optionName);
   
@@ -259,7 +259,7 @@ export async function applyAgeCardEffect(card, optionName = null, playerId) {
     effects = card.choice?.[optionName]?.effects;
     if (!effects || !Array.isArray(effects)) {
       console.warn(`No effects array found for option ${optionName}:`, card.choice?.[optionName]);
-      console.log('---------applyAgeCardEffect END---------')
+      console.log('=============applyAgeCardEffect END=============')
       await processAgeCardEffects(card, []);
       return;
     }
@@ -267,7 +267,7 @@ export async function applyAgeCardEffect(card, optionName = null, playerId) {
     effects = card.effects;
     if (!effects || !Array.isArray(effects)) {
       console.warn('No effects array found on card:', card);
-      console.log('---------applyAgeCardEffect END---------')
+      console.log('=============applyAgeCardEffect END=============')
       await processAgeCardEffects(card, []);
       return;
     }
@@ -347,7 +347,7 @@ export async function applyAgeCardEffect(card, optionName = null, playerId) {
 }
 
 export async function applyResourceChange(resourceType, amount, source, playerId) {
-  console.log('---------applyResourceChange---------')
+  console.log('=============applyResourceChange=============')
   
   const player = getCurrentPlayer(playerId);
   if (!player) {
@@ -439,7 +439,7 @@ export async function applyResourceChange(resourceType, amount, source, playerId
   }
 
   console.log(`[RESOURCE] Chain completed: ${player.name} ${isGain ? 'gained' : 'lost'} ${Math.abs(adjustedAmount)} ${resourceType}`);
-  console.log('---------applyResourceChange END---------');
+  console.log('=============applyResourceChange END=============');
 
   return logEntry;
 }
@@ -452,7 +452,7 @@ export async function applyResourceChange(resourceType, amount, source, playerId
  * @returns {Array} List of valid targets
  */
 export function getValidStealTargets(currentPlayer, players, cardEffect) {
-  console.log('---------getValidStealTargets---------');
+  console.log('=============getValidStealTargets=============');
   
   const validTargets = players.filter(p => {
     // Can't steal from self
@@ -500,7 +500,7 @@ const resourceLog = [];
  * Log every change with full metadata
  */
 export function logChange({ resourceType, baseAmount, adjustedAmount, source, actionType }) {
-  console.log('---------logChange---------');
+  console.log('=============logChange=============');
   const player = getCurrentPlayer();
   if (!player) {
     console.error('logChange: No current player found');
@@ -532,7 +532,7 @@ export function logChange({ resourceType, baseAmount, adjustedAmount, source, ac
  * @returns {Promise} Resolves when movement is complete
  */
 export async function handleCardMovement(effect) {
-  console.log('---------handleCardMovement---------')
+  console.log('=============handleCardMovement=============')
   
   const player = getCurrentPlayer();
   if (!player) {
@@ -611,7 +611,7 @@ export async function handleCardMovement(effect) {
 
       // Function to search for a coordinate across all paths with tolerance
       const findPathByChosenCoord = (chosenCoord, tolerance = 5) => {
-        console.log('-----------------findPathByChosenCoord-----------------');
+        console.log('=============--------findPathByChosenCoord=============--------');
         for (const path of paths) {
           for (const segment of path.segments) {
             const segCoord = segment.coordinates?.[0];
@@ -843,7 +843,7 @@ export async function handleCardResourceEffect({
   amount,
   source = 'cardEffect'
 }) {
-  console.log('---------handleCardResourceEffect---------');
+  console.log('=============handleCardResourceEffect=============');
   if (!isValidResource(resourceType)) {
     console.error(`Invalid resource type in card effect: ${resourceType}`);
     return;
@@ -897,12 +897,12 @@ export async function handleCardResourceEffect({
  * Returns deep copy of the full log
  */
 export function getResourceLog() {
-  console.log('---------getResourceLog---------');
+  console.log('=============getResourceLog=============');
   return JSON.parse(JSON.stringify(resourceLog));
 }
 
 export async function showStealPopover(effect, currentPlayer, validTargets, delayMs = 5000) {
-  console.log('---------showStealPopover---------');
+  console.log('=============showStealPopover=============');
   
   return new Promise((resolve) => {
     // Use existing HTML popover for both human and AI players
@@ -1000,7 +1000,7 @@ export async function showStealPopover(effect, currentPlayer, validTargets, dela
 }
 
 export async function applyStealEffect(effect, sourcePlayer) {
-  console.log('---------applyStealEffect---------');
+  console.log('=============applyStealEffect=============');
   console.log(`Starting steal chain: applyStealEffect → getValidStealTargets → showStealPopover → handleStealEffect`);
   
   try {
@@ -1020,12 +1020,12 @@ export async function applyStealEffect(effect, sourcePlayer) {
     console.error('Error in applyStealEffect:', error);
   }
   
-  console.log('---------applyStealEffect END---------');
+  console.log('=============applyStealEffect END=============');
 }
 
 // This function actually performs the resource transfer (called after user selects target)
 export async function handleStealEffect(effect, targetPlayer, sourcePlayer, adjustedAmount) {
-  console.log('---------handleStealEffect---------');
+  console.log('=============handleStealEffect=============');
   console.log(`${sourcePlayer.name} steals ${adjustedAmount} ${effect.resource} from ${targetPlayer.name}`);
   
   try {
@@ -1057,11 +1057,11 @@ export async function handleStealEffect(effect, targetPlayer, sourcePlayer, adju
     console.error('Error in handleStealEffect:', error);
   }
   
-  console.log('---------handleStealEffect END---------');
+  console.log('=============handleStealEffect END=============');
 }
 
 export async function handleStealFromAll(effect, sourcePlayer, allPlayers) {
-  console.log('---------handleStealFromAll---------');
+  console.log('=============handleStealFromAll=============');
   const validTargets = getValidStealTargets(sourcePlayer, allPlayers, effect);
 
   if (validTargets.length === 0) {
@@ -1094,7 +1094,7 @@ export async function handleStealFromAll(effect, sourcePlayer, allPlayers) {
  * @returns {Promise} Resolves when the skip turn is processed
  */
 export async function applySkipTurn(effect, player) {
-  console.log('---------applySkipTurn---------')
+  console.log('=============applySkipTurn=============')
   
   return new Promise((resolve) => {
     try {

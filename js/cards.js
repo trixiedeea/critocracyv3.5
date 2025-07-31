@@ -222,7 +222,7 @@ function shuffleDeck(deckType) {
  * @returns {Promise} Resolves when card is drawn and displayed
  */
 export function drawCard(deckType) {
-    console.log('---------drawCard---------');
+    console.log('=============drawCard=============');
     if (!isActionAllowed('PLAYING, MOVING, TURN_TRANSITION, AWAITING_PATH_CHOICE')) return;
         
     const player = getCurrentPlayer();
@@ -309,7 +309,7 @@ export function drawCard(deckType) {
  * @param {string} deckType - The type of deck the card belongs to
  */
 export function discardCard(card, deckType) {
-    console.log('---------discardCard---------')
+    console.log('=============discardCard=============')
     console.log(`Discarding card: ${card?.name || 'Unknown'}`);
     
     // Try to determine deck type if not provided
@@ -375,7 +375,7 @@ export function discardCard(card, deckType) {
  * @param {Function} onComplete - Callback when card is closed
  */
 export async function showCard(card) {
-    console.log('---------showCard---------')
+    console.log('=============showCard=============')
     
     // Get current player
     const player = getCurrentPlayer();
@@ -395,7 +395,7 @@ export async function showCard(card) {
     
     // Enhanced logging for deck type detection
     //console.log(`[showCard] Deck Type Analysis:`);
-    //console.log(`- deckType: ${deckType}`);
+    console.log(`- deckType: ${deckType}`);
     //console.log(`- isEndOfTurnCard: ${isEndOfTurnCard} (deckType match: ${deckType === 'endOfTurnDeck'}, card.type: ${card?.type}, card.deck: ${card?.deck})`);
     //console.log(`- isAgeDeck: ${isAgeDeck} (regex test: ${/^age-Of/i.test(deckType)})`);
     //console.log(`- Card has choice: ${!!card?.choice}`);
@@ -688,7 +688,7 @@ export async function showCard(card) {
 }
 
 function formatResourceChanges(changes) {
-    console.log('---------formatResourceChanges---------');
+    console.log('=============formatResourceChanges=============');
     const result = [];
     if (changes.money !== undefined) result.push(`${changes.money >= 0 ? '+' : ''}${changes.money}💰`);
     if (changes.knowledge !== undefined) result.push(`${changes.knowledge >= 0 ? '+' : ''}${changes.knowledge}📚`);
@@ -705,7 +705,7 @@ export function isEndOfTurnCard(card) {
 }
 
 export async function processCardEffects(card, targetPlayer = null) {
-    console.log('---------processCardEffects---------')
+    console.log('=============processCardEffects=============')
     // Use provided player or get current player
     const currentPlayer = targetPlayer || getCurrentPlayer();
     
@@ -767,12 +767,6 @@ export async function processCardEffects(card, targetPlayer = null) {
                 if (effect.changes.influence !== undefined) {
                     await applyResourceChange('influence', effect.changes.influence, 'cardEffect', currentPlayer.id);
                 }
-            } else if (effect.type === 'MOVEMENT') {
-                console.log(`Applying movement effect to ${currentPlayer.name}:`, effect);
-                handleCardMovement(currentPlayer, effect);
-            } else if (effect.type === 'SKIP_TURN') {
-                console.log(`Skipping turn for ${currentPlayer.name}`);
-                skipPlayerTurn(currentPlayer, effect.turns || 1);
             } else {
                 console.warn(`Unknown effect type: ${effect.type}`, effect);
             }
@@ -833,7 +827,7 @@ export async function processCardEffects(card, targetPlayer = null) {
     if (roleEffect.type !== 'RESOURCE_CHANGE' || !roleEffect.changes) {
         console.warn(`Effect for ${matchedRole} is not a resource change or has no changes`);
         console.log('Available effect:', roleEffect);
-        console.log('------------processCardEffects END------------')
+        console.log('=============---processCardEffects END=============---')
         updatePlayerInfo(currentPlayer);
         processEndPlayerTurn(card);
         return;
@@ -867,7 +861,7 @@ export async function processCardEffects(card, targetPlayer = null) {
     console.log(`- influence: ${changes.influence || 0}`);
     console.log(`- Explanation: ${roleEffect.explanation}`);
     
-    console.log('---------processCardEffects END---------');
+    console.log('=============processCardEffects END=============');
     // Call processEndPlayerTurn when complete, passing the card
     updatePlayerInfo(currentPlayer);
     processEndPlayerTurn(card);
@@ -880,7 +874,7 @@ export async function processCardEffects(card, targetPlayer = null) {
    * @param {Array} effects - Array of effects that were processed
    */
   export async function processAgeCardEffects(card, effects) {
-    console.log('---------processAgeCardEffects---------');
+    console.log('=============processAgeCardEffects=============');
     console.log('Validating effects for card:', card.name);
       
       // Validate that all effects were processed
@@ -926,6 +920,6 @@ export async function processCardEffects(card, targetPlayer = null) {
       // Always call handleEndTurn regardless of validation results
       updatePlayerInfo(currentPlayer);
       // This ensures the game doesn't get stuck
-      console.log('---------processAgeCardEffects END---------');
+      console.log('=============processAgeCardEffects END=============');
       handleEndTurn();
   }

@@ -206,7 +206,7 @@ export function getRandomOtherPlayer(currentPlayer) {
 }
 
 export function updatePlayerResources(player, changes) {
-   // console.log('---------updatePlayerResources players---------');
+   // console.log('=============updatePlayerResources players=============');
     if (!player || !changes) {
         console.error('Invalid parameters for updatePlayerResources:', { player, changes });
         return false;
@@ -271,7 +271,7 @@ export function updatePlayerResources(player, changes) {
  * @returns {Object} Player's resources or null if not found
  */
 export function getPlayerResources(playerId) {
-   // console.log('---------getPlayerResources---------');
+   // console.log('=============getPlayerResources=============');
     if (!playerId || !_state.playerResources[playerId]) return null;
     return JSON.parse(JSON.stringify(_state.playerResources[playerId]));
 }
@@ -282,7 +282,7 @@ export function getPlayerResources(playerId) {
  * @param {Object} initialResources - Initial resource values
  */
 export function initPlayerResources(playerId, initialResources) {
-    console.log('---------initPlayerResources---------');
+    console.log('=============initPlayerResources=============');
     if (!playerId || !initialResources) return;
     _state.playerResources[playerId] = JSON.parse(JSON.stringify(initialResources));
 }
