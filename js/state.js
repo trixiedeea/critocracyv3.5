@@ -42,7 +42,8 @@ export const _state = {
                 progress: 0,
                 direction: 'right'
             }
-        }
+        },
+        gameboard: {}
     },
     
     // Game State
@@ -176,8 +177,7 @@ export function updatePlayerResources(playerId, resources) {
     console.log('=============updatePlayerResources=============');
     if (!playerId || !resources) return;
     _state.playerResources[playerId] = JSON.parse(JSON.stringify(resources));
-    notifySubscribers();
-    
+    notifySubscribers();  
 }
 
 // ===== State Setters =====
@@ -195,7 +195,7 @@ export function subscribe(callback) {
     return () => subscribers.delete(callback);
 }
 
-function notifySubscribers() {
+export function notifySubscribers() {
    // console.log('=============notifySubscribers=============');
     const state = {
         game: getGameState(),

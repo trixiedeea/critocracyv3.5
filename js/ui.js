@@ -350,7 +350,7 @@ export function updatePlayerInfo(playerId) {
         if (playerId === undefined || playerId === null) {
             console.log('updatePlayerInfo: No player ID provided, trying to get current player from game state');
             if (state.game?.currentPlayerIndex !== undefined && state.players?.[state.game.currentPlayerIndex]) {
-                playerId = state.players[state.game.playersIndex].id;
+                playerId = state.players[state.game.currentPlayerIndex].id;
                 //console.log('updatePlayerInfo: Using current player ID:', playerId);
             } else {
                 console.warn('updatePlayerInfo: Could not determine current player');

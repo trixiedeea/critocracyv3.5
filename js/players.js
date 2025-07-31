@@ -1,6 +1,11 @@
 
 import { START_SPACE } from './board-data.js';
 import { updatePlayerInfo } from './ui.js'; // Corrected import name
+import { 
+    notifySubscribers, 
+    updateGameState,
+    _state,
+} from './state.js';
 
 // ===== Resource & Player Constants =====
 // List of all valid resource keys used throughout the game.
@@ -205,18 +210,34 @@ export function getRandomOtherPlayer(currentPlayer) {
     return otherPlayers[randomIndex];
 }
 
-export function updatePlayerResources(player, changes) {
-   // console.log('=============updatePlayerResources players=============');
+/**
+ * Update a player's resources in global state
+ * @param {Object} params - Parameters object
+ * @param {string} params.fromPlayerId - The player ID to update
+ * @param {Object} changes - The resource changes to apply (can be positive or negative)
+ * @returns {boolean} - True if update succeeded, false otherwise
+ */
+export function updatePlayerResources({ fromPlayerId }, changes) {
+    console.log('=============updatePlayerResources=============');
+    console.log('Parameters:', { fromPlayerId, changes });
+    
+    // Find the player in the global state
+    const players = getPlayers ? getPlayers() : []; // Safety check
+    const player = players.find(p => p.id === fromPlayerId);
+    
     if (!player || !changes) {
-        console.error('Invalid parameters for updatePlayerResources:', { player, changes });
+        console.error('Invalid parameters for updatePlayerResources:', { playerId: fromPlayerId, changes });
         return false;
     }
-    
+
     // Validate player has resources object
     if (!player.resources) {
         console.error('Player missing resources object:', player);
         return false;
     }
+
+    // Define valid resources
+    const RESOURCES = ['knowledge', 'money', 'influence'];
 
     // Validate and normalize changes
     const normalizedChanges = {};
@@ -226,17 +247,17 @@ export function updatePlayerResources(player, changes) {
             console.warn(`Invalid resource type '${resource}' ignored`);
             continue;
         }
-        
+
         const change = Number(changes[resource]);
         if (isNaN(change)) {
             console.error(`Invalid change value for ${resource}:`, changes[resource]);
             isValid = false;
             break;
         }
-        
+
         normalizedChanges[resource] = change;
     }
-    
+
     if (!isValid) return false;
 
     // Calculate new values first to ensure all changes are valid
@@ -244,26 +265,42 @@ export function updatePlayerResources(player, changes) {
     for (const [resource, change] of Object.entries(normalizedChanges)) {
         const currentValue = newValues[resource] || 0;
         const newValue = currentValue + change;
-        
+
         // Prevent negative resources
         if (newValue < 0) {
             console.error(`Cannot update ${resource}: would result in negative value (${newValue})`);
             return false;
         }
-        
+
         newValues[resource] = newValue;
     }
 
-    // Apply validated changes
+    // Apply validated changes to the player object
     Object.assign(player.resources, newValues);
     console.log(`Resources updated for ${player.name}:`, player.resources);
+
+    // Update the global state with the modified player
+    const updatedPlayers = players.map(p => 
+        p.id === fromPlayerId ? { ...p, resources: { ...player.resources } } : p
+    );
     
-    // Trigger UI update
-    // Update UI for this specific player
-    updatePlayerInfo(player.id);
+    // Update global state (if function exists)
+    if (typeof updateGameState === 'function') {
+        updateGameState({ players: updatedPlayers });
+    }
+    
+    // Notify subscribers of state changes (if function exists)
+    if (typeof notifySubscribers === 'function') {
+        notifySubscribers();
+    }
+
+    // Trigger UI update for this specific player (if function exists)
+    if (typeof updatePlayerInfo === 'function') {
+        updatePlayerInfo(fromPlayerId);
+    }
+    
     return true;
 }
-
 
 /**
  * Get a player's resources from global state
