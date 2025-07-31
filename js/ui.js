@@ -132,7 +132,7 @@ function initializeElementReferences() {
                     cardTitle: document.getElementById('card-Title'),
                     stealPopover: document.getElementById('steal-Popover'),
                     stealPopoverContainer: document.getElementById('steal-Popover-Container'),
-                    playerPopover: document.getElementById('player-Popover'),
+                    playerPopover: document.querySelectorAll('.player-Popover'),
                     cardDescription: document.getElementById('card-Description'),
                     ageOfExpansionDeck: document.getElementById('age-Of-Expansion-Deck'),
                     ageOfResistanceDeck: document.getElementById('age-Of-Resistance-Deck'),
