@@ -212,14 +212,12 @@ export function getRandomOtherPlayer(currentPlayer) {
 
 /**
  * Update a player's resources in global state
- * @param {Object} params - Parameters object
- * @param {string} params.fromPlayerId - The player ID to update
+ * @param {Object} from - Object containing playerId
  * @param {Object} changes - The resource changes to apply (can be positive or negative)
  * @returns {boolean} - True if update succeeded, false otherwise
  */
-export function updatePlayerResources({ fromPlayerId }, changes) {
+export function updatePlayerResources(fromPlayerId, changes) {
     console.log('=============updatePlayerResources=============');
-    console.log('Parameters:', { fromPlayerId, changes });
     
     // Find the player in the global state
     const players = getPlayers ? getPlayers() : []; // Safety check

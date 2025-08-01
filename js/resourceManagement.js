@@ -847,64 +847,42 @@ export async function handleCardResourceEffect({
   console.log(`Processing card resource effect: ${resourceType} ${amount} from ${fromPlayer.name} to ${toPlayer?.name ?? 'no target'}`);
   
   if (!isValidResource(resourceType)) {
-      console.error(`Invalid resource type in card effect: ${resourceType}`);
-      return;
+    console.error(`Invalid resource type in card effect: ${resourceType}`);
+    return;
   }
 
   if (toPlayer) {
-      // This is a steal - subtract from fromPlayer, add to toPlayer
-      console.log(`Transferring ${amount} ${resourceType} from ${fromPlayer.name} to ${toPlayer.name}`);
-      
-      // Calculate actual amounts with resistance/multipliers
-      const resistance = getResistanceRate(fromPlayer, resourceType);
-      const actualLoss = Math.floor(amount * resistance);
-      
-      const multiplier = getMultiplier(resourceType, true);
-      const actualGain = Math.floor(amount * multiplier);
-      
-      // FIXED: Use correct parameter structure and property names
-      const fromResult = updatePlayerResources(
-          { fromPlayerId: fromPlayer.id }, 
-          { [resourceType]: -actualLoss }
-      );
-      
-      const toResult = updatePlayerResources(
-          { fromPlayerId: toPlayer.id }, 
-          { [resourceType]: actualGain }
-      );
-      
-      if (fromResult && toResult) {
-          console.log(`Transfer complete: ${fromPlayer.name} lost ${actualLoss}, ${toPlayer.name} gained ${actualGain}`);
-      } else {
-          console.error('Failed to complete resource transfer');
-      }
-      
+    // This is a steal - subtract from fromPlayer, add to toPlayer
+    console.log(`Transferring ${amount} ${resourceType} from ${fromPlayer.name} to ${toPlayer.name}`);
+    
+    // Calculate actual amounts with resistance/multipliers
+    const resistance = getResistanceRate(fromPlayer, resourceType);
+    const actualLoss = Math.floor(amount * resistance);
+    
+    const multiplier = getMultiplier(resourceType, true);
+    const actualGain = Math.floor(amount * multiplier);
+    
+    // Let updatePlayerResources handle all the state management
+    updatePlayerResources({fromPlayerId }, { changes: { [resourceType]: -actualLoss }});
+    updatePlayerResources({toPlayerId }, { changes: { [resourceType]: actualGain }});
+    
+    console.log(`Transfer complete: ${fromPlayer.name} lost ${actualLoss}, ${toPlayer.name} gained ${actualGain}`);
   } else {
-      // Regular resource change
-      try {
-          console.log(`Updating ${fromPlayer.name}'s resources: +${amount} ${resourceType}`);
-          
-          // FIXED: Use correct parameter structure and property names
-          const result = updatePlayerResources(
-              { fromPlayerId: fromPlayer.id }, 
-              { [resourceType]: amount }
-          );
-          
-          if (result) {
-              console.log('Successfully updated player resources');
-              
-              // Call processAgeCardEffects for validation
-              const currentCard = window.currentCard;
-              if (currentCard) {
-                  console.log('Calling processAgeCardEffects for validation');
-                  await processAgeCardEffects(currentCard, []);
-              }
-          } else {
-              console.error('Failed to update player resources');
-          }
-      } catch (error) {
-          console.error('Error in updatePlayerResources or processAgeCardEffects:', error);
+    // Regular resource change
+    try {
+      console.log(`Updating ${fromPlayer.name}'s resources: +${amount} ${resourceType}`);
+      updatePlayerResources({ playerId: fromPlayer.id }, { [resourceType]: amount });
+      console.log('Successfully updated player resources');
+      
+      // Call processAgeCardEffects for validation
+      const currentCard = window.currentCard;
+      if (currentCard) {
+        console.log('Calling processAgeCardEffects for validation');
+        await processAgeCardEffects(currentCard, []);
       }
+    } catch (error) {
+      console.error('Error in updatePlayerResources or processAgeCardEffects:', error);
+    }
   }
 }
 
