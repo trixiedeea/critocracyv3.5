@@ -11,8 +11,8 @@ export const DEBUG_MODE = false;
 
 // Initialize the game when the DOM is ready
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log("DOM fully loaded and parsed. Initializing Critocracy...");
-    console.log("[Main] Starting game initialization sequence...");
+    //console.log("DOM fully loaded and parsed. Initializing Critocracy...");
+    //console.log("[Main] Starting game initialization sequence...");
 
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -48,28 +48,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Add click handlers for path choice buttons
     if (ui.ageOfExpansionButton) {
         ui.ageOfExpansionButton.addEventListener('click', () => {
-            console.log('Age of Expansion button clicked');
+            //console.log('Age of Expansion button clicked');
             handlePathSelection(PATH_COORDINATES.ageOfExpansionPath, 'ageOfExpansionPath');
         });
     }
 
     if (ui.ageOfLegacyButton) {
         ui.ageOfLegacyButton.addEventListener('click', () => {
-            console.log('Age of Legacy button clicked');
+            //console.log('Age of Legacy button clicked');
             handlePathSelection(PATH_COORDINATES.ageOfLegacyPath, 'ageOfLegacyPath');
         });
     }
 
     if (ui.ageOfResistanceButton) {
         ui.ageOfResistanceButton.addEventListener('click', () => {
-            console.log('Age of Resistance button clicked');
+            //console.log('Age of Resistance button clicked');
             handlePathSelection(PATH_COORDINATES.ageOfResistancePath, 'ageOfResistancePath');
         });
     }
 
     if (ui.ageOfReckoningButton) {
         ui.ageOfReckoningButton.addEventListener('click', () => {
-            console.log('Age of Reckoning button clicked');
+            //console.log('Age of Reckoning button clicked');
             handlePathSelection(PATH_COORDINATES.ageOfReckoningPath, 'ageOfReckoningPath');
         });
     }
@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Handle path selection-
     function handlePathSelection(coords, pathName) {
         console.log('---------handlePathSelectionmain----------');
-        console.log(`Path selected: ${pathName} at`, coords);
+        //console.log(`Path selected: ${pathName} at`, coords);
         // Hide the path choice Popover
         if (ui.pathChoicePopover) {
             ui.pathChoicePopover.style.display = 'none';
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Event listeners for game state updates
     window.addEventListener('playersSelected', event => {
-        console.log("[Main] Received playerArray in main.js:", event.detail);
+        //console.log("[Main] Received playerArray in main.js:", event.detail);
         updateGameState({
             playerArray: event.detail,
             humanPlayers: event.detail.filter(player => player.type === "human").length,
@@ -105,24 +105,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     window.addEventListener('rolesAssigned', event => {
-        console.log("[Main] Roles assigned event received in main.js:", event.detail);
+        //console.log("[Main] Roles assigned event received in main.js:", event.detail);
         // Update game state with player configurations including roles
         updateGameState({
             playerConfigs: event.detail
         });
 
         // Transition to the turn order screen
-        console.log("[Main] Transitioning to Turn Order Screen...");
+        //console.log("[Main] Transitioning to Turn Order Screen...");
         showScreen('turnOrderScreen');
         if (window.turnOrderUI && window.turnOrderUI.initTurnOrderScreen) {
             window.turnOrderUI.initTurnOrderScreen(event.detail);
         } else {
-            console.log("[Main] turnOrderUI.initTurnOrderScreen is not defined!");
+            //console.log("[Main] turnOrderUI.initTurnOrderScreen is not defined!");
         }
     });
 
     window.addEventListener('turnOrderDetermined', event => {
-        console.log("[Main] Turn order determined event received in main.js:", event.detail);
+        //console.log("[Main] Turn order determined event received in main.js:", event.detail);
         
         // Hide the turn order screen and show the game board
         showScreen('gameBoardScreen');
@@ -143,21 +143,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Function to show a specific screen and hide others
     function showScreen(screenName) {
-        console.log(`--- showScreen called with: ${screenName} ---`);
+        //console.log(`--- showScreen called with: ${screenName} ---`);
         Object.entries(screens).forEach(([name, screen]) => {
             if (screen) {
                 if (name === screenName) {
-                    console.log(`  Showing screen element: ${name}`);
+                    //console.log(`  Showing screen element: ${name}`);
                     screen.style.display = 'block';
                     if (name === 'turnOrderScreen') {
-                        console.log('  Turn Order Screen is now visible. Checking for dice elements...');
+                        //console.log('  Turn Order Screen is now visible. Checking for dice elements...');
                         setTimeout(() => {
                             const diceElements = document.querySelectorAll('.dice');
-                            console.log('  Found dice elements after screen display:', diceElements.length);
+                            //console.log('  Found dice elements after screen display:', diceElements.length);
                             if (diceElements.length > 0) {
                                 const dice = diceElements[0];
                                 const style = window.getComputedStyle(dice);
-                                console.log('  Dice animation-related styles - animation:', style.animation, 'animation-name:', style.animationName);
+                                //console.log('  Dice animation-related styles - animation:', style.animation, 'animation-name:', style.animationName);
                             }
                         }, 100);
                     }
@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     screen.style.display = 'none';
                 }
             } else {
-                console.log(`Screen element ${name} not found during showScreen.`);
+                //console.log(`Screen element ${name} not found during showScreen.`);
             }
         });
     }
@@ -195,11 +195,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (Canvas) {
             drawBoard(); 
         } else {
-            console.log("Board Canvas element not found! Cannot perform initial draw.");
+            //console.log("Board Canvas element not found! Cannot perform initial draw.");
             throw new Error("Board Canvas missing.");
         }
         
-        console.log("Critocracy initialization sequence complete. Ready for user interaction.");
+        //console.log("Critocracy initialization sequence complete. Ready for user interaction.");
         
     } catch (error) {
         console.error("CRITICAL ERROR during game initialization:", error);
@@ -229,6 +229,6 @@ import './game.js';
 document.addEventListener('DOMContentLoaded', () => {
     // The UI initialization is already handled by the main game initialization
     // No need to call initializeUiState() separately as it's handled by initializeUI()
-    console.log('DOM fully loaded and parsed');
+    //console.log('DOM fully loaded and parsed');
 });
 

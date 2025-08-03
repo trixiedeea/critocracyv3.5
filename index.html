@@ -186,7 +186,10 @@
                     </div>
                         <Button id="start-Game-Button" class="animate-fadeIn">Start Game</Button>
                     </div>
-
+                </div>
+            </div>
+        </div>
+    </div>
     <div id="game-Board-Screen" class="screen">
         <div id="board-Container-Wrapper" class="wrapper">
             <div id="board-Container" class="board-Container">
@@ -194,7 +197,7 @@
                 <canvas id="board-Token-Canvas" class="board-Token-Layer" style="aspect-ratio: 3/2;"></canvas>
                 <div id="token-Layer" class="token-Layer" style="aspect-ratio: 3/2;"></div>
                 <!-- Card Popover -->
-                <dialog class="card-Popover" class="popover">
+                <dialog class="card-Popover" class="popover" id="age-Of-Expansion-Deck">
                     <div class="card-Popover-Container">
                         <div id="age-Of-Expansion-Deck" class="purple-Popover-Content" data-deck-id="ageOfExpansionDeck">
                             <h3 id="card-Title">Card Title</h3>
@@ -210,7 +213,7 @@
                         </div>
                     </div>
                 </dialog>
-                <dialog class="card-Popover" class="popover">
+                <dialog id="age-Of-Resistance-Deck" class="card-Popover" class="popover">
                     <div class="card-Popover-Container">
                         <div id="age-Of-Resistance-Deck" class="blue-Popover-Content" data-deck-id="ageOfResistanceDeck">
                             <h3 id="card-Title">Card Title</h3>
@@ -307,6 +310,16 @@
                         </div>
                     </div>
                 </dialog>
+                <div class="resource-Score-Container">
+                    <div class="player-Score-Display">
+                        <h3>Player Scores</h3>
+                            <h4><span class="role-Name">Player Name 1</span><p>0 💰, 0 🧠, 0 🎯</p></h4>
+                            <h4><span class="role-Name">Player Name 2</span><p>0 💰, 0 🧠, 0 🎯</p></h4>
+                            <h4><span class="role-Name">Player Name 3</span><p>0 💰, 0 🧠, 0 🎯</p></h4>
+                            <h4><span class="role-Name">Player Name 4</span><p>0 💰, 0 🧠, 0 🎯</p></h4>
+                            <h4><span class="role-Name">Player Name 5</span><p>0 💰, 0 🧠, 0 🎯</p></h4>
+                    </div>
+                </div>
                 <div id="player-Info-Panel" class="container">
                     <div id="end-Turn-Button-Container" class="button-Container">
                         <button id="end-Turn-Button">End Turn</button>

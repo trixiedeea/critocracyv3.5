@@ -1,4 +1,4 @@
-import { 
+import {  
     getUIState, 
     updateUIState,
     state,
@@ -34,6 +34,8 @@ import {
 
 import {drawCard } from './cards.js';
 import { markPlayerFinished } from './players.js';
+
+const debug_mode = true;
 
 // Animation timing constants
 export const TIMING = {
@@ -116,12 +118,13 @@ export const animateDiceRoll = async (diceElement, finalValue, duration = 1500) 
 
   // If not human, delay 2 seconds before continuing
   if (!player?.isHuman) {
-      console.log('CPU player detected – auto-rolling in 2 seconds...');
+      //console.log('CPU player detected – auto-rolling in 2 seconds...');
       await new Promise(resolve => setTimeout(resolve, 2000));
   }
 
      const dice = document.getElementById('dice');
    if (!dice) return;
+   
 
   // Disable interaction while rolling
   dice.style.pointerEvents = 'none';
@@ -130,7 +133,8 @@ export const animateDiceRoll = async (diceElement, finalValue, duration = 1500) 
   dice.classList.add('rolling');
 
   // Use the provided finalValue or generate a random roll if not provided
-   const result = Math.ceil(Math.random() * 6);
+   const result = debug_mode ? 6 : Math.ceil(Math.random() * 6);
+
    
    // Store the roll result in state
    updateGameState({ rollResult: result });
@@ -177,7 +181,7 @@ export const animateDiceRoll = async (diceElement, finalValue, duration = 1500) 
  * @returns {Array} Array of coordinates representing the path
  */
 export function getPathSegments(start, end, pathData) {
-   // console.log('=============getPathSegments=============');
+   //console.log('=============getPathSegments=============');
     // Find the closest segment to start
     let startSegment = null;
     let minStartDist = Infinity;
@@ -239,7 +243,7 @@ export function getPathSegments(start, end, pathData) {
 };
   
 export const ensurePlayerPath = (player) => {
-   // console.log('=============ensurePlayerPath=============');
+  //console.log('=============ensurePlayerPath=============');
     if (!player.currentPath) {
       player.currentPath = 'ageOfLegacyPath'; // or default based on your game state
     }
@@ -261,7 +265,7 @@ export function animateTokenToPosition(player, newPosition, duration = 1000, ski
   updateGameState({
     currentPhase: 'MOVING'
   });
-  console.log(`Moving ${rollResult} spaces for ${player.name}`);
+  //console.log(`Moving ${rollResult} spaces for ${player.name}`);
 
   return new Promise(async (resolve) => {
     const token = document.querySelector(`[data-player-id="${player.id}"]`);
@@ -274,15 +278,15 @@ export function animateTokenToPosition(player, newPosition, duration = 1000, ski
     const paths = [ageOfExpansionPath, ageOfResistancePath, ageOfReckoningPath, ageOfLegacyPath];
     let pathData = paths.find(path => path.pathName === player.currentPath);
 
-    if (!pathData || !pathData.segments) {
+      if (!pathData || !pathData.segments) {
       console.warn("No path data found for player's current path.");
       resolve();
       return;
     }
 
     let remainingSteps = rollResult;
-    let currentCoord = { ...player.currentCoords };
-    //console.log(`Current coordinates for ${player.name}:`, currentCoord);
+    let currentCoords = { ...player.currentCoords };
+    //console.log(`Current coordinates for ${player.name}:`, currentCoords);
     //console.log(`Remaining steps for ${player.name}:`, remainingSteps);
 
     const findSegmentByCoord = (coord, targetPathData = pathData) => {
@@ -294,7 +298,7 @@ export function animateTokenToPosition(player, newPosition, duration = 1000, ski
 
     // Function to search for a coordinate across all paths with tolerance
     const findPathByChosenCoord = (chosenCoord, tolerance = 5) => {
-      console.log('=============--------findPathByChosenCoord=============--------');
+      //console.log('=============--------findPathByChosenCoord=============--------');
       for (const path of paths) {
         for (const segment of path.segments) {
           const segCoord = segment.coordinates?.[0];
@@ -302,7 +306,7 @@ export function animateTokenToPosition(player, newPosition, duration = 1000, ski
             const dx = Math.abs(segCoord[0] - chosenCoord.x);
             const dy = Math.abs(segCoord[1] - chosenCoord.y);
             if (dx <= tolerance && dy <= tolerance) {
-              console.log(`Found matching coords in path ${path.pathName} with tolerance ${tolerance}`);
+              //console.log(`Found matching coords in path ${path.pathName} with tolerance ${tolerance}`);
               return { path, segment, exactCoord: { x: segCoord[0], y: segCoord[1] } };
             }
           }
@@ -347,24 +351,36 @@ export function animateTokenToPosition(player, newPosition, duration = 1000, ski
       //console.log('=============--------animateNextSegment=============--------')
       if (remainingSteps <= 0) {
         // Movement complete
-        //console.log(`[DEBUG] Movement complete. Final position: ${JSON.stringify(currentCoord)}`);
+        //console.log(`[DEBUG] Movement complete. Final position: ${JSON.stringify(currentCoords)}`);
         token.classList.remove('enlarged');
         token.classList.add('normal');
-        await handleEndOfMove();
+        player.currentCoords = { ...currentCoords };
+        // CRITICAL: Update player coordinates in central game state
+        updateGameState({
+          players: state.players.map(p => 
+            p.id === player.id ? { ...p, currentCoords: { ...player.currentCoords } } : p
+          )
+        });
+        await handleEndOfMove(player.currentCoords);
         resolve();
         return;
       }
     
-      const segment = findSegmentByCoord(currentCoord);
-      if (!segment || !segment.Next || segment.Next.length === 0) {
-        console.warn("Invalid or incomplete segment found at", currentCoord);
+      const segment = findSegmentByCoord(currentCoords);
+      if (!segment || !segment.Next || segment.Next.length === 0 && !currentCoords === FINISH_SPACE) {
+        console.warn("Invalid or incomplete segment found at", currentCoords);
+        resolve();
+        return;
+      } else if (currentCoords === FINISH_SPACE) {
+        console.log("Player has reached the finish space!");
+        markPlayerFinished(player.id);
         resolve();
         return;
       }
     
       // Check if this is a choicepoint (multiple Next coordinates)
       if (segment.Next.length > 1) {
-        //console.log(`[DEBUG] Choicepoint detected at ${JSON.stringify(currentCoord)} with ${segment.Next.length} options`);
+        //console.log(`[DEBUG] Choicepoint detected at ${JSON.stringify(currentCoords)} with ${segment.Next.length} options`);
         
         // Store interrupted move data
         state.interruptedMove = {
@@ -402,13 +418,13 @@ export function animateTokenToPosition(player, newPosition, duration = 1000, ski
           if (match) {
             player.currentPath = match.path.pathName;
             player.currentCoords = match.exactCoord;
-            currentCoord = { ...match.exactCoord };
+            currentCoords = { ...match.exactCoord };
             pathData = match.path; // Update pathData to the new path
-            //console.log(`Updated player path to ${player.currentPath} at coords ${JSON.stringify(currentCoord)}`);
+            //console.log(`Updated player path to ${player.currentPath} at coords ${JSON.stringify(currentCoords)}`);
           } else {
             console.warn("Could not match chosen coords exactly, using provided coords:", chosenOption.coords);
             player.currentCoords = { x: chosenOption.coords[0], y: chosenOption.coords[1] };
-            currentCoord = { ...player.currentCoords };
+            currentCoords = { ...player.currentCoords };
           }
           
           remainingSteps--;
@@ -435,23 +451,23 @@ export function animateTokenToPosition(player, newPosition, duration = 1000, ski
         y: segment.Next[0][1]
       };
 
-      // Count step as we leave the currentCoord
+      // Count step as we leave the currentCoords
       remainingSteps--;
             // Persist updated step count immediately
             updateGameState({ remainingSteps });
       
       // Animate visual movement
-      await animatePosition(token, currentCoord, nextCoord, duration);
+      await animatePosition(token, currentCoords, nextCoord, duration);
       
       // Update to exact coordinates from the path segment
       const nextSegment = findSegmentByCoord(nextCoord);
       if (nextSegment) {
         const exactCoord = nextSegment.coordinates[0];
         player.currentCoords = { x: exactCoord[0], y: exactCoord[1] };
-        currentCoord = { ...player.currentCoords };
+        currentCoords = { ...player.currentCoords };
       } else {
         player.currentCoords = nextCoord;
-        currentCoord = nextCoord;
+        currentCoords = nextCoord;
       }
     
       await animateNextSegment();
@@ -576,7 +592,7 @@ export function animateCardDiscard(cardElement, onComplete) {
  */
 export function highlightDeckRegions(player, deckType, positions, duration = 3000) {
   return new Promise((resolve) => {
-    console.log('=============highlightDeckRegions=============')
+    console.log('=============highlightDeckRegions=============');
     //console.log('Highlighting deck regions for player:', player.name, 'deckType:', deckType, 'positions:', positions);
 
     const canvas = state.board?.Canvas || state.board?.canvas;
@@ -585,16 +601,20 @@ export function highlightDeckRegions(player, deckType, positions, duration = 300
       resolve();
       return;
     }
+    
+    // CRITICAL: Set currentDeck state so deck click restrictions work
+    updateGameState({ currentDeck: deckType });
+    //console.log(`Set currentDeck to: ${deckType} for deck click restrictions`);
 
     const ctx = canvas.getContext('2d');
 
     // Map proper highlight colors by deckType
     const colorMap = {
-      ageOfExpansionDeck: 'rgba(83, 0, 159, 0.81)',   // purple
-      ageOfResistanceDeck: 'rgba(25, 25, 248, 0.81)',  // blue
-      ageOfReckoningDeck: 'rgba(39, 255, 248, 0.81)',   // cyan
-      ageOfLegacyDeck: 'rgba(255, 15, 171, 0.81)',      // pink
-      endOfTurnDeck: 'rgba(245, 238, 52, 0.9)'         // gold/yellow
+      ageOfExpansionDeck: 'rgba(140, 40, 234, 0.9)',   // purple
+      ageOfResistanceDeck: 'rgba(27, 71, 248, 0.89)',  // blue
+      ageOfReckoningDeck: 'rgba(39, 255, 237, 0.91)',   // cyan
+      ageOfLegacyDeck: 'rgba(162, 0, 151, 0.89)',      // pink
+      endOfTurnDeck: 'rgba(179, 196, 0, 0.9)'         // gold/yellow
     };
 
     const highlightColor = colorMap[deckType] || '#FF0000'; // fallback to red

@@ -87,7 +87,7 @@ export function initializeUI() {
  * Caches references to all required DOM elements into the state.ui object.
  */
 function initializeElementReferences() {
-    console.log("Caching DOM references...");
+    //console.log("Caching DOM references...");
 
     updateGameState({
         ui: {
@@ -102,7 +102,10 @@ function initializeElementReferences() {
                 },
                 gameBoard: {
                     boardCanvas: document.getElementById('board-Canvas'),
+                    resourceScoreContainer: document.querySelector('.resource-Score-Container'),
+                    playerScoreDisplay: document.querySelectorAll('.player-Score-Display'),
                     boardTokenCanvas: document.getElementById('board-Token-Canvas'),
+                    roleName: document.querySelectorAll('.role-Name'),
                     tokenLayer: document.getElementById('token-Layer'),
                     boardContainerWrapper: document.getElementById('board-Container-Wrapper'),
                     boardContainer: document.getElementById('board-Container'),
@@ -155,7 +158,7 @@ function initializeElementReferences() {
         }
     });
 
-    console.log("UI elements cached:", state.ui.elements);
+    //console.log("UI elements cached:", state.ui.elements);
     return true;
 };
 
@@ -180,12 +183,12 @@ function validateElements() {
  * Sets up all necessary event listeners for UI interactions.
  */
 function setupEventListeners() {
-    console.log("Setting up event listeners...");
+    //console.log("Setting up event listeners...");
     const { gameBoard, popovers, endGame } = state.ui.elements;
 
     // --- Game Board Buttons ---
     gameBoard.endTurnButton.addEventListener('click', () => {
-        console.log("End Turn button clicked.");
+        //console.log("End Turn button clicked.");
         gameBoard.endTurnButton.classList.remove('shake');
         advanceToNextPlayer();
     });
@@ -193,15 +196,25 @@ function setupEventListeners() {
     gameBoard.dice.addEventListener('click', () => {
         if (state.currentPhase !== 'ROLLING') return; // Only act during ROLLING phase
     
-        console.log('🎯 Dice clicked in ROLLING phase');
+        console.log('🎯========== Dice clicked in ROLLING phase==========');
+        
+        // Disable dice immediately after click to prevent multiple rolls
+        gameBoard.dice.style.pointerEvents = 'none';
+        gameBoard.dice.disabled = true;
     
         stopDiceShake?.(); // Optional: stops visual shake
         updateGameState({ currentPhase: 'PLAYING' }); // Phase gating
         animateDiceRoll(2000); // Your full animation + logic
+        
+        // Re-enable dice after animation completes (for next turn)
+        setTimeout(() => {
+            gameBoard.dice.style.pointerEvents = 'auto';
+            gameBoard.dice.disabled = false;
+        }, 3000);
     });
   
     popovers.showCardDetailsButton?.addEventListener('click', () => {
-        console.log('=============showCardDetailsButton clicked=============');
+        //console.log('=============showCardDetailsButton clicked=============');
         if (popovers.cardEffects) {
             const currentDisplay = popovers.cardEffects.style.display;
             popovers.cardEffects.style.display = currentDisplay === 'none' ? 'block' : 'none';
@@ -215,7 +228,7 @@ function setupEventListeners() {
             button.addEventListener('click', () => {
                 // Clear deck highlights
                 clearDeckHighlights();
-                console.log('--------closeAgeCardButtons clicked=============')
+                console.log('===========closeAgeCardButtons clicked=============')
                 
                 // Close the dialog
                 const dialog = button.closest('dialog');
@@ -246,17 +259,17 @@ function setupEventListeners() {
 
     // --- End Game Screen Button ---
     endGame.newGameButton.addEventListener('click', () => {
-        console.log("--------New Game button clicked. Reloading page.--------");
+        //console.log("--------New Game button clicked. Reloading page.--------");
         window.location.reload();
     });
 
     // --- Canvas Click Listener ---
     // --- Canvas Click Listener ---
     gameBoard.boardCanvas.addEventListener('click', (event) => {
-        console.log('--------Canvas clicked--------');
+        console.log('==============Canvas clicked==============');
         const player = getCurrentPlayer();
-        console.log('Current player:', player);
-        console.log('Current phase:', state.currentPhase);
+        //console.log('Current player:', player);
+        //console.log('Current phase:', state.currentPhase);
         
         if (state.currentPhase === 'AWAITING_CARD_ACTION' && player?.isHuman) {
             handleCanvasCardClick(event);
@@ -309,9 +322,33 @@ export function handleCanvasCardClick(event, coords = null, player = null) {
 
     // Check which deck region was clicked using fullDeckRegionPathMap positions.
     let clickedDeckType = null;
+    
+    // Get current player's path to determine which deck should be clickable
+    const playerPath = currentPlayer.currentPath;
+    const isEndOfTurn = state.currentPhase === 'TURN_TRANSITION';
+    
+    // Determine which deck types should be clickable based on player position and game phase
+    let allowedDeckTypes = [];
+    if (isEndOfTurn) {
+        // At end of turn, allow up to 2 deck types (current path + adjacent if applicable)
+        if (playerPath) {
+            allowedDeckTypes.push(playerPath.toLowerCase().replace('age of ', '').replace(' ', ''));
+        }
+    } else {
+        // During normal play, only allow current path deck
+        if (playerPath) {
+            allowedDeckTypes.push(playerPath.toLowerCase().replace('age of ', '').replace(' ', ''));
+        }
+    }
 
     for (const [key, region] of Object.entries(fullDeckRegionPathMap)) {
         if (region.positions && region.positions.length > 0) {
+            // Only check regions that are currently allowed
+            const regionDeckType = region.deckType.toLowerCase();
+            const isAllowed = allowedDeckTypes.some(allowed => regionDeckType.includes(allowed));
+            
+            if (!isAllowed) continue;
+            
             // Check each position in the region
             for (const pos of region.positions) {
                 if (boardX >= pos.topleft && boardX <= pos.bottomrightx && 
@@ -326,121 +363,26 @@ export function handleCanvasCardClick(event, coords = null, player = null) {
     }
 
     if (clickedDeckType) {
-        console.log(`Drawing from deck: ${clickedDeckType}`);
+        //console.log(`Drawing from deck: ${clickedDeckType}`);
         clearHighlights();
+        
+        // Disable canvas clicks immediately after card draw to prevent multiple clicks
+        const canvas = state.ui.elements.gameBoard.boardCanvas;
+        if (canvas) {
+            canvas.style.pointerEvents = 'none';
+            setTimeout(() => {
+                canvas.style.pointerEvents = 'auto';
+            }, 2000); // Re-enable after 2 seconds
+        }
+        
         drawCard(clickedDeckType);
     } else {
-        console.log(`No valid deck region clicked at coordinates (${boardX}, ${boardY})`);
+        //console.log(`No valid deck region clicked at coordinates (${boardX}, ${boardY})`);
     }
     console.log('=============handleCanvasCardClick END=============');
 };
 
-// --- UI Update Functions ---
-
-/**
- * Updates the player information panel with the current player's stats.
- * @param {string|Object} playerId - The ID of the player to display, or a player object.
- */
-export function updatePlayerInfo(playerId) {
-    console.log('--------updatePlayerInfo=============')
-    //console.log('[UI] updatePlayerInfo called with:', playerId);
-    
-    try {
-        // If no player ID provided, try to get current player from game state
-        if (playerId === undefined || playerId === null) {
-            console.log('updatePlayerInfo: No player ID provided, trying to get current player from game state');
-            if (state.game?.currentPlayerIndex !== undefined && state.players?.[state.game.currentPlayerIndex]) {
-                playerId = state.players[state.game.currentPlayerIndex].id;
-                //console.log('updatePlayerInfo: Using current player ID:', playerId);
-            } else {
-                console.warn('updatePlayerInfo: Could not determine current player');
-                return;
-            }
-        }
-        
-        // Handle case where playerId is an object (should be string)
-        const playerIdStr = typeof playerId === 'object' ? (playerId.id || '') : String(playerId || '');
-        
-        if (!playerIdStr) {
-            console.warn('updatePlayerInfo: Empty player ID provided');
-            return;
-        }
-
-        const players = getPlayers();
-        //console.log('[UI] All players:', players);
-        
-        if (!Array.isArray(players)) {
-            console.error('updatePlayerInfo: Players data is not an array');
-            return;
-        }
-
-        const player = players.find(p => p && p.id === playerIdStr);
-        if (!player) {
-            console.error(`updatePlayerInfo: Player with ID ${playerIdStr} not found. Available players:`, 
-                players.map(p => p ? p.id : 'null'));
-            return;
-        }
-        
-        console.log('[UI] Found player:', {
-            id: player.id,
-            name: player.name,
-            role: player.role,
-            resources: player.resources,
-            isHuman: player.isHuman
-        });
-
-        const { currentPlayer, KNOWLEDGE_COUNT, MONEY_COUNT, INFLUENCE_COUNT } = state.ui.elements.gameBoard || {};
-        
-        // Log the UI elements for debugging
-       console.log('[UI] UI Elements:', {
-            currentPlayer: !!currentPlayer,
-            KNOWLEDGE_COUNT: !!KNOWLEDGE_COUNT,
-            MONEY_COUNT: !!MONEY_COUNT,
-            INFLUENCE_COUNT: !!INFLUENCE_COUNT
-        });
-        
-        if (!getCurrentPlayer() || !KNOWLEDGE_COUNT || !MONEY_COUNT || !INFLUENCE_COUNT) {
-            console.error('updatePlayerInfo: Missing required UI elements');
-            // Try to re-initialize UI elements if they're missing
-            if (initializeElementReferences) {
-               // console.log('Attempting to re-initialize UI elements...');
-                initializeElementReferences();
-            }
-            return;
-        }
-
-        // Ensure resources exist, default to 0 if not
-        const resources = player.resources || {};
-        const knowledge = resources.knowledge ?? 0;
-        const money = resources.money ?? 0;
-        const influence = resources.influence ?? 0;
-        
-        //console.log('[UI] Updating UI with resources:', { knowledge, money, influence });
-        
-        // Update the UI elements
-        currentPlayer.textContent = `${player.name} (${player.role || 'No Role'})`;
-        KNOWLEDGE_COUNT.textContent = knowledge;
-        MONEY_COUNT.textContent = money;
-        INFLUENCE_COUNT.textContent = influence;
-        
-        // Force a reflow to ensure the UI updates
-        void currentPlayer.offsetHeight;
-        
-        console.log(`[UI] Successfully updated UI for ${player.name}'s turn`);
-        console.log('=============updatePlayerInfo END=============');
-        
-    } catch (error) {
-        console.error('Error in updatePlayerInfo:', error);
-        // Try a full UI refresh on error
-        try {
-            //console.log('Attempting full UI refresh...');
-            if (initializeUI) initializeUI();
-            if (updateGameControls) updateGameControls();
-        } catch (e) {
-            console.error('Failed to refresh UI:', e);
-        }
-    }
-};  
+// --- UI Update Functions ---  
 
 /**
  * Displays a message to the user in the message log.
@@ -461,7 +403,7 @@ export function promptForPathChoice(pathOptions, player, aiChosenOption = null) 
 
     console.log('=============promptForPathChoice=============');
     //console.log('Path options:', pathOptions);
-    console.log('Player:', player);
+    //console.log('Player:', player);
     
     updateGameControls(); // Sync UI with game state
 
@@ -697,11 +639,11 @@ export function promptForChoicepoint(options, onChoice, delayMs = 3000) {
             setTimeout(animateScale, delayMs);
         }
     }
-    console.log('=============promptForChoicepoint END=============');
+    //console.log('=============promptForChoicepoint END=============');
 }
   
 export function updateGameControls() {
-    console.log('=============updateGameControls=============');
+    //console.log('=============updateGameControls=============');
     const player = getCurrentPlayer();
     let rollEnabled = false;
     let endTurnEnabled = false;
@@ -741,33 +683,15 @@ export function updateGameControls() {
         endTurnButton.disabled = !endTurnEnabled;
     }
 
-    console.log(`UI Controls Updated: Roll=${rollEnabled}, EndTurn=${endTurnEnabled}, Phase=${state.currentPhase}`);
-    console.log('=============updateGameControls END=============');
-};
-        
-/**
- * Update player's resource panel with current values.
- */
-export function updateResourceDisplayContainer(player) {
-    console.log('=============updateResourceDisplayContainer=============');
-    // Try to find (or freshly create) the panel again
-    const panelUpdated = document.getElementById(`resource-Display-Container-${player.id}`);
-    if (!panelUpdated) {
-      console.error(`No resource display container found for player ID: ${player.id}`);
-      return;
-    }
-  
-    panelUpdated.querySelector('.player-name').textContent = player.name;
-    panelUpdated.querySelector('.KNOWLEDGE_COUNT').textContent = `Knowledge ${player.resources.money}`;
-    panelUpdated.querySelector('.MONEY_COUNT').textContent = `Money ${player.resources.knowledge}`;
-    panelUpdated.querySelector('.INFLUENCE_COUNT').textContent = `Influence ${player.resources.influence}`;
+    //console.log(`UI Controls Updated: Roll=${rollEnabled}, EndTurn=${endTurnEnabled}, Phase=${state.currentPhase}`);
+    //console.log('=============updateGameControls END=============');
 };
   
   /**
    * Flash a feedback animation near the resource panel for the player
    */
 export function showResourceChangeFeedback(playerId, resourceType, amount) {
-    console.log('=============showResourceChangeFeedback=============');
+    //console.log('=============showResourceChangeFeedback=============');
     const panel = document.getElementById(`resource-Display-Container-${playerId}`);
     if (!panel) return;
   
@@ -792,4 +716,128 @@ export function showResourceChangeFeedback(playerId, resourceType, amount) {
       feedbackEl.style.transform = 'translateY(0px)';
     }, 1000);
 }
+
+/**
+ * Updates the player information panel with the current player's stats.
+ * @param {string|Object} playerId - The ID of the player to display, or a player object.
+ */
+export function updatePlayerInfo(currentPlayer = getCurrentPlayer(), newValues = {}) {
+    //console.log('==============updatePlayerInfo=============')
+    //console.log('[UI] updatePlayerInfo called with:', playerId);
+    
+    try {
+        // If no player ID provided, try to get current player from game state
+        if (currentPlayer === undefined || currentPlayer === null) {
+            //console.log('updatePlayerInfo: No player ID provided, trying to get current player from game state');
+            if (state.game?.currentPlayerIndex !== undefined && state.players?.[state.game.currentPlayerIndex]) {
+                currentPlayer = state.players[state.game.currentPlayerIndex].id;
+                //console.log('updatePlayerInfo: Using current player ID:', playerId);
+            } else {
+                console.warn('updatePlayerInfo: Could not determine current player');
+                return;
+            }
+        }
+        
+        // Handle case where playerId is an object (should be string)
+        const playerIdStr = typeof currentPlayer === 'object' ? (currentPlayer.id || '') : String(currentPlayer || '');
+        
+        if (!playerIdStr) {
+            console.warn('updatePlayerInfo: Empty player ID provided');
+            return;
+        }
+  
+        const players = getPlayers();
+        //console.log('[UI] All players:', players);
+        
+        if (!Array.isArray(players)) {
+            console.error('updatePlayerInfo: Players data is not an array');
+            return;
+        }
+        currentPlayer = players.find(p => p && p.id === playerIdStr);
+        if (!currentPlayer) {
+            console.error(`updatePlayerInfo: Player with ID ${playerIdStr} not found. Available players:`, 
+                players.map(p => p ? p.id : 'null'));
+            return;
+        }
+        
+        console.log('[UI] Found player:', {
+            id: currentPlayer.id,
+            name: currentPlayer.name,
+            role: currentPlayer.role,
+            resources: currentPlayer.resources,
+            isHuman: currentPlayer.isHuman
+        });
+  
+        const { currentPlayer: playerElement, KNOWLEDGE_COUNT, MONEY_COUNT, INFLUENCE_COUNT } = state.ui.elements.gameBoard || {};
+        
+        // Log the UI elements for debugging
+       console.log('[UI] UI Elements:', {
+            currentPlayer: !!playerElement,
+            KNOWLEDGE_COUNT: !!KNOWLEDGE_COUNT,
+            MONEY_COUNT: !!MONEY_COUNT,
+            INFLUENCE_COUNT: !!INFLUENCE_COUNT
+        });
+        
+        if (!playerElement || !KNOWLEDGE_COUNT || !MONEY_COUNT || !INFLUENCE_COUNT) {
+            console.error('updatePlayerInfo: Missing required UI elements');
+            // Try to re-initialize UI elements if they're missing
+            if (initializeElementReferences) {
+               // console.log('Attempting to re-initialize UI elements...');
+                initializeElementReferences();
+            }
+            return;
+        }
+  
+        // Ensure resources exist, default to 0 if not
+        const resources = currentPlayer.resources || {};
+        const knowledge = resources.knowledge ?? 0;
+        const money = resources.money ?? 0;
+        const influence = resources.influence ?? 0;
+  
+        
+        //console.log('[UI] Updating UI with resources:', { knowledge, money, influence });
+        
+        // Update the UI elements
+        playerElement.textContent = `${currentPlayer.name} (${currentPlayer.role || 'No Role'})`;
+        KNOWLEDGE_COUNT.textContent = newValues.knowledge ?? knowledge;
+        MONEY_COUNT.textContent = newValues.money ?? money;
+        INFLUENCE_COUNT.textContent = newValues.influence ?? influence;
+        
+        // Force a reflow to ensure the UI updates
+        void playerElement.offsetHeight;
+        
+        //console.log(`[UI] Successfully updated UI for ${currentPlayer}'s turn`);
+        console.log('=============updatePlayerInfo END=============');
+        
+    } catch (error) {
+        console.error('Error in updatePlayerInfo:', error);
+        // Try a full UI refresh on error
+        try {
+            //console.log('Attempting full UI refresh...');
+            if (initializeUI) initializeUI();
+            if (updateGameControls) updateGameControls();
+        } catch (e) {
+            console.error('Failed to refresh UI:', e);
+        }
+    }
+}; 
+  
+  
+  /**
+   * Update player's resource panel with current values.
+   */
+  export function updateResourceDisplayContainer(player = getCurrentPlayer()) {
+    //console.log('=============updateResourceDisplayContainer=============');
+    // Try to find (or freshly create) the panel again
+    const panelUpdated = document.getElementById(`resource-Display-Container-${player.id}`);
+    if (!panelUpdated) {
+      console.error(`No resource display container found for player ID: ${player.id}`);
+      return;
+    }
+  
+    panelUpdated.querySelector('.player-name').textContent = player.name;
+    panelUpdated.querySelector('.KNOWLEDGE_COUNT').textContent = `Knowledge ${player.resources.money}`;
+    panelUpdated.querySelector('.MONEY_COUNT').textContent = `Money ${player.resources.knowledge}`;
+    panelUpdated.querySelector('.INFLUENCE_COUNT').textContent = `Influence ${player.resources.influence}`;
+};
   

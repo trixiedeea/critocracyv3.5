@@ -103,7 +103,7 @@ export const deckIdMap = {
 };
 
 // Check the actual export names and fix if necessary
-console.log("Loaded Cards:", Object.keys(CARD_DATA));
+//console.log("Loaded Cards:", Object.keys(CARD_DATA));
 
 // Card State Management
 let cardState = {
@@ -134,14 +134,14 @@ let currentOnComplete = null;
  * Initializes card decks from imported data and shuffles them.
  */
 export function setupDecks() {
-    console.log("Setting up card decks...");
+    //console.log("Setting up card decks...");
     try {
         // Load and shuffle Age of Expansion (Purple)
         if (Array.isArray(ageOfExpansionDeck) && ageOfExpansionDeck.length > 0) {
             cardState.decks[deckType.ageOfExpansionDeck] = [...ageOfExpansionDeck];
             cardState.discardPiles[deckType.ageOfExpansionDeck] = [];
             shuffleDeck(deckType.ageOfExpansionDeck);
-            console.log(`Deck ${deckType.ageOfExpansionDeck} loaded with ${cardState.decks[deckType.ageOfExpansionDeck].length} cards.`);
+            //console.log(`Deck ${deckType.ageOfExpansionDeck} loaded with ${cardState.decks[deckType.ageOfExpansionDeck].length} cards.`);
         } else {
             console.error(`Failed to load Age of Expansion cards.ageOfExpansionDeck=${ageOfExpansionDeck ? 'exists' : 'undefined'}`);
             return false;
@@ -152,9 +152,9 @@ export function setupDecks() {
             cardState.decks[deckType.ageOfResistanceDeck] = [...ageOfResistanceDeck];
             cardState.discardPiles[deckType.ageOfResistanceDeck] = [];
             shuffleDeck(deckType.ageOfResistanceDeck);
-            console.log(`Deck ${deckType.ageOfResistanceDeck} loaded with ${cardState.decks[deckType.ageOfResistanceDeck].length} cards.`);
+            //console.log(`Deck ${deckType.ageOfResistanceDeck} loaded with ${cardState.decks[deckType.ageOfResistanceDeck].length} cards.`);
         } else {
-            console.log(`Failed to load Age of Resistance (ageOfResistanceDeck) cards. Data is missing, empty, or not an array.`);
+            //console.log(`Failed to load Age of Resistance (ageOfResistanceDeck) cards. Data is missing, empty, or not an array.`);
             return false;
         }
 
@@ -163,9 +163,9 @@ export function setupDecks() {
             cardState.decks[deckType.ageOfReckoningDeck] = [...ageOfReckoningDeck];
             cardState.discardPiles[deckType.ageOfReckoningDeck] = [];
             shuffleDeck(deckType.ageOfReckoningDeck);
-            console.log(`Deck ${deckType.ageOfReckoningDeck} loaded with ${cardState.decks[deckType.ageOfReckoningDeck].length} cards.`);
+            //console.log(`Deck ${deckType.ageOfReckoningDeck} loaded with ${cardState.decks[deckType.ageOfReckoningDeck].length} cards.`);
         } else {
-            console.log(`Failed to load Age of Reckoning (ageOfReckoningDeck) cards. Data is missing, empty, or not an array.`);
+            //console.log(`Failed to load Age of Reckoning (ageOfReckoningDeck) cards. Data is missing, empty, or not an array.`);
             return false;
         }
 
@@ -174,9 +174,9 @@ export function setupDecks() {
             cardState.decks[deckType.ageOfLegacyDeck] = [...ageOfLegacyDeck];
             cardState.discardPiles[deckType.ageOfLegacyDeck] = [];
             shuffleDeck(deckType.ageOfLegacyDeck);
-            console.log(`Deck ${deckType.ageOfLegacyDeck} loaded with ${cardState.decks[deckType.ageOfLegacyDeck].length} cards.`);
+            //console.log(`Deck ${deckType.ageOfLegacyDeck} loaded with ${cardState.decks[deckType.ageOfLegacyDeck].length} cards.`);
         } else {
-            console.log(`Failed to load Age of Legacy (ageOfLegacyDeck) cards. Data is missing, empty, or not an array.`);
+            //console.log(`Failed to load Age of Legacy (ageOfLegacyDeck) cards. Data is missing, empty, or not an array.`);
             return false;
         }
 
@@ -185,14 +185,14 @@ export function setupDecks() {
             cardState.decks[deckType.endOfTurnDeck] = [...endOfTurnDeck];
             cardState.discardPiles[deckType.endOfTurnDeck] = [];
             shuffleDeck(deckType.endOfTurnDeck);
-            console.log(`End of Turn deck loaded with ${cardState.decks[deckType.endOfTurnDeck].length} cards.`);
+            //console.log(`End of Turn deck loaded with ${cardState.decks[deckType.endOfTurnDeck].length} cards.`);
         } else {
-            console.log("Failed to load End of Turn (endOfTurnDeck) cards. Data is missing, empty, or not an array.");
+            //console.log("Failed to load End of Turn (endOfTurnDeck) cards. Data is missing, empty, or not an array.");
             return false;
         }
 
         cardState.initialized = true;
-        console.log("All card decks have been set up successfully.");
+        //console.log("All card decks have been set up successfully.");
         return true;
     } catch (error) {
         console.error("An unexpected error occurred during deck setup:", error);
@@ -208,7 +208,7 @@ function shuffleDeck(deckType) {
     let deck = cardState.decks[deckType];
     if (!deck) return;
 
-    console.log(`Shuffling ${deckType} deck...`);
+    //console.log(`Shuffling ${deckType} deck...`);
     for (let i = deck.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [deck[i], deck[j]] = [deck[j], deck[i]]; // Swap
@@ -222,7 +222,7 @@ function shuffleDeck(deckType) {
  * @returns {Promise} Resolves when card is drawn and displayed
  */
 export function drawCard(deckType) {
-    console.log('=============drawCard=============');
+    console.log('===============drawCard===============');
     if (!isActionAllowed('PLAYING, MOVING, TURN_TRANSITION, AWAITING_PATH_CHOICE')) return;
         
     const player = getCurrentPlayer();
@@ -232,9 +232,9 @@ export function drawCard(deckType) {
     }
     // Clear any existing card first
     if (state.currentCard) {
-        console.log('Clearing current card before drawing new one:', state.currentCard.name);
+        //console.log('Clearing current card before drawing new one:', state.currentCard.name);
     }
-    console.log(`Drawing card from ${deckType} deck for player:`, player.name);
+    //console.log(`Drawing card from ${deckType} deck for player:`, player.name);
 
     // Get deck region configuration
     const deckConfig = Object.values(fullDeckRegionPathMap).find(r => r.deckType === deckType);
@@ -258,7 +258,7 @@ export function drawCard(deckType) {
 
     // Draw the actual card from the deck
     if (!cardState.initialized || !cardState.decks[deckType]) {
-        console.log(`Cannot draw card: Deck type ${deckType} not initialized or invalid.`);
+        //console.log(`Cannot draw card: Deck type ${deckType} not initialized or invalid.`);
         return;
     }
 
@@ -266,7 +266,7 @@ export function drawCard(deckType) {
     let discardPile = cardState.discardPiles[deckType];
 
     if (deck.length === 0) {
-        console.log(`${deckType} deck empty. Reshuffling discard pile...`);
+        //console.log(`${deckType} deck empty. Reshuffling discard pile...`);
         if (discardPile.length === 0) {
             console.warn(`Cannot draw card: ${deckType} deck and discard pile are both empty.`);
             return;
@@ -281,13 +281,14 @@ export function drawCard(deckType) {
     const card = deck.pop(); // Draw from the end (top) of the deck
     
     if (!card) {
-        console.log(`Popped an undefined card from ${deckType}. Deck state:`, deck);
+        //console.log(`Popped an undefined card from ${deckType}. Deck state:`, deck);
         return;
     }
     
-    console.log(`Drawn card from ${deckType}: ${card.name}`);
+    //console.log(`Drawn card from ${deckType}: ${card.name}`);
     
     // Store the current deck type in state
+    state.currentCard = card; 
     state.currentDeck = deckType;
     
     // Set flag if this is an end-of-turn card
@@ -309,22 +310,22 @@ export function drawCard(deckType) {
  * @param {string} deckType - The type of deck the card belongs to
  */
 export function discardCard(card, deckType) {
-    console.log('=============discardCard=============')
-    console.log(`Discarding card: ${card?.name || 'Unknown'}`);
+    console.log('===============discardCard===============')
+    //console.log(`Discarding card: ${card?.name || 'Unknown'}`);
     
     // Try to determine deck type if not provided
     if (!deckType && card) {
         // First try to get deck type from the card object
         deckType = card.deckType || state.currentDeck;
-        console.log(`Deck type not provided, using: ${deckType || 'Unknown'}`);
+        console.warn(`Deck type not provided, using: ${deckType || 'Unknown'}`);
     }
     
-    console.log(`Target deck: ${deckType || 'Unknown'}`);
+    console.warn(`Target deck: ${deckType || 'Unknown'}`);
     
     // Clear card data from all dialogs
     document.querySelectorAll('dialog').forEach(dialog => {
         if (dialog.dataset.cardData) {
-            console.log(`Removing card data from dialog: ${dialog.id || 'unnamed'}`);
+            console.warn(`Removing card data from dialog: ${dialog.id || 'dialog unnamed'}`);
             delete dialog.dataset.cardData;
         }
     });
@@ -335,7 +336,7 @@ export function discardCard(card, deckType) {
         for (const [type, deck] of Object.entries(cardState.decks)) {
             if (deck.includes(card)) {
                 deckType = type;
-                console.log(`Found card in ${type} deck`);
+                console.warn(`Found card in ${type} deck`);
                 break;
             }
         }
@@ -344,7 +345,7 @@ export function discardCard(card, deckType) {
     // Add card to discard pile if valid
     if (!cardState.initialized || !deckType || !cardState.discardPiles[deckType]) {
         console.warn(`Cannot discard card: Deck type ${deckType} not initialized or invalid.`);
-        console.log('Available discard piles:', Object.keys(cardState.discardPiles || {}));
+        //console.log('Available discard piles:', Object.keys(cardState.discardPiles || {}));
         return;
     }
     
@@ -354,11 +355,11 @@ export function discardCard(card, deckType) {
     }
     
     cardState.discardPiles[deckType].push(card);
-    //console.log(`Card ${card.name} discarded to ${deckType}. Pile size: ${cardState.discardPiles[deckType].length}`);
+    console.log(`Card ${card.name} discarded to ${deckType}. Pile size: ${cardState.discardPiles[deckType].length}`);
     
     // Clear current card from state
     if (state.currentCard) {
-        console.log('Clearing current card from state');
+        //console.log('Clearing current card from state');
         state.currentCard = null;
         state.currentDeck = null;
     }
@@ -375,7 +376,7 @@ export function discardCard(card, deckType) {
  * @param {Function} onComplete - Callback when card is closed
  */
 export async function showCard(card) {
-    console.log('=============showCard=============')
+    console.log('===============showCard===============')
     
     // Get current player
     const player = getCurrentPlayer();
@@ -395,13 +396,13 @@ export async function showCard(card) {
     
     // Enhanced logging for deck type detection
     //console.log(`[showCard] Deck Type Analysis:`);
-    console.log(`- deckType: ${deckType}`);
+    //console.log(`- deckType: ${deckType}`);
     //console.log(`- isEndOfTurnCard: ${isEndOfTurnCard} (deckType match: ${deckType === 'endOfTurnDeck'}, card.type: ${card?.type}, card.deck: ${card?.deck})`);
     //console.log(`- isAgeDeck: ${isAgeDeck} (regex test: ${/^age-Of/i.test(deckType)})`);
     //console.log(`- Card has choice: ${!!card?.choice}`);
     if (card?.choice) {
-        console.log(`  - Option A effects: ${card.choice.optionA?.effects ? 'Present' : 'None'}`);
-        console.log(`  - Option B effects: ${card.choice.optionB?.effects ? 'Present' : 'None'}`);
+        //console.log(`  - Option A effects: ${card.choice.optionA?.effects ? 'Present' : 'None'}`);
+        //console.log(`  - Option B effects: ${card.choice.optionB?.effects ? 'Present' : 'None'}`);
     }
 
     if (isEndOfTurnCard) console.log('Card details:', JSON.stringify({
@@ -543,7 +544,7 @@ export async function showCard(card) {
             dialog.close();
             drawBoard();
             // Apply card effect with the card's deck type
-            console.log(`Applying card effect from ${card.deckType} deck`);
+            //console.log(`Applying card effect from ${card.deckType} deck`);
             applyCardEffect(card);
             if (typeof onComplete === 'function') onComplete();
         };
@@ -586,7 +587,7 @@ export async function showCard(card) {
             freshOptionAButton.disabled = false;
             
             freshOptionAButton.onclick = async () => {
-                console.log('Age Deck Option A selected');
+                //console.log('Age Deck Option A selected');
                 freshOptionAButton.style.display = 'none';
                 
                 if (card.choice.optionA.effects && Array.isArray(card.choice.optionA.effects)) {
@@ -623,7 +624,7 @@ export async function showCard(card) {
             freshOptionBButton.disabled = false;
             
             freshOptionBButton.onclick = async () => {
-                console.log('Age Deck Option B selected');
+                //console.log('Age Deck Option B selected');
                 freshOptionBButton.style.display = 'none';
                 
                 if (card.choice.optionB.effects && Array.isArray(card.choice.optionB.effects)) {
@@ -656,11 +657,11 @@ export async function showCard(card) {
     
     // Handle AI player auto-choice
     if (isAI) {
-        console.log('AI player handling card:', card.name);
+        //console.log('AI player handling card:', card.name);
         setTimeout(() => {
             if (!dialog.open) return;
             
-            console.log('AI making choice for card:', card.name);
+            //console.log('AI making choice for card:', card.name);
             
             if (isAgeDeck) {
                 // Wait 3 seconds before clicking
@@ -688,7 +689,7 @@ export async function showCard(card) {
 }
 
 function formatResourceChanges(changes) {
-    console.log('=============formatResourceChanges=============');
+    console.log('================formatResourceChanges================');
     const result = [];
     if (changes.money !== undefined) result.push(`${changes.money >= 0 ? '+' : ''}${changes.money}💰`);
     if (changes.knowledge !== undefined) result.push(`${changes.knowledge >= 0 ? '+' : ''}${changes.knowledge}📚`);
@@ -705,7 +706,7 @@ export function isEndOfTurnCard(card) {
 }
 
 export async function processCardEffects(card, targetPlayer = null) {
-    console.log('=============processCardEffects=============')
+    console.log('================processCardEffects================')
     // Use provided player or get current player
     const currentPlayer = targetPlayer || getCurrentPlayer();
     
@@ -715,14 +716,14 @@ export async function processCardEffects(card, targetPlayer = null) {
         return;
     }
     
-    console.log(`Processing card effects for player ${currentPlayer.name} with role ${currentPlayer.role || 'N/A'}`);
+    //console.log(`Processing card effects for player ${currentPlayer.name} with role ${currentPlayer.role || 'N/A'}`);
     
     // If the card parameter is already an effect (not a card object with effects property)
     if (card && (card.type || card.changes || card.effect)) {
-        console.log('Processing direct effect:', card);
+        //console.log('Processing direct effect:', card);
         // Handle the effect directly
         if (card.type === 'RESOURCE_CHANGE') {
-            console.log(`Applying resource change effect to ${currentPlayer.name}:`, card.changes);
+            //console.log(`Applying resource change effect to ${currentPlayer.name}:`, card.changes);
             // Apply each resource change individually
             if (card.changes.money !== undefined) {
                 await applyResourceChange('money', card.changes.money, 'cardEffect', currentPlayer.id);
@@ -734,10 +735,10 @@ export async function processCardEffects(card, targetPlayer = null) {
                 await applyResourceChange('influence', card.changes.influence, 'cardEffect', currentPlayer.id);
             }
         } else if (card.type === 'MOVEMENT') {
-            console.log(`Applying movement effect to ${currentPlayer.name}:`, card);
+            //console.log(`Applying movement effect to ${currentPlayer.name}:`, card);
             handleCardMovement(currentPlayer, card);
         } else if (card.type === 'SKIP_TURN') {
-            console.log(`Skipping turn for ${currentPlayer.name}`);
+            //console.log(`Skipping turn for ${currentPlayer.name}`);
             skipPlayerTurn(currentPlayer, card.turns || 1);
         } else {
             console.warn(`Unknown effect type: ${card.type}`, card);
@@ -754,23 +755,26 @@ export async function processCardEffects(card, targetPlayer = null) {
     
     // If effects is an array, process each effect
     if (Array.isArray(card.effects)) {
-        for (const effect of card.effects) {
+        card.effects.forEach(effect => {
             if (effect.type === 'RESOURCE_CHANGE') {
-                console.log(`Applying resource change effect to ${currentPlayer.name}:`, effect.changes);
-                // Apply each resource change individually
-                if (effect.changes.money !== undefined) {
-                    await applyResourceChange('money', effect.changes.money, 'cardEffect', currentPlayer.id);
-                }
-                if (effect.changes.knowledge !== undefined) {
-                    await applyResourceChange('knowledge', effect.changes.knowledge, 'cardEffect', currentPlayer.id);
-                }
-                if (effect.changes.influence !== undefined) {
-                    await applyResourceChange('influence', effect.changes.influence, 'cardEffect', currentPlayer.id);
-                }
+                //console.log(`Applying resource change effect to ${currentPlayer.name}:`, effect.changes);
+                applyResourceChange({
+                    player: currentPlayer,
+                    changes: effect.changes,
+                    source: 'card',
+                    cardId: card?.id,
+                    explanation: effect.explanation
+                });
+            } else if (effect.type === 'MOVEMENT') {
+                //console.log(`Applying movement effect to ${currentPlayer.name}:`, effect);
+                handleCardMovement(currentPlayer, effect);
+            } else if (effect.type === 'SKIP_TURN') {
+                //console.log(`Skipping turn for ${currentPlayer.name}`);
+                skipPlayerTurn(currentPlayer, effect.turns || 1);
             } else {
                 console.warn(`Unknown effect type: ${effect.type}`, effect);
             }
-        }
+        });
         return;
     }
     
@@ -803,31 +807,31 @@ export async function processCardEffects(card, targetPlayer = null) {
         }
         
         if (roleEffect) {
-            console.log(`Found effects for role variant: ${matchedRole}`);
+            //console.log(`Found effects for role variant: ${matchedRole}`);
             if (Array.isArray(roleEffect)) {
                 roleEffect.forEach(effect => handleEffect(effect, currentPlayer, card));
             } else {
                 handleEffect(roleEffect, currentPlayer, card);
             }
         } else {
-            console.log(`No effects found for role: ${playerRole} (tried variants: ${roleVariants.join(', ')})`);
-            console.log('Available roles in card effects:', Object.keys(card.effects));
+            //console.log(`No effects found for role: ${playerRole} (tried variants: ${roleVariants.join(', ')})`);
+            //console.log('Available roles in card effects:', Object.keys(card.effects));
             processEndPlayerTurn(card);
         }
     }
     
-    console.log(`Found effects for role variant: ${matchedRole}`);
-    console.log(`Processing effect: ${roleEffect.type}`);
+    //console.log(`Found effects for role variant: ${matchedRole}`);
+    //console.log(`Processing effect: ${roleEffect.type}`);
     
     if (roleEffect.explanation) {
-        console.log(`Effect explanation: ${roleEffect.explanation}`);
+        //console.log(`Effect explanation: ${roleEffect.explanation}`);
     }
     
     // Verify this is a resource change effect
     if (roleEffect.type !== 'RESOURCE_CHANGE' || !roleEffect.changes) {
         console.warn(`Effect for ${matchedRole} is not a resource change or has no changes`);
-        console.log('Available effect:', roleEffect);
-        console.log('=============---processCardEffects END=============---')
+        //console.log('Available effect:', roleEffect);
+        console.log('------------processCardEffects END------------')
         updatePlayerInfo(currentPlayer);
         processEndPlayerTurn(card);
         return;
@@ -836,32 +840,32 @@ export async function processCardEffects(card, targetPlayer = null) {
     // Apply the resource changes using your existing applyResourceChange function
     const changes = roleEffect.changes;
     
-    console.log(`Applying resource changes:`, changes);
+    //console.log(`Applying resource changes:`, changes);
     
     // Apply each resource change individually using your existing function
     if (changes.money !== undefined) {
-        console.log(`Applying money change: ${changes.money}`);
+        //console.log(`Applying money change: ${changes.money}`);
         await applyResourceChange('money', changes.money, 'cardEffect', currentPlayer.id);
     }
     
     if (changes.knowledge !== undefined) {
-        console.log(`Applying knowledge change: ${changes.knowledge}`);
+        //console.log(`Applying knowledge change: ${changes.knowledge}`);
         await applyResourceChange('knowledge', changes.knowledge, 'cardEffect', currentPlayer.id);
     }
     
     if (changes.influence !== undefined) {
-        console.log(`Applying influence change: ${changes.influence}`);
+        //console.log(`Applying influence change: ${changes.influence}`);
         await applyResourceChange('influence', changes.influence, 'cardEffect', currentPlayer.id);
     }
     
     // Log the changes for debugging/feedback
-    console.log(`Applied effects for ${matchedRole}:`);
-    console.log(`- Money: ${changes.money || 0}`);
-    console.log(`- Knowledge: ${changes.knowledge || 0}`);
-    console.log(`- influence: ${changes.influence || 0}`);
-    console.log(`- Explanation: ${roleEffect.explanation}`);
+    //console.log(`Applied effects for ${matchedRole}:`);
+    //console.log(`- Money: ${changes.money || 0}`);
+    //console.log(`- Knowledge: ${changes.knowledge || 0}`);
+    //console.log(`- influence: ${changes.influence || 0}`);
+    //console.log(`- Explanation: ${roleEffect.explanation}`);
     
-    console.log('=============processCardEffects END=============');
+    //console.log('---------processCardEffects END---------');
     // Call processEndPlayerTurn when complete, passing the card
     updatePlayerInfo(currentPlayer);
     processEndPlayerTurn(card);
@@ -874,8 +878,8 @@ export async function processCardEffects(card, targetPlayer = null) {
    * @param {Array} effects - Array of effects that were processed
    */
   export async function processAgeCardEffects(card, effects) {
-    console.log('=============processAgeCardEffects=============');
-    console.log('Validating effects for card:', card.name);
+    console.log('================processAgeCardEffects================');
+    //console.log('Validating effects for card:', card.name);
       
       // Validate that all effects were processed
       let allEffectsApplied = true;
@@ -899,7 +903,7 @@ export async function processCardEffects(card, targetPlayer = null) {
       if (!allEffectsApplied) {
         console.warn('Some age card effects may not have been properly applied:', validationErrors);
       } else {
-        console.log('All age card effects have been successfully processed');
+        //console.log('All age card effects have been successfully processed');
       }
       
       // Update player resources and UI (this ensures all changes are reflected)
@@ -915,11 +919,11 @@ export async function processCardEffects(card, targetPlayer = null) {
       // Reset game state flags
       state.preventCardDraw = false;
       
-      console.log('processAgeCardEffects validation complete - calling handleEndTurn');
+      //console.log('processAgeCardEffects validation complete - calling handleEndTurn');
       
       // Always call handleEndTurn regardless of validation results
       updatePlayerInfo(currentPlayer);
       // This ensures the game doesn't get stuck
-      console.log('=============processAgeCardEffects END=============');
+      console.log('---------processAgeCardEffects END---------');
       handleEndTurn();
   }

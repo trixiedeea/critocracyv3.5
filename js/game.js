@@ -19,7 +19,8 @@ import {
 } from './board-data.js';
 import { 
     setupDecks, 
-    discardCard
+    discardCard,
+    deckType
 } from './cards.js';
 
 import { 
@@ -66,7 +67,7 @@ const DEBUG_MODE = false;
  */
 export function startGame(playerConfigs, turnOrder, { debugMode = false } = {}) {
     console.log('=============startGame=============');
-    console.log('[Game] startGame called with:', { playerConfigs, turnOrder, debugMode });
+    //console.log('[Game] startGame called with:', { playerConfigs, turnOrder, debugMode });
     
     if (!playerConfigs || !turnOrder || playerConfigs.length === 0 || turnOrder.length === 0) {
         console.error('[Game] startGame called with invalid arguments.');
@@ -242,7 +243,7 @@ export async function handlePlayerAction() {
 
     // 0. Check if player turn should be skipped
     if (player.skipTurns > 0) {
-        console.log(`Player ${player.name} skips turn (${player.skipTurns} remaining).`);
+        //console.log(`Player ${player.name} skips turn (${player.skipTurns} remaining).`);
         player.skipTurns--;
         updatePlayerInfo(player.id);
         handleEndTurn(true);
@@ -275,14 +276,14 @@ export async function handlePlayerAction() {
     const isAtStart = dx <= tolerance && dy <= tolerance;
     
     // Log the comparison results
-    console.log('Coordinate comparison:', { dx, dy, tolerance, isAtStart });
+    //console.log('Coordinate comparison:', { dx, dy, tolerance, isAtStart });
 
-    console.log(`Checking start space - Player: (${player.currentCoords.x},${player.currentCoords.y}), Start: (${startX},${startY}), Within tolerance: ${isAtStart}`);
+    //console.log(`Checking start space - Player: (${player.currentCoords.x},${player.currentCoords.y}), Start: (${startX},${startY}), Within tolerance: ${isAtStart}`);
 
     // Determine player action based on type and position
     if (player.isHuman) {
         if (isAtStart) {
-            console.log(`Human player ${player.name} is at Start. Prompting for path choice.`);
+            //console.log(`Human player ${player.name} is at Start. Prompting for path choice.`);
             updateGameState({
                 currentPhase: 'AWAITING_PATH_CHOICE',
                 pendingActionData: { rollResult }
@@ -304,13 +305,13 @@ export async function handlePlayerAction() {
             promptForPathChoice(options, player);
             return; // Wait for choice
         } else {
-            console.log(`Human player ${player.name} is not at start. Animating token to position.`);
+            //console.log(`Human player ${player.name} is not at start. Animating token to position.`);
             await animateTokenToPosition(player, null, 1000, false, null);
         }
     } else {
         // AI Player
         if (isAtStart) {
-            console.log(`AI player ${player.name} is at Start. Simulating path choice.`);
+            //console.log(`AI player ${player.name} is at Start. Simulating path choice.`);
             updateGameState({
                 currentPhase: 'AWAITING_PATH_CHOICE',
                 pendingActionData: { rollResult }
@@ -322,7 +323,7 @@ export async function handlePlayerAction() {
                 currentPhase: 'MOVING',
             });
             console.warn('game phase updated to MOVING');
-            console.log(`AI player ${player.name} is not at start. Animating token to position.`);
+            //console.log(`AI player ${player.name} is not at start. Animating token to position.`);
             animateTokenToPosition(player, null, 1000, false, null);
         }
     }
@@ -364,27 +365,32 @@ export function handlePathChoice(chosenCoords, chosenPath) {
  * Identifies the space type and path, then highlights the associated deck.
  * @param {object} completionData - { reason, stepsTaken }
  */
-export async function handleEndOfMove(completionData = { reason: 'unknown', stepsTaken: 0 }) {
+export async function handleEndOfMove(currentCoords) {
     if (!isActionAllowed('handleEndOfMove')) return;
-    const { reason, stepsTaken } = completionData;
     const player = getCurrentPlayer();
+    
+    // Ensure player coordinates in state match the current position
+    if (player.currentCoords.x !== currentCoords.x || player.currentCoords.y !== currentCoords.y) {
+        console.log(`Updating player ${player.id} coordinates to:`, currentCoords);
+        updatePlayer(player.id, { currentCoords: { ...currentCoords } });
+    }
 
     updateGameState({
         currentPhase: 'AWAITING_CARD_ACTION',
     });
     console.warn('game state updated to AWAITING_CARD_ACTION')
     console.log('=============handleEndOfMove=============');
-    console.log(`Player ${player.name} completed movement to coords:`, player.currentCoords);
+    //console.log(`Player ${player.name} completed movement to coords:`, player.currentCoords);
 
-    const spaceDetails = findSpaceDetailsByCoords(player.currentCoords);
+    const spaceDetails = findSpaceDetailsByCoords(currentCoords);
 
     if (!spaceDetails) {
-        console.error(`Could not find space details at:`, player.currentCoords);
+        console.error(`Could not find space details at:`, currentCoords);
         console.warn("Resetting player to START_SPACE due to invalid position.");
 
         if (START_SPACE && START_SPACE.coordinates?.[0]) {
             player.currentCoords = { x: START_SPACE.coordinates[0][0], y: START_SPACE.coordinates[0][1] };
-            console.log(`Player position reset to START_SPACE at (${player.currentCoords.x}, ${player.currentCoords.y})`);
+            //console.log(`Player position reset to START_SPACE at (${player.currentCoords.x}, ${player.currentCoords.y})`);
             drawBoard(); // Refresh visuals
         } else {
             console.error("START_SPACE is invalid or malformed.");
@@ -411,16 +417,27 @@ export async function handleEndOfMove(completionData = { reason: 'unknown', step
     // Get the correct path key if it exists in our mapping
     const mappedPathKey = pathKey ? pathNameMap[pathKey] : null;
 
-    console.log(`Space type: ${spaceType}, Path: ${pathKey}, Mapped Path: ${mappedPathKey}, Color: ${pathColor}`);
+    //console.log(`Space type: ${spaceType}, Path: ${pathKey}, Mapped Path: ${mappedPathKey}, Color: ${pathColor}`);
 
     // Only highlight deck regions if this is a Draw space
     if (spaceType === 'draw') {
         // Determine deck to highlight based on path for Draw spaces
         let deckType = 'endOfTurnDeck';
         
-        if (mappedPathKey && fullDeckRegionPathMap[mappedPathKey]?.deckType) {
-            deckType = fullDeckRegionPathMap[mappedPathKey].deckType;
-            console.log(`Found deck type: ${deckType} for path ${mappedPathKey}`);
+        if (pathColor === 'purple') {
+            deckType = 'ageOfExpansionDeck';
+
+        } else if (pathColor === 'blue') {
+            deckType = 'ageOfResistanceDeck';
+
+        } else if (pathColor === 'cyan') {
+            deckType = 'ageOfReckoningDeck';
+
+        } else if (pathColor === 'pink') {
+            deckType = 'ageOfLegacyDeck';
+            
+        } else if (!pathColor) {
+            deckType = 'endOfTurnDeck';
         } else {
             console.warn(`No specific deckType found for path '${pathKey}'. Using 'endOfTurnDeck'.`);
         }
@@ -432,16 +449,24 @@ export async function handleEndOfMove(completionData = { reason: 'unknown', step
         } else if (deckType === 'endOfTurnDeck' && fullDeckRegionPathMap.endOfTurn?.positions) {
             positions = fullDeckRegionPathMap.endOfTurn.positions;
         }
-        
-        console.log(`Draw space → highlighting deck region for path ${mappedPathKey} using deckType ${deckType}`);
+        //console.log(`Draw space → highlighting deck region for path ${mappedPathKey} using deckType ${deckType}`);
         await highlightDeckRegions(player, deckType, positions);
+
     } else if (spaceType === 'regular') {
         // For Regular spaces, only highlight end-of-turn regions
         const deckType = 'endOfTurnDeck';
         const positions = fullDeckRegionPathMap.endOfTurn?.positions || [];
-        
-        console.log(`Regular space → highlighting end-of-turn regions`);
-        await highlightDeckRegions(player, deckType, positions);
+         //console.log(`Regular space → highlighting end-of-turn regions`);
+        await highlightDeckRegions(player, deckType, positions);``
+
+    } else if (spaceType === 'choicepoint') {
+        const deckType = 'endOfTurnDeck';
+        const positions = fullDeckRegionPathMap.endOfTurn?.positions || [];
+        console.log('choicepoint space, treating as regular space player will pick direction start of next turn')
+        await highlightDeckRegions(player, deckType, positions);``
+
+    } else if (spaceType === 'finish') {
+        await markPlayerFinished(player);
     } else {
         console.log(`Space type ${spaceType} - no deck highlighting needed`);
     }
@@ -457,10 +482,10 @@ export async function handleEndOfMove(completionData = { reason: 'unknown', step
  */
 export async function handleSpaceAction(player, spaceType, pathName) {
     console.log('=============handleSpaceAction=============');
-    console.log(`Handling space type: ${spaceType}, pathName: ${pathName}, player: ${player.name}`);
+    //console.log(`Handling space type: ${spaceType}, pathName: ${pathName}, player: ${player.name}`);
   
     if (preventAgeCardDraw) {
-        console.log('Age of card draw prevented - player moved by card effect');
+        //console.log('Age of card draw prevented - player moved by card effect');
         preventAgeCardDraw = false; // Reset the flag
         return; // Don't draw a card
       }
@@ -477,11 +502,11 @@ export async function handleSpaceAction(player, spaceType, pathName) {
       const deckType = pathData.deckType;
       const positions = pathData.positions;
   
-      console.log(`Draw space → deckType: ${deckType}, positions:`, positions);
+      //console.log(`Draw space → deckType: ${deckType}, positions:`, positions);
       
       if (!player.isHuman) {
         // For AI players, wait 5 seconds then simulate deck click
-        console.log(`AI player ${player.name} will draw a card in 5 seconds...`);
+        //console.log(`AI player ${player.name} will draw a card in 5 seconds...`);
         await delay(5000);
         await simulateCpuDeckClick(deckType);
       } else {
@@ -493,11 +518,11 @@ export async function handleSpaceAction(player, spaceType, pathName) {
       const deckType = 'endOfTurnDeck';
       const positions = fullDeckRegionPathMap.endOfTurn?.positions || [];
   
-      console.log(`Regular space → deckType: ${deckType}, positions:`, positions);
+      //console.log(`Regular space → deckType: ${deckType}, positions:`, positions);
       
       if (!player.isHuman) {
         // For AI players, wait 5 seconds then simulate end of turn deck click
-        console.log(`AI player ${player.name} will draw an end of turn card in 2.5 seconds...`);
+        //console.log(`AI player ${player.name} will draw an end of turn card in 2.5 seconds...`);
         await delay(2500);
         await simulateCpuDeckClick(deckType);
       } else {
@@ -506,7 +531,7 @@ export async function handleSpaceAction(player, spaceType, pathName) {
       }
   
     } else {
-      console.log(`Unhandled space type: ${spaceType}`);
+      //console.log(`Unhandled space type: ${spaceType}`);
     }
 };
 
@@ -516,7 +541,7 @@ export async function handleSpaceAction(player, spaceType, pathName) {
  */
 export function handleEndTurn() {
     if (!isActionAllowed('handleEndTurn')) {
-        console.log('handleEndTurn action not allowed');
+        //console.log('handleEndTurn action not allowed');
         return;
     }
     console.log('=============handleEndTurn=============');
@@ -527,7 +552,7 @@ export function handleEndTurn() {
       return;
     }
   
-    console.log(`GAME: Ending turn for Player ${player.name} (${player.role})`);
+    //console.log(`GAME: Ending turn for Player ${player.name} (${player.role})`);
   
     // Stop any queued animations
     if (window.animationQueue && typeof window.animationQueue.clear === 'function') {
@@ -559,7 +584,7 @@ export function handleEndTurn() {
         bottomleftx: 1128, bottomleft: 596
       }
     ];
-    console.log("Prompting player to draw end-of-turn card. Turn will advance after card is drawn.");
+    //console.log("Prompting player to draw end-of-turn card. Turn will advance after card is drawn.");
     // 👇 Call exactly as you demanded
     highlightDeckRegions(player, deckType, positions);
   
@@ -572,7 +597,7 @@ export function handleEndTurn() {
  */
 export function processEndPlayerTurn() {
     if (!isActionAllowed('processEndPlayerTurn')) {
-        console.log('processEndPlayerTurn action not allowed');
+        //console.log('processEndPlayerTurn action not allowed');
         return;
     }
     console.log('=============processEndPlayerTurn=============');
@@ -580,10 +605,10 @@ export function processEndPlayerTurn() {
     try {
         // Discard the current card with proper deck type
         if (state.currentCard) {
-            console.log(`Discarding current card: ${state.currentCard.name}`);
+            //console.log(`Discarding current card: ${state.currentCard.name}`);
             // Get deck type from state or card
             const deckType = state.currentDeck || state.currentCard.deckType || 'unknown';
-            console.log(`Using deck type: ${deckType}`);
+            //console.log(`Using deck type: ${deckType}`);
             discardCard(state.currentCard, deckType);
         } else {
             console.warn('No current card to discard at end of turn');
@@ -603,19 +628,19 @@ export function processEndPlayerTurn() {
         return;
     }
 
-    console.log(`Processing end of turn for ${currentPlayer.name} (${currentPlayer.role})`);
+    //console.log(`Processing end of turn for ${currentPlayer.name} (${currentPlayer.role})`);
 
     // Check if player is at finish coordinates
     const playerCoords = currentPlayer.coordinates;
     const finishCoords = FINISH_SPACE.coordinates[0]; // [1384, 512]
         
     if (playerCoords && playerCoords.x === finishCoords[0] && playerCoords.y === finishCoords[1]) {
-            console.log(`Player ${currentPlayer.name} is at finish coordinates, marking as finished`);
+            //console.log(`Player ${currentPlayer.name} is at finish coordinates, marking as finished`);
             markPlayerFinished(currentPlayer);
             
             // Check if all other players are finished
             if (allPlayersFinished()) {
-                console.log('All players finished, triggering game over');
+                //console.log('All players finished, triggering game over');
                 triggerGameOver().catch(console.error);
                 return;
             }
@@ -625,7 +650,7 @@ export function processEndPlayerTurn() {
 
     if (currentPlayer.isHuman) {
         // For human players, enable the end turn button with pulse effect
-        console.log('Enabling end turn button for human player');
+        //console.log('Enabling end turn button for human player');
         if (endTurnButton) {
             // First, remove any existing pulse animation
             endTurnButton.classList.remove('shake');
@@ -637,12 +662,12 @@ export function processEndPlayerTurn() {
             endTurnButton.classList.add('shake');
             endTurnButton.style.pointerEvents = 'auto';
             
-            console.log('End turn button enabled and pulsing for human player');
+            //console.log('End turn button enabled and pulsing for human player');
         }
         updateGameState({ currentPhase: 'TURN_TRANSITION' });
     } else {
         // For AI players, ensure the button is disabled and not pulsing
-        console.log('AI player turn ended, ensuring end turn button is disabled');
+        //console.log('AI player turn ended, ensuring end turn button is disabled');
         if (endTurnButton) {
             endTurnButton.disabled = true;
             endTurnButton.classList.remove('shake');
@@ -666,7 +691,7 @@ export async function triggerGameOver() {
 
     // Calculate final scores/rankings
     const finalRankings = getPlayerRanking();
-    console.log("Final Rankings:", finalRankings);
+    //console.log("Final Rankings:", finalRankings);
 
     // Display end game screen
     showEndGameScreen(finalRankings);
@@ -696,11 +721,11 @@ export function handleAITurn(aiPlayer) {
     });
     
     // Debug log
-    console.log(`🔄 AI ${aiPlayer.name}'s turn starting...`);
+    //console.log(`🔄 AI ${aiPlayer.name}'s turn starting...`);
     
     // 1. Generate a random roll (1-6)
     const rollResult = Math.floor(Math.random() * 6) + 1;
-    console.log(`AI ${aiPlayer.name} rolled a ${rollResult}`);
+    //console.log(`AI ${aiPlayer.name} rolled a ${rollResult}`);
     
     // 2. Update game state with the roll result
     updateGameState({ 
@@ -714,7 +739,7 @@ export function handleAITurn(aiPlayer) {
         updateGameState({ 
             currentPhase: 'ROLLING',
         });
-        console.log(`✅ AI ${aiPlayer.name}'s roll completed`);
+        //console.log(`✅ AI ${aiPlayer.name}'s roll completed`);
         animateDiceRoll(diceElement, rollResult, 2000);
     } else {
         console.warn('Dice element not found for AI roll animation');
@@ -731,7 +756,7 @@ export function handleAITurn(aiPlayer) {
 export function simulateCpuChoicepoint(player) {
     if (!isActionAllowed('simulateCpuChoicepoint')) return;
     console.log('=============simulateCpuChoicepoint=============');
-    console.log(`[AI] Simulating path choice choice for ${player.name} in phase: ${state.currentPhase}`);
+    //console.log(`[AI] Simulating path choice choice for ${player.name} in phase: ${state.currentPhase}`);
     updateGameState({ currentPhase: 'AWAITING_PATH_CHOICE' });
     console.warn('gamestate updated to AWAITING_PATH_CHOICE');
 
@@ -763,7 +788,7 @@ export function simulateCpuChoicepoint(player) {
                 choiceInProgress: false,
                 currentPhase: 'MOVING'
             });
-            console.log(`[AI] ${player.name} completed choice in phase: ${state.currentPhase}`);
+            //console.log(`[AI] ${player.name} completed choice in phase: ${state.currentPhase}`);
         }
     };
     
@@ -776,7 +801,7 @@ export function simulateCpuChoicepoint(player) {
 
     // Initial 1-second delay for thought time
     setTimeout(() => {
-        console.log(`[AI] ${player.name} is making a choicepoint decision...`);
+        //console.log(`[AI] ${player.name} is making a choicepoint decision...`);
 
         let options;
         
@@ -791,7 +816,7 @@ export function simulateCpuChoicepoint(player) {
         
         if (isAtStart) {
             // At start position, use the start space options
-            console.log('[AI] At start position, using start space options');
+            //console.log('[AI] At start position, using start space options');
             options = Object.entries(START_SPACE.nextCoordOptions).map(([pathKey, coords]) => ({
                 text: pathKey.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()),
                 coords: { x: coords[0], y: coords[1] },
@@ -799,7 +824,7 @@ export function simulateCpuChoicepoint(player) {
             }));
         } else {
             // At a regular choicepoint, get next step options
-            console.log('[AI] At regular choicepoint, getting next step options');
+            //console.log('[AI] At regular choicepoint, getting next step options');
             const currentCoords = player.currentCoords;
             if (!currentCoords) {
                 return handleError("Player has no current coordinates");
@@ -828,7 +853,7 @@ export function simulateCpuChoicepoint(player) {
             }
         });
 
-        console.log(`[AI] ${player.name} pre-selected path: ${selectedOption.pathName || selectedOption.text}.`);
+        //console.log(`[AI] ${player.name} pre-selected path: ${selectedOption.pathName || selectedOption.text}.`);
 
         // Show popover
         const popover = document.getElementById('path-Choice-Popover');
@@ -856,7 +881,7 @@ export function simulateCpuChoicepoint(player) {
         const chosenButton = document.getElementById(buttonId);
         
         if (chosenButton) {
-            console.log(`[AI] Animating button for path choice: ${selectedOption.pathName}`);
+            //console.log(`[AI] Animating button for path choice: ${selectedOption.pathName}`);
             
             // Animate button scaling: 1.0 -> 0.9 -> 0.8 -> 0.7 -> 0.8 -> 0.9 -> 1.0 over 2 seconds
             const scales = [0.9, 0.8, 0.7, 0.8, 0.9, 1.0];
@@ -905,7 +930,7 @@ export function simulateCpuChoicepoint(player) {
                 console.error('Failed to close popover:', err);
             }
             
-            console.log(`[AI] AI ${player.name} chose path: ${selectedOption.pathName} at (${selectedOption.coords.x}, ${selectedOption.coords.y})`);
+            //console.log(`[AI] AI ${player.name} chose path: ${selectedOption.pathName} at (${selectedOption.coords.x}, ${selectedOption.coords.y})`);
             
             // Call handlePathChoice with the selected coordinates and path
 
@@ -923,11 +948,11 @@ export function simulateCpuChoicepoint(player) {
  * Handles skipping finished players and looping back.
  */
 export async function advanceToNextPlayer() {
-    console.log("=============-- advance To Next Player =============---");
+    console.log("=============== advance To Next Player ================");
     
     // Normal game flow for non-debug mode
     if (state.currentPlayerIndex === state.totalPlayerCount - 1) {
-        console.log("End of round reached, decrementing/clearing statuses.");
+        //console.log("End of round reached, decrementing/clearing statuses.");
         // Update game state with any end-of-round cleanup
         updateGameState({
             // Reset any round-based state here
@@ -948,11 +973,11 @@ export async function advanceToNextPlayer() {
             }))
         });
         
-        console.log("All temporary alliances and turn flags cleared.");
+        //console.log("All temporary alliances and turn flags cleared.");
     }
 
     if (state.ended) {
-        console.log("Game has ended, not advancing player.");
+        //console.log("Game has ended, not advancing player.");
         return;
     }
 
@@ -965,15 +990,15 @@ export async function advanceToNextPlayer() {
     let nextPlayerIndex = (state.currentPlayerIndex + 1) % state.totalPlayerCount;
     let loopCheck = 0; // Prevent infinite loops
 
-    console.log(`Advancing from player index ${state.currentPlayerIndex} of ${state.totalPlayerCount} total players`);
-    console.log(`Initial next index: ${nextPlayerIndex}`);
+    //console.log(`Advancing from player index ${state.currentPlayerIndex} of ${state.totalPlayerCount} total players`);
+    //console.log(`Initial next index: ${nextPlayerIndex}`);
 
     // Find the next player who hasn't finished
     while (state.players[nextPlayerIndex].finished && loopCheck < state.totalPlayerCount) {
-        console.log(`Player ${state.players[nextPlayerIndex].name} at index ${nextPlayerIndex} has finished, skipping.`);
+        //console.log(`Player ${state.players[nextPlayerIndex].name} at index ${nextPlayerIndex} has finished, skipping.`);
         nextPlayerIndex = (nextPlayerIndex + 1) % state.totalPlayerCount;
         loopCheck++;
-        console.log(`Trying next index: ${nextPlayerIndex}, loop count: ${loopCheck}`);
+        //console.log(`Trying next index: ${nextPlayerIndex}, loop count: ${loopCheck}`);
     }
 
     // If loopCheck reaches totalPlayerCount, it means everyone left is finished - trigger game over again just in case.
@@ -983,7 +1008,7 @@ export async function advanceToNextPlayer() {
          return;
     }
 
-    console.log(`Final next player index selected: ${nextPlayerIndex} - Player: ${state.players[nextPlayerIndex].name}`);
+    //console.log(`Final next player index selected: ${nextPlayerIndex} - Player: ${state.players[nextPlayerIndex].name}`);
     
     const newCurrentPlayer = state.players[nextPlayerIndex];
     
@@ -996,7 +1021,7 @@ export async function advanceToNextPlayer() {
     });
     console.warn(`GAMEPHASE UPDATED TO ROLLING for ${newCurrentPlayer.name}`);
 
-    console.log(`Advancing turn. New current player: ${newCurrentPlayer.name} (ID: ${newCurrentPlayer.id}, Index: ${state.currentPlayerIndex})`);
+    //console.log(`Advancing turn. New current player: ${newCurrentPlayer.name} (ID: ${newCurrentPlayer.id}, Index: ${state.currentPlayerIndex})`);
     
     // Clear any pending data from previous turn
     updateGameState({
@@ -1014,7 +1039,7 @@ export async function advanceToNextPlayer() {
     updateGameControls();
     
     if (newCurrentPlayer.isHuman) {
-        console.log(`[DEBUG] Human player ${newCurrentPlayer.name}'s turn started`);
+        //console.log(`[DEBUG] Human player ${newCurrentPlayer.name}'s turn started`);
         // Enable dice shake for human players
         startDiceShake();
         // Update UI to show it's the player's turn
@@ -1024,9 +1049,9 @@ export async function advanceToNextPlayer() {
     } else {
         console.log(`[DEBUG] AI player ${newCurrentPlayer.name}'s turn started`);
         // For AI players, trigger the AI turn after a short delay
-        console.log("Starting 2 second delay before AI turn...");
+        //console.log("Starting 2 second delay before AI turn...");
         await new Promise(resolve => setTimeout(resolve, 2000)); 
-        console.log("...Delay finished, starting AI turn.");
+        //console.log("...Delay finished, starting AI turn.");
         await handleAITurn(newCurrentPlayer);
     }
 }

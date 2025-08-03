@@ -120,7 +120,7 @@ window.getCurrentPlayer = getCurrentPlayer;
  * @returns {Object} Immutable copy of the game state
  */
 export function getGameState() {
-   // console.log('=============getGameState=============');
+    //console.log('=============getGameState=============');
     return JSON.parse(JSON.stringify(_state.game));
 }
 
@@ -129,7 +129,7 @@ export function getGameState() {
  * @returns {Object} Immutable copy of the UI state
  */
 export function getUIState() {
-   // console.log('=============getUIState=============');
+    //console.log('=============getUIState=============');
     return JSON.parse(JSON.stringify(_state.ui));
 }
 
@@ -138,6 +138,7 @@ export function getUIState() {
  * @returns {Object|null} Current player or null if none
  */
 export function getCurrentPlayer() {
+    //console.log('=============getCurrentPlayer=============');
     const { game } = _state;
     
     // Check if players array exists and has players
@@ -157,16 +158,6 @@ export function getCurrentPlayer() {
     return { ...game.players[game.currentPlayerIndex] };
 }
 
-/**
- * Get a player by ID
- * @param {string} playerId - The ID of the player to find
- * @returns {Object|null} Player object or null if not found
- */
-export function getPlayerById(playerId) {
-    console.log('=============getPlayerById=============');
-    const player = _state.game.players.find(p => p.id === playerId);
-    return player ? { ...player } : null;
-}
 
 /**
  * Update a player's resources in global state
@@ -212,7 +203,7 @@ let isUpdating = false;
 let updateQueue = [];
 
 export function updateGameState(updates) {
-   // console.log('=============updateGameState=============');
+   //console.log('=============updateGameState=============');
     // If we're already processing updates, queue this one
     if (isUpdating) {
         updateQueue.push(updates);
@@ -242,7 +233,7 @@ export function updateGameState(updates) {
 }
 
 export function animationState(updates) {
-    console.log('=============animationState=============');
+    //console.log('=============animationState=============');
     Object.assign(_state.ui.animation, updates);
     notifySubscribers();
 }
@@ -252,7 +243,7 @@ export function animationState(updates) {
  * @param {Object} updates - Partial UI state update
  */
 export function updateUIState(updates) {
-   // console.log('=============updateUIState=============');
+    //console.log('=============updateUIState=============');
     Object.assign(_state.ui, updates);
     notifySubscribers();
 }
@@ -264,13 +255,19 @@ export function updateUIState(updates) {
  * @returns {boolean} True if player was found and updated
  */
 export function updatePlayer(playerId, updates) {
-    console.log('=============updatePlayer=============');
+    //console.log('=============updatePlayer=============');
     const playerIndex = _state.game.players.findIndex(p => p.id === playerId);
     if (playerIndex !== -1) {
         _state.game.players[playerIndex] = { 
             ..._state.game.players[playerIndex], 
             ...updates 
         };
+        
+        // If coordinates are being updated, ensure immediate state synchronization
+        if (updates.currentCoords) {
+            //console.log(`Player ${playerId} coordinates updated immediately:`, updates.currentCoords);
+        }
+        
         notifySubscribers();
         return true;
     }
@@ -282,7 +279,7 @@ export function updatePlayer(playerId, updates) {
  * @param {Object} [settings] - Optional game settings
  */
 export function resetGameState(settings = {}) {
-    console.log('=============resetGameState=============');
+    //console.log('=============resetGameState=============');
     Object.assign(_state.game, {
         players: [],
         currentPlayerIndex: 0,
@@ -337,13 +334,13 @@ export function resetGameState(settings = {}) {
 }
 
 export function addPlayer(playerData) {
-    console.log('=============addPlayer=============');
+    //console.log('=============addPlayer=============');
     _state.game.players.push(playerData);
     notifySubscribers();
 }
 
 export function startGame() {
-    console.log('=============startGame=============');
+    //console.log('=============startGame=============');
     _state.game.gameStarted = true;
     _state.game.phase = 'PLAYING';
     notifySubscribers();
@@ -354,7 +351,7 @@ export let currentDeck = null;
 export let currentOnComplete = null;
 
 export function setCurrentCardState(card, deck, onComplete) {
-    console.log('=============setCurrentCardState=============');
+    //console.log('=============setCurrentCardState=============');
     currentCard = card;
     currentDeck = deck;
     currentOnComplete = onComplete;
@@ -394,7 +391,7 @@ const FORBIDDEN_ACTIONS = {
 };
 
 export function isActionAllowed(action) {
-   // console.log('=============isActionAllowed=============');
+   //console.log('=============isActionAllowed=============');
     // During initialization, allow all actions until game state is fully set up
     if (!state.game) {
         return true;
@@ -416,7 +413,7 @@ export function isActionAllowed(action) {
 
 // SINGLE function that everybody calls
 export function getEffectDescription(effect) {
-    console.log('=============getEffectDescription=============');
+    //console.log('=============getEffectDescription=============');
     const parser = EFFECT_PARSERS[effect.type];
     if (!parser) return [`Unknown effect type: ${effect.type}`];
 

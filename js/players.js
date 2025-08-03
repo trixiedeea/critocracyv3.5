@@ -4,6 +4,7 @@ import { updatePlayerInfo } from './ui.js'; // Corrected import name
 import { 
     notifySubscribers, 
     updateGameState,
+    getCurrentPlayer,
     _state,
 } from './state.js';
 
@@ -21,7 +22,7 @@ export const PLAYER_ROLES = {
         abilityIdentifier: 'knowledgeTheftImmunity',
         token: 'H.png',
         abilityDescription: 'Immune to Knowledge Theft',
-        resourceDisplayContainer: null,
+        playerScoreDisplay: null,
     },
     REVOLUTIONARY: {
         name: 'Audre Lorde the Revolutionary',
@@ -31,7 +32,7 @@ export const PLAYER_ROLES = {
         abilityIdentifier: 'influenceMultiplier',
         token: 'R.png',
         abilityDescription: 'Gains influence Faster',
-        resourceDisplayContainer: null,
+        playerScoreDisplay: null,
     },
     COLONIALIST: { 
         name: 'Jacques Cartier the Colonialist', 
@@ -41,7 +42,7 @@ export const PLAYER_ROLES = {
         abilityIdentifier: 'influenceTheftImmunity',
         token: 'C.png',
         abilityDescription: 'Immune to influence Theft',
-        resourceDisplayContainer: null,
+        playerScoreDisplay: null,
     },
     ENTREPRENEUR: { 
         name: 'Regina Basilier the Entrepreneur', 
@@ -51,7 +52,7 @@ export const PLAYER_ROLES = {
         abilityIdentifier: 'moneyMultiplier',
         token: 'E.png',
         abilityDescription: 'Gains Money Faster',
-        resourceDisplayContainer: null,
+        playerScoreDisplay: null,
     },
     POLITICIAN: { 
         name: 'Winston Churchill the Politician', 
@@ -61,7 +62,7 @@ export const PLAYER_ROLES = {
         abilityIdentifier: 'moneyTheftImmunity',
         token: 'P.png',
         abilityDescription: 'Immune To Money Theft',
-        resourceDisplayContainer: null,
+        playerScoreDisplay: null,
     },
     ARTIST: { 
         name: 'Salvador Dali the Artist', 
@@ -71,7 +72,7 @@ export const PLAYER_ROLES = {
         abilityIdentifier: 'knowledgeMultiplier',
         token: 'A.png',
         abilityDescription: 'Gains Knowledge Faster',
-        resourceDisplayContainer: null,
+        playerScoreDisplay: null,
     }
 };
 
@@ -95,12 +96,12 @@ export function createPlayer(config) {
         y: START_SPACE.coordinates[1]
     };
 
-  console.log('START_SPACE coordinates:', START_SPACE.coordinates);
-  console.log('Player start coords:', startCoords);
+  //console.log('START_SPACE coordinates:', START_SPACE.coordinates);
+  //console.log('Player start coords:', startCoords);
 
-  console.log(`[Players] Creating player ${config.name} with role ${config.role}`);
-  console.log(`[Players] Role definition for ${config.role}:`, PLAYER_ROLES[config.role]);
-  console.log(`[Players] Starting resources for ${config.role}:`, PLAYER_ROLES[config.role]?.startingResources);
+  //console.log(`[Players] Creating player ${config.name} with role ${config.role}`);
+  //console.log(`[Players] Role definition for ${config.role}:`, PLAYER_ROLES[config.role]);
+  //console.log(`[Players] Starting resources for ${config.role}:`, PLAYER_ROLES[config.role]?.startingResources);
 
   const player = {
     id: config.id,
@@ -123,8 +124,8 @@ export function createPlayer(config) {
     abilityUsed: false,
   };
 
-  console.log(`[Players] Player created with final resources:`, player.resources);
-  console.log(`Created player ${player.name} (${player.role}), Human: ${player.isHuman}, starting at (${player.x},${player.y})`);
+  //console.log(`[Players] Player created with final resources:`, player.resources);
+  //console.log(`Created player ${player.name} (${player.role}), Human: ${player.isHuman}, starting at (${player.x},${player.y})`);
 
   players.push(player);
   return player;
@@ -143,7 +144,7 @@ export function getPlayers() {
  * Resets the player state, clearing all players.
  */
 export function resetPlayers() {
-    console.log("Player state reset.");
+    //console.log("Player state reset.");
     players = [];
 }
 
@@ -152,7 +153,7 @@ export function resetPlayers() {
  */
 export function markPlayerFinished(player) {
     if (!player) return;
-    console.log(`Marking player ${player.name} as finished.`);
+    //console.log(`Marking player ${player.name} as finished.`);
     console.trace('markPlayerFinished called from:');
     player.finished = true;
     // Optionally add finish time/rank later if needed
@@ -164,6 +165,17 @@ export function markPlayerFinished(player) {
 export function allPlayersFinished() {
     if (players.length === 0) return false; // No players, game can't be finished
     return players.every(p => p.finished);
+}
+
+/**
+ * Get a player by ID
+ * @param {string} playerId - The ID of the player to find
+ * @returns {Object|null} Player object or null if not found
+ */
+export function getPlayerById(playerId) {
+    console.log('=============getPlayerById=============');
+    const player = _state.game.players.find(p => p.id === playerId);
+    return player ? { ...player } : null;
 }
 
 
@@ -212,101 +224,121 @@ export function getRandomOtherPlayer(currentPlayer) {
 
 /**
  * Update a player's resources in global state
- * @param {Object} from - Object containing playerId
- * @param {Object} changes - The resource changes to apply (can be positive or negative)
+ * @param {Object|string} currentPlayer - Either the player object, player ID, or changes object if called with single parameter
+ * @param {Object} [changes] - The resource changes to apply (can be positive or negative)
  * @returns {boolean} - True if update succeeded, false otherwise
  */
-export function updatePlayerResources(fromPlayerId, changes) {
-    console.log('=============updatePlayerResources=============');
-    
-    // Find the player in the global state
-    const players = getPlayers ? getPlayers() : []; // Safety check
-    const player = players.find(p => p.id === fromPlayerId);
-    
-    if (!player || !changes) {
-        console.error('Invalid parameters for updatePlayerResources:', { playerId: fromPlayerId, changes });
-        return false;
-    }
+export function updatePlayerResources(currentPlayer, changes) {
+  console.log('=============updatePlayerResources=============');
+  
+  // Handle single parameter call (just changes object)
+  if (arguments.length === 1 && currentPlayer && typeof currentPlayer === 'object' && !Array.isArray(currentPlayer)) {
+    changes = currentPlayer;
+    currentPlayer = getCurrentPlayer();
+  } else if (!changes) {
+    // If changes is not provided, treat the first param as changes
+    changes = currentPlayer;
+    currentPlayer = getCurrentPlayer();
+  }
+  
+  // If currentPlayer is a string, treat it as playerId
+  if (typeof currentPlayer === 'string') {
+    currentPlayer = getPlayerById(currentPlayer);
+  } else if (!currentPlayer) {
+    // Fallback to current player if not provided
+    currentPlayer = getCurrentPlayer();
+  }
+  
+  // Find the player in the global state
+  const players = getPlayers ? getPlayers() : []; // Safety check
+  
+  if (!currentPlayer || !changes) {
+    console.error('Invalid parameters for updatePlayerResources:', { 
+      currentPlayer: currentPlayer?.id || 'undefined', 
+      changes 
+    });
+    return false;
+  }
 
-    // Validate player has resources object
-    if (!player.resources) {
-        console.error('Player missing resources object:', player);
-        return false;
-    }
+  // Validate player has resources object
+  if (!currentPlayer.resources) {
+      console.error('Player missing resources object:', currentPlayer);
+      return false;
+  }
 
-    // Define valid resources
-    const RESOURCES = ['knowledge', 'money', 'influence'];
+  // Define valid resources
+  const RESOURCES = ['knowledge', 'money', 'influence'];
 
-    // Validate and normalize changes
-    const normalizedChanges = {};
-    let isValid = true;
-    for (const resource in changes) {
-        if (!RESOURCES.includes(resource)) {
-            console.warn(`Invalid resource type '${resource}' ignored`);
-            continue;
-        }
+  // Validate and normalize changes
+  const normalizedChanges = {};
+  let isValid = true;
+  for (const resource in changes) {
+      if (!RESOURCES.includes(resource)) {
+          console.warn(`Invalid resource type '${resource}' ignored`);
+          continue;
+      }
 
-        const change = Number(changes[resource]);
-        if (isNaN(change)) {
-            console.error(`Invalid change value for ${resource}:`, changes[resource]);
-            isValid = false;
-            break;
-        }
+      const change = Number(changes[resource]);
+      if (isNaN(change)) {
+          console.error(`Invalid change value for ${resource}:`, changes[resource]);
+          isValid = false;
+          break;
+      }
 
-        normalizedChanges[resource] = change;
-    }
+      normalizedChanges[resource] = change;
+  }
 
-    if (!isValid) return false;
+  if (!isValid) return false;
 
-    // Calculate new values first to ensure all changes are valid
-    const newValues = { ...player.resources };
-    for (const [resource, change] of Object.entries(normalizedChanges)) {
-        const currentValue = newValues[resource] || 0;
-        const newValue = currentValue + change;
+  // Calculate new values first to ensure all changes are valid
+  const newValues = { ...currentPlayer.resources };
+  for (const [resource, change] of Object.entries(normalizedChanges)) {
+      const currentValue = newValues[resource] || 0;
+      const newValue = currentValue + change;
 
-        // Prevent negative resources
-        if (newValue < 0) {
-            console.error(`Cannot update ${resource}: would result in negative value (${newValue})`);
-            return false;
-        }
+      // Prevent negative resources
+      if (newValue < 0) {
+          console.error(`Cannot update ${resource}: would result in negative value (${newValue})`);
+          return false;
+      }
 
-        newValues[resource] = newValue;
-    }
+      newValues[resource] = newValue;
+  }
 
-    // Apply validated changes to the player object
-    Object.assign(player.resources, newValues);
-    console.log(`Resources updated for ${player.name}:`, player.resources);
+  // Apply validated changes to the player object
+  Object.assign(currentPlayer.resources, newValues);
+  //console.log(`Resources updated for ${currentPlayer.name}:`, currentPlayer.resources);
 
-    // Update the global state with the modified player
-    const updatedPlayers = players.map(p => 
-        p.id === fromPlayerId ? { ...p, resources: { ...player.resources } } : p
-    );
-    
-    // Update global state (if function exists)
-    if (typeof updateGameState === 'function') {
-        updateGameState({ players: updatedPlayers });
-    }
-    
-    // Notify subscribers of state changes (if function exists)
-    if (typeof notifySubscribers === 'function') {
-        notifySubscribers();
-    }
+  // Update the global state with the modified player
+  const updatedPlayers = players.map(p => 
+      p.id === currentPlayer.id ? { ...p, resources: { ...currentPlayer.resources } } : p
+  );
+  
+  // Update global state (if function exists)
+  if (typeof updateGameState === 'function') {
+      updateGameState({ players: updatedPlayers });
+  }
+  
+  // Notify subscribers of state changes (if function exists)
+  if (typeof notifySubscribers === 'function') {
+      notifySubscribers();
+  }
 
-    // Trigger UI update for this specific player (if function exists)
-    if (typeof updatePlayerInfo === 'function') {
-        updatePlayerInfo(fromPlayerId);
-    }
-    
-    return true;
+  // Trigger UI update for this specific player (if function exists)
+  if (typeof updatePlayerInfo === 'function') {
+      updatePlayerInfo(currentPlayer, newValues);
+  }
+  
+  return true;
 }
 
 /**
- * Get a player's resources from global state
- * @param {string} playerId - The ID of the player
- * @returns {Object} Player's resources or null if not found
- */
+* Get a player's resources from global state
+* @param {string} playerId - The ID of the player
+* @returns {Object} Player's resources or null if not found
+*/
 export function getPlayerResources(playerId) {
-   // console.log('=============getPlayerResources=============');
+    console.log('=============getPlayerResources=============');
     if (!playerId || !_state.playerResources[playerId]) return null;
     return JSON.parse(JSON.stringify(_state.playerResources[playerId]));
 }

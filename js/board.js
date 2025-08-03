@@ -50,7 +50,7 @@ export const boardState = {
  * @returns {object|null} - The path object or null if not found.
  */
 export function findPathForCoordinate(coords) {
-   // console.log('=============findPathForCoordinate=============');
+   console.log('=============findPathForCoordinate=============');
     const allPaths = {
         ageOfExpansion: ageOfExpansionPath,
         ageOfResistance: ageOfResistancePath,
@@ -210,9 +210,8 @@ function drawCardRectangles() {
     const ctx = state.board.ctx;
     
     // Set global alpha for transparency
-    ctx.globalAlpha = 0.3; // 50% transparency
+    ctx.globalAlpha = 0.2; // 50% transparency
     ctx.strokeStyle = "#000000";
-    ctx.lineWidth = 0.1;
     
     // Gold rectangles for End of Turn cards
     ctx.fillStyle = "Gold"; // Gold color
@@ -283,7 +282,7 @@ function drawCardRectangles() {
     ctx.fill();
     
     // Reset line width for other elements
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 0.2;
     ctx.strokeStyle = "#000000";
     ctx.globalAlpha = 0.3;
     
@@ -309,13 +308,29 @@ function drawCardRectangles() {
     ctx.globalAlpha = 1.0;
 };
 
-export function findSpaceDetailsByCoords(targetCoords, tolerance = 5, player = null) {
-   // console.log('=============findSpaceDetailsByCoords=============');
-    console.log('Searching for coords:', targetCoords);
-  
-    if (!targetCoords || typeof targetCoords.x !== 'number' || typeof targetCoords.y !== 'number') {
-      console.error('Invalid or missing targetCoords:', targetCoords);
-      return null;
+export function findSpaceDetailsByCoords(coords) {
+    console.log('=============findSpaceDetailsByCoords=============');
+    console.log('Searching for coords:', coords);
+    
+    // Normalize coordinates to {x, y} format
+    let currentCoords;
+    if (Array.isArray(coords)) {
+        if (coords.length >= 2) {
+            currentCoords = { x: coords[0], y: coords[1] };
+        } else {
+            console.error('Invalid coordinate array:', coords);
+            return null;
+        }
+    } else if (coords && typeof coords === 'object' && 'x' in coords && 'y' in coords) {
+        currentCoords = { ...coords };
+    } else {
+        console.error('Invalid coordinates format. Expected {x, y} or [x, y], got:', coords);
+        return null;
+    }
+    
+    if (typeof currentCoords.x !== 'number' || typeof currentCoords.y !== 'number') {
+        console.error('Invalid coordinate values:', currentCoords);
+        return null;
     }
   
     const allPaths = {
@@ -328,8 +343,15 @@ export function findSpaceDetailsByCoords(targetCoords, tolerance = 5, player = n
     for (const pathName in allPaths) {
         const path = allPaths[pathName];
         for (const segment of path.segments) {
-            if (segment.coordinates.some(c => c[0] === targetCoords.x && c[1] === targetCoords.y)) {
-                return path;
+            //console.log(`Checking segment in path ${pathName}:`, segment);
+            if (segment.coordinates.some(c => c[0] === currentCoords.x && c[1] === currentCoords.y)) {
+                //console.log(`Found matching space at (${currentCoords.x}, ${currentCoords.y}) in path ${pathName}`);
+                // Return the segment with path info included
+                return {
+                    ...segment,
+                    pathName: path.name || pathName,
+                    pathColor: path.color || 'default'
+                };
             }
         }
     }
@@ -337,10 +359,10 @@ export function findSpaceDetailsByCoords(targetCoords, tolerance = 5, player = n
     // Check START space
     const startCoord = START_SPACE.coordinates[0];
     if (
-      Math.abs(targetCoords.x - startCoord[0]) <= tolerance &&
-      Math.abs(targetCoords.y - startCoord[1]) <= tolerance
+      Math.abs(currentCoords.x - startCoord[0]) <= tolerance &&
+      Math.abs(currentCoords.y - startCoord[1]) <= tolerance
     ) {
-      console.log('Found START space at:', targetCoords);
+      console.log('Found START space at:', currentCoords);
       const space = {
         ...START_SPACE,
         pathName: 'none',
@@ -349,17 +371,17 @@ export function findSpaceDetailsByCoords(targetCoords, tolerance = 5, player = n
         Next: Object.values(START_SPACE.nextCoordOptions)
       };
   
-      updateSpaceInState(space, targetCoords);
+      updateSpaceInState(space, currentCoords);
       return space;
     }
   
     // Check FINISH space
     const finishCoord = FINISH_SPACE.coordinates[0];
     if (
-      Math.abs(targetCoords.x - finishCoord[0]) <= tolerance &&
-      Math.abs(targetCoords.y - finishCoord[1]) <= tolerance
+      Math.abs(currentCoords.x - finishCoord[0]) <= tolerance &&
+      Math.abs(currentCoords.y - finishCoord[1]) <= tolerance
     ) {
-      console.log('Found FINISH space at:', targetCoords);
+      console.log('Found FINISH space at:', currentCoords);
       const space = {
         ...FINISH_SPACE,
         pathName: 'none',
@@ -368,7 +390,7 @@ export function findSpaceDetailsByCoords(targetCoords, tolerance = 5, player = n
         Next: []
       };
   
-      updateSpaceInState(space, targetCoords);
+      markPlayerFinished();
       return space;
     }
   
@@ -377,13 +399,14 @@ export function findSpaceDetailsByCoords(targetCoords, tolerance = 5, player = n
       if (!path || !path.segments) continue;
       
       for (const segment of path.segments) {
+        console.log(`Checking segment in path ${path.name || 'unknown'}`, segment);
         if (!segment || !segment.coordinates || !segment.coordinates[0]) continue;
         
         const coords = segment.coordinates[0];
         if (coords.length < 2) continue;
   
-        const dx = Math.abs(targetCoords.x - coords[0]);
-        const dy = Math.abs(targetCoords.y - coords[1]);
+        const dx = Math.abs(currentCoords.x - coords[0]);
+        const dy = Math.abs(currentCoords.y - coords[1]);
   
         if (dx <= tolerance && dy <= tolerance) {
             console.log(`Found matching space at (${coords[0]},${coords[1]}) in path ${path.name || 'unknown'}`);
@@ -408,18 +431,18 @@ export function findSpaceDetailsByCoords(targetCoords, tolerance = 5, player = n
                 handleSpaceAction(player, 'regular', space.pathName);
             }
             
-            updateSpaceInState(space, targetCoords);
+            updateSpaceInState(space, currentCoords);
             return space;
         }
       }
     }
     
-    console.warn(`No space found near (${targetCoords.x}, ${targetCoords.y}) within tolerance ${tolerance}`);
+    console.warn(`No space found near (${currentCoords.x}, ${currentCoords.y}) within tolerance ${tolerance}`);
     return null;
 };
 
 function updateSpaceInState(space, coords) {
- //   console.log('=============updateSpaceInState=============');
+    console.log('=============updateSpaceInState=============');
     gameState.currentPath = space.pathName;
     gameState.currentCoords = coords;
     gameState.pathColorKey = space.pathColor;
@@ -430,7 +453,7 @@ function updateSpaceInState(space, coords) {
  * Determines the next coordinate options based on the current coordinates.
  */
 export function getNextStepOptions(currentCoords) {
-   // console.log("=============getNextStepOptions=============");
+   console.log("=============getNextStepOptions=============");
     console.log(`PATH DEBUG: Finding next step from (${currentCoords.x}, ${currentCoords.y})`);
     
     // Find current space details
@@ -762,7 +785,7 @@ export function drawTokens() {
             console.warn(`[drawTokens] Skipping ${player?.name || 'unknown player'} — missing currentCoords`);
             return;
         }
-
+''
         const roleInitial = player.role?.[0]?.toUpperCase(); // Uppercase to match filenames like "A.png"
         if (!roleInitial) {
             console.warn(`[drawTokens] Skipping ${player.name} — invalid role`);
@@ -788,7 +811,7 @@ export function drawTokens() {
         token.style.transform = `translate(${scaledX}px, ${scaledY}px)`;
 
         function updateAllTokenPositions() {
-            //console.log('=============--------updateAllTokenPositions=============--------');
+            console.log('=============--------updateAllTokenPositions=============--------');
             const tokens = document.querySelectorAll('.token');
           
             tokens.forEach(token => {

@@ -712,29 +712,160 @@ select, input[type="text"] {
     margin-left: 45%;
 }
 
-                /*=================GAME BOARD===================*/
+.resource-Score-Container {
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    align-items: center;
+    height: 15vh;
+    background-color: rgba(44, 128, 161, 0.363);
+    list-style: none;
+    flex-wrap: wrap;              
+    justify-content: center; 
+    border-radius: 2ch;     
+    z-index: 20;          
+} 
+
+.player-Score-Display {          
+    width: 95%;
+    height:80%;
+    align-items: center;
+    display: flex;  
+    margin: 10px;
+    border-radius: 1ch;
+    flex-direction: row;           /* lays out children side by side */
+    justify-content: space-around;
+    background-color: rgba(44, 128, 161, 0.363);
+    box-shadow: 0.2ch 0.3ch rgba(0,0,0,0.4);
+    z-index: 30;
+}
+
 
 ul {
-    background: #00536f52;
+    background: rgba(44, 128, 161, 0.363);
     padding: 10px;
     margin: 10px;
-    color: #ffffff;
-    border-radius: 10px;
+    color: #ffffff; 
+    border-radius: 8px;
+    z-index:40;
   }
 
 ul.display-Container li {
     display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
     justify-content: center;
-    align-items: left;
+    align-items: center;
     margin-bottom: 0.1rem;
     list-style: none;
+    z-index:100;
 }
+
+#player-Info-Panel {
+    display: flex;
+    flex-wrap: wrap;
+    position: fixed;
+    height: 15vh;
+    width: 90%;
+    bottom: 1vh;
+    left: 20px;
+    justify-content: center;
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(44, 128, 161, 0.363);
+    padding: 10px;
+    list-style: none; 
+    z-index: 20;
+  
+}
+
+#resource-Display-Container {
+    display:flex;
+    position: static;
+    flex-wrap: wrap;
+    margin:10px;
+    padding: 10px;
+    width: 50%;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
+    margin-top: 5px;
+    list-style: none;
+    z-index:30;
+}
+
+h3 {
+    color: #ffffff;
+    text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.7);
+    z-index: 40;
+}
+
+h4 {
+    color: #ffffff;
+    padding: 5px;
+    text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.829);
+    z-index: 40;
+}
+
+#end-Turn-Button {        /* stays at the bottom */
+    background-color: #093d50;
+    color: white;
+    font-weight: bold;
+    font-size: 0.87rem;
+    padding: 34px 15px;
+    border: #01242b;
+    border-width: 4px;
+    border-style: solid;
+    position: absolute;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.5s;
+    display: inline-block;
+    flex-wrap: wrap;
+    margin: 5px;
+    z-index:40;
+}
+
+#end-Turn-Button-Container {
+    display: flex;  
+    flex-wrap: wrap;
+    position: static; 
+    width: 20%;
+    height: 90px;
+    align-items: right;
+    justify-content: space-evenly;
+    z-index:30;
+};
 
 ul li {
     padding-left: 1rem;
+    flex-wrap: wrap;
     list-style-type: inside;
     margin-bottom: 1rem;
     justify-content: left;
+}
+
+#dice-Container {          /* stays at the bottom */
+    display: flex;  
+    flex-wrap: wrap;
+    position: static; 
+    width: 20%;
+    height: 90px;
+    align-items: right;
+    justify-content: space-evenly;
+    perspective: 2000px;
+    z-index: 30;
+}
+
+#dice {
+  	width: 90px;
+  	height: 90px;
+    flex-direction: column;
+    flex-wrap: wrap;
+  	background-size: cover;
+  	transform-style: preserve-3d;
+    perspective: 1000;
+    z-index: 40;
 }
 
 #game-Board-Screen {
@@ -804,17 +935,6 @@ ul li {
     left: 0;
 }
 
-#player-Info-Panel {
-    display: flex;
-    justify-content: space-between;
-    position: relative;
-    bottom: 0;
-    align-items: center;
-    background-color: rgba(37, 158, 188, 0.178);
-    padding: 10px;
-    z-index: 12;
-}
-
 /* Animation Classes */
 .animating-card {
     opacity: 0;
@@ -860,79 +980,10 @@ ul li {
     transition: top 0.5s ease, left 0.5s ease
 }
 
-
-#end-Turn-Button-Container {
-    display: flex;
-    align-items: center;
-    margin-top: 5px;
-}
-
-#end-Turn-Button {
-    background-color: #093d50;
-    color: white;
-    font-weight: bold;
-    font-size: 0.87rem;
-    padding: 34px 15px;
-    border: #01242b;
-    border-width: 4px;
-    border-style: solid;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: background-color 0.5s;
-    display: inline-block;
-    margin: 5px;
-}
-
 #end-Turn-Button:hover {
     background-color: #24a7a3;
 }
 
-#resource-Display-Container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 5px;
-    list-style: none;
-
-}
-
-#dice-animation-container {
-  width: 90px;
-  height: 90px;
-  position: relative;
-  transform-style: preserve-3d;
-  transform: rotateX(0deg) rotateY(0deg);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-#dice-Container {
-    width: 90px;
-    height: 90px;
-    align-items: center;
-    justify-content: center;
-    perspective: 2000px;
-}
-/* Center the dice */
-.dice-Animation-Container {
-    width: 90px;
-    height: 90px;
-    align-items: center;
-    justify-content: center;
-    perspective: 2000px;
-}
-
-
-#dice {
-  	width: 90px;
-  	height: 90px;
-  	position: absolute;
-  	width: 90px;
-  	height: 90px;
-  	background-size: cover;
-  	transform-style: preserve-3d;
-}
 
 .dice-face {
     position: absolute;
