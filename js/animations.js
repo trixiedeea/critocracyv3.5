@@ -367,7 +367,15 @@ export function animateTokenToPosition(player, newPosition, duration = 1000, ski
       }
     
       const segment = findSegmentByCoord(currentCoords);
-      if (!segment || !segment.Next || segment.Next.length === 0 && !currentCoords === FINISH_SPACE) {
+      let FINISH_SPACE = [1384, 512];
+    if (!segment.Next && currentCoords === FINISH_SPACE ) {
+      console.log("Player has reached the finish space!");
+      markPlayerFinished(player.id);
+      resolve();
+      return;
+    } else if (!segment.Next && currentCoords !== FINISH_SPACE) {
+        console.warn('next segment null player not at finish');
+    } else if (!segment || !segment.Next || segment.Next.length === 0 && !currentCoords === FINISH_SPACE) {
         console.warn("Invalid or incomplete segment found at", currentCoords);
         resolve();
         return;
