@@ -21,7 +21,6 @@ import {
 import { 
     advanceToNextPlayer,
     handlePathChoice,
-    handlePlayerAction,
 } from './game.js';
 
 import { drawCard } from './cards.js';
@@ -190,6 +189,7 @@ function setupEventListeners() {
     gameBoard.endTurnButton.addEventListener('click', () => {
         //console.log("End Turn button clicked.");
         gameBoard.endTurnButton.classList.remove('shake');
+        console.log('*************CALL advanceToNextPlayer *************');
         advanceToNextPlayer();
     });
     // Dice Roll
