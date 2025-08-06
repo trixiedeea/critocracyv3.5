@@ -40,7 +40,7 @@ export const ageOfExpansionDeck = [
                 text: "Initiate peace negotiations",
                 effects: [
                     { type: 'RESOURCE_CHANGE', changes: { influence: 5 } },
-                    { type: 'RESOURCE_CHANGE', changes: { money: -2 } }
+                    { type: 'RESOURCE_CHANGE', changes: { money: 5 } }
                 ]
             }
         },
@@ -61,7 +61,7 @@ export const ageOfExpansionDeck = [
                   text: "Expose the abuse publicly",
                   effects: [
                     { type: 'SKIP_TURN', target: 'SELF' },
-                    { type: 'STEAL', target: 'OTHER', resource: 'MONEY', amount: 3 }
+                    { type: 'STEAL', target: 'OTHER', resource: 'MONEY', amount: 5 }
                   ]
                 }
             }

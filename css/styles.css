@@ -574,34 +574,32 @@ select, input[type="text"] {
 }
 /* Center the dice */
 .dice-Animation-Container {
-    width: 100px;
-    height: 100px;
+    width: 90px;
+    height: 90px;
     align-items: center;
     justify-content: center;
     perspective: 2000px;
 }
 
 #turn-Order-Dice {
-    width: 100px;
-    height: 100px;
+    width: 90px;
+    height: 90px;
     position: relative;
     transform-style: preserve-3d;
 }
 
 .dice {
-  	width: 90px;
-  	height: 90px;
+  	width: 80px;
+  	height: 80px;
   	position: absolute;
-  	width: 90px;
-  	height: 90px;
   	background-size: cover;
   	transform-style: preserve-3d;
 }
 
 .dice-face {
     position: absolute;
-    width: 90px;
-    height: 90px;
+    width: 80px;
+    height: 80px;
     background-size: cover;
     backface-visibility: visible;
     transform-style: preserve-3d;
@@ -609,27 +607,27 @@ select, input[type="text"] {
 
     .dice-face-1 {
         transform: translateZ(40px);
-        background-image: url('/assets/dice/dice1.png');
+        background-image: url('/assets/dice/dice12.png');
     }
     .dice-face-2 {
         transform: rotateY(-90deg) translateZ(40px);
-        background-image: url('/assets/dice/dice2.png');
+        background-image: url('/assets/dice/dice22.png');
     }
     .dice-face-3 {
         transform: rotateX(-90deg) translateZ(40px);
-        background-image: url('/assets/dice/dice3.png');
+        background-image: url('/assets/dice/dice32.png');
     }
     .dice-face-4 {
         transform: rotateX(90deg) translateZ(40px);
-        background-image: url('/assets/dice/dice4.png');
+        background-image: url('/assets/dice/dice42.png');
     }
     .dice-face-5 {
         transform: rotateY(90deg) translateZ(40px);
-        background-image: url('/assets/dice/dice5.png');
+        background-image: url('/assets/dice/dice52.png');
     }
     .dice-face-6 {
         transform: rotateY(180deg) translateZ(40px);
-        background-image: url('../assets/dice/dice6.png');
+        background-image: url('/assets/dice/dice62.png');
     }
 
 
@@ -679,7 +677,6 @@ select, input[type="text"] {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: rgba(255, 255, 255, 0.15);
     border-radius: 50%;
     transition: all 0.3s ease;
 }
@@ -743,22 +740,33 @@ select, input[type="text"] {
 
 ul {
     background: rgba(44, 128, 161, 0.363);
-    padding: 10px;
-    margin: 10px;
     color: #ffffff; 
     border-radius: 8px;
     z-index:40;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+  }
+
+  li {
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+    list-style: none;
+    z-index:100;
+    margin: 10px;
   }
 
 ul.display-Container li {
     display: flex;
     flex-wrap: wrap;
-    gap: 5px;
+    gap: 15px;
     justify-content: center;
     align-items: center;
-    margin-bottom: 0.1rem;
     list-style: none;
     z-index:100;
+    margin: 10px;
 }
 
 #player-Info-Panel {
@@ -843,6 +851,16 @@ ul li {
     list-style-type: inside;
     margin-bottom: 1rem;
     justify-content: left;
+    gap: 15px;
+}
+
+ul.role-Effect li {
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+    list-style: none;
+    z-index:100;
+    margin: 10px;
 }
 
 #dice-Container {          /* stays at the bottom */
@@ -987,8 +1005,8 @@ ul li {
 
 .dice-face {
     position: absolute;
-    width: 90px;
-    height: 90px;
+    width: 80px;
+    height: 80px;
     background-size: cover;
     backface-visibility: visible;
     transform-style: preserve-3d;
@@ -996,27 +1014,27 @@ ul li {
 }
 
     .dice-face-1 {
-        transform: translateZ(40px);
+        transform: translateZ(35px);
         background-image: url('../assets/dice/dice1.png');
     }
     .dice-face-2 {
-        transform: rotateY(-90deg) translateZ(40px);
+        transform: rotateY(-90deg) translateZ(35px);
         background-image: url('../assets/dice/dice2.png');
     }
     .dice-face-3 {
-        transform: rotateX(-90deg) translateZ(40px);
+        transform: rotateX(-90deg) translateZ(35px);
         background-image: url('../assets/dice/dice3.png');
     }
     .dice-face-4 {
-        transform: rotateX(90deg) translateZ(40px);
+        transform: rotateX(90deg) translateZ(35px);
         background-image: url('../assets/dice/dice4.png');
     }
     .dice-face-5 {
-        transform: rotateY(90deg) translateZ(40px);
+        transform: rotateY(90deg) translateZ(35px);
         background-image: url('../assets/dice/dice5.png');
     }
     .dice-face-6 {
-        transform: rotateY(180deg) translateZ(40px);
+        transform: rotateY(180deg) translateZ(35px);
         background-image: url('../assets/dice/dice6.png');
     }
 
@@ -1230,8 +1248,10 @@ dialog.popover::backdrop {
     font-size: 0.95em;
     color: white;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
-    grid-template-rows: 6;
-    row-gap: 5px;
+    row-gap: 10px;
+    justify-content: space-evenly;
+    align-items: center;
+    flex-direction: row;
 }
   
 .popover-header {
@@ -1252,6 +1272,9 @@ dialog.popover::backdrop {
   
 .column {
     display: flex;
+    flex-direction: row;
+    gap: 15px;
+    margin-bottom: 15px;
     justify-content: center;
     align-items: center;
 }

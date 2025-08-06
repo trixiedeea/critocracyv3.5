@@ -58,33 +58,13 @@ export const deckType = {
     endOfTurnDeck: 'endOfTurnDeck'
 };
 
-// Map deck types to their display names and colors using fullDeckRegionPathMap
 export const deckInfo = {
-    [deckType.ageOfExpansionDeck]: { 
-        name: fullDeckRegionPathMap.ageOfExpansion.name + ' Deck',
-        color: fullDeckRegionPathMap.ageOfExpansion.cssClass.replace('path-', ''),
-        displayName: fullDeckRegionPathMap.ageOfExpansion.name
-    },
-    [deckType.ageOfResistanceDeck]: { 
-        name: fullDeckRegionPathMap.ageOfResistance.name + ' Deck',
-        color: fullDeckRegionPathMap.ageOfResistance.cssClass.replace('path-', ''),
-        displayName: fullDeckRegionPathMap.ageOfResistance.name
-    },
-    [deckType.ageOfReckoningDeck]: { 
-        name: fullDeckRegionPathMap.ageOfReckoning.name + ' Deck',
-        color: fullDeckRegionPathMap.ageOfReckoning.cssClass.replace('path-', ''),
-        displayName: fullDeckRegionPathMap.ageOfReckoning.name
-    },
-    [deckType.ageOfLegacyDeck]: { 
-        name: fullDeckRegionPathMap.ageOfLegacy.name + ' Deck',
-        color: fullDeckRegionPathMap.ageOfLegacy.cssClass.replace('path-', ''),
-        displayName: fullDeckRegionPathMap.ageOfLegacy.name
-    },
-    [deckType.endOfTurnDeck]: {
-        name: 'End of Turn Deck',
-        color: 'yellow',
-        displayName: 'End of Turn'
-    }
+    ageOfExpansionDeck: fullDeckRegionPathMap.ageOfExpansion.deckType,
+    ageOfResistanceDeck: fullDeckRegionPathMap.ageOfResistance.deckType,
+    ageOfReckoningDeck: fullDeckRegionPathMap.ageOfReckoning.deckType,
+    ageOfLegacyDeck: fullDeckRegionPathMap.ageOfLegacy.deckType,
+    
+    endOfTurnDeck: 'endOfTurnDeck'
 };
 
 export const deckIdMap = {

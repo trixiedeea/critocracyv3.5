@@ -744,7 +744,7 @@ export function highlightDeckRegions(player, deckType, positions, duration = 300
         clearDeckHighlights();
         drawCard(deckType, player);
         resolve();
-      }, 5000);
+      }, 3000);
     } else {
       // For human players, set a timeout to auto-resolve after a longer duration
       // This ensures the Promise doesn't hang if the player doesn't click
