@@ -214,9 +214,9 @@ export const ageOfExpansionPath = {
       { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[1289, 683]], Next: [[1308, 662]], Type: "regular" , spaceId: "47P" },
       { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[1308, 662]], Next: [[1325, 633]], Type: "regular" , spaceId: "48P" },
       { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[1325, 633]], Next: [[1339, 600]], Type: "draw" , spaceId: "49P" },
-      { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[1339, 600]], Next: [[1348, 571]], Type: "regular" , spaceId: "50P" },
-      { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[1348, 571]], Next: [[1384, 512]], Type: "draw" , spaceId: "51P" },
-      { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[1384, 512]], Type: "finish", spaceId: "finish" }
+      { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[1339, 600]], Next: [[1345, 570]], Type: "regular" , spaceId: "50P" },
+      { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[1345, 570]], Next: [[1384, 512]], Type: "draw" , spaceId: "51P" },
+      { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[1384, 512]], Type: "FINISH_SPACE", spaceId: "finish" }
         // NOTE: Last space should implicitly lead to FINISH based on coordinates									
 // NOTE: Last space should implicitly lead to FINISH based on coordinates
 ]
@@ -260,9 +260,10 @@ export const ageOfResistancePath = {
       { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[829, 885]], Next: [[862, 869]], Type: "regular" , spaceId: "29B" },	
       { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[862, 869]], Next: [[892, 851]], Type: "regular" , spaceId: "30B" },	
       { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[892, 851]], Next: [[911, 829]], Type: "draw" , spaceId: "31B" },	
-      { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[911, 829]], Next: [[962, 766]], Type: "draw" , spaceId: "33B" },	
-      { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[962, 766]], Next: [[975, 738], [996, 780]], Type: "choicepoint", pathNames: ["ageOfResistancePath, ageOfExpansionPath"] },
-      { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[966, 729]], Next: [[971, 705]], Type: "regular" , spaceId: "34B" },	
+      { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[911, 829]], Next: [[929, 799]], Type: "draw" , spaceId: "32B" },	
+      { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[929, 799]], Next: [[948, 770]], Type: "draw" , spaceId: "33B" },
+      { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[948, 770]], Next: [[975, 738], [996, 780]], Type: "choicepoint", pathNames: ["ageOfResistancePath, ageOfExpansionPath"] },
+      { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[975, 738]], Next: [[971, 705]], Type: "regular" , spaceId: "34B" },	
       { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[971, 705]], Next: [[973, 673]], Type: "regular" , spaceId: "35B" },	
       { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[973, 673]], Next: [[974, 642]], Type: "draw" , spaceId: "36B" },	
       { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[974, 642]], Next: [[974, 618]], Type: "regular" , spaceId: "37B" },	
@@ -286,7 +287,7 @@ export const ageOfResistancePath = {
       { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[1268, 449]], Next: [[1297, 472]], Type:"regular", spaceId: "54B"},
       { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[1297, 472]], Next: [[1319, 490]], Type:"draw", spaceId: "55B"},
       { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[1319, 490]], Next: [[1384, 512]], Type:"regular", spaceId: "56B"},
-      { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[1384, 512]], Type:"finish", spaceId: "finish"},
+      { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[1384, 512]], Type:"FINISH_SPACE", spaceId: "finish"},
 // NOTE: Last space should implicitly lead to FINISH based on coordinates
 ]
 };
@@ -354,9 +355,8 @@ export const ageOfReckoningPath = {
       { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[1238, 603]], Next: [[1263, 576]], Type: "regular", spaceId: "54C" },
       { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[1263, 576]], Next: [[1290, 556]], Type: "regular", spaceId: "55C" },
       { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[1290, 556]], Next: [[1310, 540]], Type: "draw", spaceId: "56C" },
-      { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[1310, 540]], Next: [[1328, 525]], Type: "regular", spaceId: "57C" },
-      { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[1328, 525]], Next: [[1384, 512]], Type: "draw", spaceId: "58C" },
-      { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[1384, 512]], Type: "finish", spaceId: "finish_space" },
+      { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[1310, 540]], Next: [[1384, 512]], Type: "regular", spaceId: "57C" },
+      { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[1384, 512]], Type: "FINISH_SPACE", spaceId: "finish_space" },
 // NOTE: Last space should implicitly lead to FINISH based on coordinates
 ]
 };
@@ -418,7 +418,7 @@ export const ageOfLegacyPath = {
       { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[1308, 406]], Next: [[1315, 430]], Type: "draw" , spaceId: "48PK" },
       { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[1315, 430]], Next: [[1337, 459]], Type: "regular" , spaceId: "49PK" },
       { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[1337, 459]], Next: [[1384, 512]], Type: "regular" , spaceId: "50PK" },
-      { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[1384, 512]], Type: "finish" , spaceId: "finish" },
+      { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[1384, 512]], Type: "FINISH_SPACE" , spaceId: "finish" },
 // NOTE: Last space should implicitly lead to FINISH based on coordinates
 ]
 };
