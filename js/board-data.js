@@ -24,10 +24,10 @@ export const fullDeckRegionPathMap = {
       pathButtonLabel: 'Age of Expansion',
       positions: [
         {
-          topleft: 566, toplefty: 468,
-          toprightx: 654, topright: 468,
-          bottomrightx: 654, bottomright: 618,
-          bottomleftx: 566, bottomleft: 618
+          topleft: 568, toplefty: 478,
+          toprightx: 652, topright: 478,
+          bottomrightx: 652, bottomright: 616,
+          bottomleftx: 568, bottomleft: 616
         }
       ],
       type: 'age'
@@ -43,10 +43,10 @@ export const fullDeckRegionPathMap = {
       pathButtonLabel: 'Age of Legacy',
       positions: [
         {
-          topleft: 692, toplefty: 253,
-          toprightx: 804, topright: 253,
-          bottomrightx: 804, bottomright: 400,
-          bottomleftx: 692, bottomleft: 400
+          topleft: 695, toplefty: 257,
+          toprightx: 802, topright: 257,
+          bottomrightx: 802, bottomright: 396,
+          bottomleftx: 695, bottomleft: 396
         }
       ],
       type: 'age'
@@ -62,10 +62,10 @@ export const fullDeckRegionPathMap = {
       pathButtonLabel: 'Age of Resistance',
       positions: [
         {
-          topleft: 843, toplefty: 472,
-          toprightx: 941, topright: 472,
-          bottomrightx:941, bottomright: 619,
-          bottomleftx: 843, bottomleft: 619
+          topleft: 847, toplefty: 477,
+          toprightx: 938, topright: 477,
+          bottomrightx:938, bottomright: 616,
+          bottomleftx: 847, bottomleft: 616
         }
       ],
       type: 'age'
@@ -80,10 +80,10 @@ export const fullDeckRegionPathMap = {
       pathButtonLabel: 'Age of Reckoning',
       positions: [
         {
-          topleft: 690, toplefty: 699,
-          toprightx: 804, topright: 699,
-          bottomrightx: 804, bottomright: 864,
-          bottomleftx: 690, bottomleft: 864
+          topleft: 694, toplefty: 703,
+          toprightx: 802, topright: 703,
+          bottomrightx: 802, bottomright: 864,
+          bottomleftx: 694, bottomleft: 864
         }
       ],
       type: 'age'
@@ -98,16 +98,16 @@ export const fullDeckRegionPathMap = {
       pathButtonLabel: null,
       positions: [
         {
-          topleft: 302, toplefty: 444,
-          toprightx: 386, topright: 444,
-          bottomrightx: 386, bottomright: 582,
-          bottomleftx: 302, bottomleft: 582
+          topleft: 307, toplefty: 450,
+          toprightx: 383, topright: 450,
+          bottomrightx: 383, bottomright: 578,
+          bottomleftx: 307, bottomleft: 578
         },
         {
-          topleft: 1128, toplefty: 458,
-          toprightx: 1210, topright: 458,
-          bottomrightx: 1210, bottomright: 596,
-          bottomleftx: 1128, bottomleft: 596
+          topleft: 1131, toplefty: 463,
+          toprightx: 1207, topright: 463,
+          bottomrightx: 1207, bottomright: 591,
+          bottomleftx: 1131, bottomleft: 591
         }
       ],
       type: 'endOfTurn'
@@ -166,25 +166,25 @@ export const ageOfExpansionPath = {
     segments: [
       { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[104, 512]], Next: [[144, 457]], Type: "start", spaceId: "start" },
       { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[144, 457]], Next: [[154, 428]], Type: "draw", spaceId: "1P" },
-      { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[154, 428]], Next: [[166, 398]], Type: "draw", spaceId: "2P" },
+      { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[154, 428]], Next: [[166, 398]], Type: "regular", spaceId: "2P" },
       { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[166, 398]], Next: [[180, 366]], Type: "draw", spaceId: "3P" },
       { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[180, 366]], Next: [[194, 337]], Type: "draw", spaceId: "4P" },
-      { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[194, 337]], Next: [[213, 309]], Type: "draw", spaceId: "5P" },
-      { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[213, 309]], Next: [[244, 286]], Type: "draw", spaceId: "6P" },
+      { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[194, 337]], Next: [[213, 309]], Type: "regular", spaceId: "5P" },
+      { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[213, 309]], Next: [[244, 286]], Type: "regular", spaceId: "6P" },
       { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[244, 286]], Next: [[272, 269]], Type: "draw", spaceId: "7P" },
-      { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[272, 269]], Next: [[308, 257]], Type: "draw", spaceId: "8P" },
+      { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[272, 269]], Next: [[308, 257]], Type: "regular", spaceId: "8P" },
       { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[308, 257]], Next: [[343, 252]], Type: "draw", spaceId: "9P" },
       { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[343, 252]], Next: [[378, 250]], Type: "draw", spaceId: "10P" },
-      { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[378, 250]], Next: [[413, 250]], Type: "draw", spaceId: "11P" },
-      { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[413, 250]], Next: [[447, 253]], Type: "draw", spaceId: "12P" },
+      { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[378, 250]], Next: [[413, 250]], Type: "regular", spaceId: "11P" },
+      { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[413, 250]], Next: [[447, 253]], Type: "regular", spaceId: "12P" },
       { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[447, 253]], Next: [[479, 266]], Type: "draw", spaceId: "13P" },
-      { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[479, 266]], Next: [[511, 281]], Type: "draw", spaceId: "14P" },
+      { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[479, 266]], Next: [[511, 281]], Type: "regular", spaceId: "14P" },
       { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[511, 281]], Next: [[534, 302]], Type: "draw", spaceId: "15P" },
       { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[534, 302]], Next: [[567, 328], [544, 259]], Type: "choicepoint", pathNames: ["ageOfExpansionPath, ageOfReckoningPath"] , spaceId: "16P" },
-      { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[567, 328]], Next: [[590, 345]], Type: "draw" , spaceId: "17P" },
-      { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[590, 345]], Next: [[610, 371]], Type: "draw" , spaceId: "18P" },
+      { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[567, 328]], Next: [[590, 345]], Type: "regular" , spaceId: "17P" },
+      { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[590, 345]], Next: [[610, 371]], Type: "regular" , spaceId: "18P" },
       { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[610, 371]], Next: [[633, 400]], Type: "draw" , spaceId: "19P" },
-      { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[633, 400]], Next: [[648, 430]], Type: "draw" , spaceId: "20P" },
+      { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[633, 400]], Next: [[648, 430]], Type: "regular", spaceId: "20P" },
       { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[648, 430]], Next: [[667, 464]], Type: "draw" , spaceId: "21P" },
       { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[667, 464]], Next: [[681, 492]], Type: "regular" , spaceId: "22P" },
       { pathColor: "purple", pathName: "ageOfExpansionPath", coordinates: [[681, 492]], Next: [[701, 518]], Type: "draw" , spaceId: "23P" },
@@ -230,24 +230,24 @@ export const ageOfResistancePath = {
     segments: [
       { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[104, 512]], Next: [[195, 475]], Type: "start", spaceId: "start" },
       { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[195, 475]], Next: [[222, 450]], Type: "draw" , spaceId: "1B" },
-      { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[222, 450]], Next: [[245, 424]], Type: "draw" , spaceId: "2B" },
+      { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[222, 450]], Next: [[245, 424]], Type: "regular" , spaceId: "2B" },
       { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[245, 424]], Next: [[271, 399]], Type: "draw" , spaceId: "3B" },
-      { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[271, 399]], Next: [[301, 370]], Type: "draw" , spaceId: "4B" },
+      { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[271, 399]], Next: [[301, 370]], Type: "regular" , spaceId: "4B" },
       { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[301, 370]], Next: [[334, 340]], Type: "draw" , spaceId: "5B" },
-      { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[334, 340]], Next: [[380, 317]], Type: "draw" , spaceId: "6B" },
-      { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[380, 317]], Next: [[419, 338]], Type: "draw" , spaceId: "7B" },
+      { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[334, 340]], Next: [[380, 317]], Type: "regular" , spaceId: "6B" },
+      { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[380, 317]], Next: [[419, 338]], Type: "regular" , spaceId: "7B" },
       { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[419, 338]], Next: [[442, 368]], Type: "draw" , spaceId: "8B" },
-      { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[442, 368]], Next: [[457, 402]], Type: "draw" , spaceId: "9B" },
+      { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[442, 368]], Next: [[457, 402]], Type: "regular" , spaceId: "9B" },
       { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[457, 402]], Next: [[475, 443]], Type: "draw" , spaceId: "10B" },
       { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[475, 443]], Next: [[478, 483]], Type: "draw" , spaceId: "11B" },
       { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[478, 483]], Next: [[502, 532], [511, 457]], Type: "choicepoint", pathNames: ["ageOfResistancePath, ageOfReckoningPath"] , spaceId: "12B" },
-      { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[502, 532]], Next: [[514, 566]], Type: "draw" , spaceId: "13B" },
+      { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[502, 532]], Next: [[514, 566]], Type: "regular" , spaceId: "13B" },
       { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[514, 566]], Next: [[523, 602]], Type: "draw" , spaceId: "14B" },
       { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[523, 602]], Next: [[533, 637]], Type: "draw" , spaceId: "15B" },
-      { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[533, 637]], Next: [[541, 675]], Type: "draw" , spaceId: "16B" },
-      { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[541, 675]], Next: [[549, 711]], Type: "draw" , spaceId: "17B" },
+      { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[533, 637]], Next: [[541, 675]], Type: "regular" , spaceId: "16B" },
+      { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[541, 675]], Next: [[549, 711]], Type: "regular" , spaceId: "17B" },
       { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[549, 711]], Next: [[556, 742]], Type: "draw" , spaceId: "18B" },
-      { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[556, 742]], Next: [[563, 772]], Type: "draw" , spaceId: "19B" },
+      { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[556, 742]], Next: [[563, 772]], Type: "regular", spaceId: "19B" },
       { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[563, 772]], Next: [[572, 810], [585, 739]], Type: "choicepoint", pathNames: ["ageOfResistancePath, ageOfLegacyPath"] , spaceId: "20B" },
       { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[572, 810]], Next: [[588, 840]], Type: "draw" , spaceId: "21B" },
       { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[588, 840]], Next: [[606, 869]], Type: "regular" , spaceId: "22B" },
@@ -280,7 +280,7 @@ export const ageOfResistancePath = {
       { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[1066, 366]], Next: [[1096, 340]], Type:"regular", spaceId: "47B"},
       { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[1096, 340]], Next: [[1132, 334]], Type:"draw", spaceId: "48B"},
       { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[1132, 334]], Next: [[1173, 349]], Type:"regular", spaceId: "49B"},
-      { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[1173, 349]], Next: [[1201, 375]], Type:"regular", spaceId: "50B"},
+      { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[1173, 349]], Next: [[1201, 375]], Type:"draw", spaceId: "50B"},
       { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[1201, 375]], Next: [[1222, 405]], Type:"regular", spaceId: "51B"},
       { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[1222, 405]], Next: [[1247, 432]], Type:"draw", spaceId: "52B"},
       { pathColor: "blue", pathName: "ageOfResistancePath", coordinates: [[1247, 432]], Next: [[1268, 449]], Type:"regular", spaceId: "53B"},
@@ -299,25 +299,25 @@ export const ageOfReckoningPath = {
     endCoord: FINISH_SPACE.coordinates,
     segments: [
       { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[104, 512]], Next: [[186, 528]], Type:"start", spaceId: "start" },
-      { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[186, 528]], Next: [[206, 538]], Type:"draw", spaceId: "1C" },
+      { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[186, 528]], Next: [[206, 538]], Type:"regular", spaceId: "1C" },
       { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[206, 538]], Next: [[228, 565]], Type:"draw", spaceId: "2C" },
-      { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[228, 565]], Next: [[247, 590]], Type:"draw", spaceId: "3C" },
+      { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[228, 565]], Next: [[247, 590]], Type:"regular", spaceId: "3C" },
       { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[247, 590]], Next: [[266, 611]], Type:"draw", spaceId: "4C" },
-      { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[266, 611]], Next: [[294, 636]], Type:"draw", spaceId: "5C" },
-      { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[294, 636]], Next: [[317, 641]], Type:"draw", spaceId: "6C" },
+      { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[266, 611]], Next: [[294, 636]], Type:"regular", spaceId: "5C" },
+      { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[294, 636]], Next: [[317, 641]], Type:"regular", spaceId: "6C" },
       { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[317, 641]], Next: [[348, 646]], Type:"draw", spaceId: "7C" },
-      { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[348, 646]], Next: [[377, 647]], Type:"draw", spaceId: "8C" },
+      { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[348, 646]], Next: [[377, 647]], Type:"regular", spaceId: "8C" },
       { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[377, 647]], Next: [[400, 649]], Type:"draw", spaceId: "9C" },
       { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[400, 649]], Next: [[419, 641]], Type:"draw", spaceId: "10C" },
-      { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[419, 641]], Next: [[425, 632]], Type:"draw", spaceId: "11C" },
+      { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[419, 641]], Next: [[425, 632]], Type:"regular", spaceId: "11C" },
       { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[425, 632]], Next: [[427, 612]], Type:"draw", spaceId: "12C" },
-      { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[427, 612]], Next: [[420, 584]], Type:"draw", spaceId: "13C" },
-      { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[420, 584]], Next: [[409, 553]], Type:"draw", spaceId: "14C" },
+      { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[427, 612]], Next: [[420, 584]], Type:"regular", spaceId: "13C" },
+      { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[420, 584]], Next: [[409, 553]], Type:"regular", spaceId: "14C" },
       { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[409, 553]], Next: [[406, 514]], Type:"draw", spaceId: "15C" },
-      { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[406, 514]], Next: [[438, 488]], Type:"draw", spaceId: "16C" },
+      { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[406, 514]], Next: [[438, 488]], Type:"regular", spaceId: "16C" },
       { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[438, 488]], Next: [[482, 480]], Type:"draw", spaceId: "17C" },
       { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[482, 480]], Next: [[511, 457], [502, 532]], Type: "choicepoint", pathNames: ["ageOfReckoningPath, ageOfResistancePath"] , spaceId: "18C" },
-      { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[511, 457]], Next: [[506, 439]], Type:"draw", spaceId: "19C" },
+      { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[511, 457]], Next: [[506, 439]], Type:"regular", spaceId: "19C" },
       { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[506, 439]], Next: [[497, 415]], Type: "draw", spaceId: "20C" },
       { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[497, 415]], Next: [[490, 384]], Type:"regular", spaceId: "21C" },
       { pathColor: "cyan", pathName: "ageOfReckoningPath", coordinates: [[490, 384]], Next: [[498, 345]], Type:"regular", spaceId: "22C" },
@@ -368,21 +368,21 @@ export const ageOfLegacyPath = {
     endCoord: FINISH_SPACE.coordinates,
     segments: [
       { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[104, 512]], Next: [[157, 545]], Type: "start", spaceId: "start" },
-      { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[157, 545]], Next: [[155, 583]], Type: "draw", spaceId: "1PK" },
+      { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[157, 545]], Next: [[155, 583]], Type: "regular", spaceId: "1PK" },
       { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[155, 583]], Next: [[162, 611]], Type: "draw", spaceId: "2PK" },
-      { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[162, 611]], Next: [[173, 641]], Type: "draw", spaceId: "3PK" },
+      { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[162, 611]], Next: [[173, 641]], Type: "regular", spaceId: "3PK" },
       { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[173, 641]], Next: [[186, 673]], Type: "draw", spaceId: "4PK" },
-      { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[186, 673]], Next: [[218, 698]], Type: "draw", spaceId: "5PK" },
+      { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[186, 673]], Next: [[218, 698]], Type: "regular", spaceId: "5PK" },
       { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[218, 698]], Next: [[240, 729]], Type: "draw", spaceId: "6PK" },
-      { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[240, 729]], Next: [[263, 748]], Type: "draw", spaceId: "7PK" },
-      { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[263, 748]], Next: [[286, 765]], Type: "draw", spaceId: "8PK" },
-      { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[286, 765]], Next: [[316,771]], Type: "draw", spaceId: "9PK" },
-      { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[316, 771]], Next: [[347,775]], Type: "draw", spaceId: "10PK" },
-      { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[347, 775]], Next: [[379,777]], Type: "draw", spaceId: "11PK" },
-      { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[379, 777]], Next: [[414,779]], Type: "draw", spaceId: "12PK" },
-      { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[414, 779]], Next: [[449,775]], Type: "draw", spaceId: "13PK" },
-      { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[449, 775]], Next: [[483,769]], Type: "draw", spaceId: "14PK" },
-      { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[483, 769]], Next: [[513, 760]], Type: "draw", spaceId: "15PK" },
+      { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[240, 729]], Next: [[263, 748]], Type: "regular", spaceId: "7PK" },
+      { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[263, 748]], Next: [[286, 765]], Type: "regular", spaceId: "8PK" },
+      { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[286, 765]], Next: [[316, 771]], Type: "draw", spaceId: "9PK" },
+      { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[316, 771]], Next: [[347, 775]], Type: "regular", spaceId: "10PK" },
+      { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[347, 775]], Next: [[379, 777]], Type: "draw", spaceId: "11PK" },
+      { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[379, 777]], Next: [[414, 779]], Type: "regular", spaceId: "12PK" },
+      { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[414, 779]], Next: [[449, 775]], Type: "regular", spaceId: "13PK" },
+      { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[449, 775]], Next: [[483, 769]], Type: "draw", spaceId: "14PK" },
+      { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[483, 769]], Next: [[513, 760]], Type: "regular", spaceId: "15PK" },
       { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[513, 760]], Next: [[559, 760]], Type: "draw", spaceId: "16PK" },
       { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[559, 760]], Next: [[585, 739], [572, 810]], Type: "choicepoint", pathNames: ["ageOfLegacyPath, ageOfResistancePath"] , spaceId: "17PK" },
       { pathColor: "pink", pathName: "ageOfLegacyPath", coordinates: [[585, 739]], Next: [[604, 718]], Type: "draw", spaceId: "18PK" },

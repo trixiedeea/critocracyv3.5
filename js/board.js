@@ -19,7 +19,7 @@ const TOKEN_SIZE = 40;
 // Removed SPACE_RADIUS, choicepoint_RADIUS as clicks/drawing might use different logic
 
 // ===== Debug Mode =====
-const DEBUG_MODE = true; // Set to true for debug visualization
+const DEBUG_MODE = false; // Set to true for debug visualization
 
 // Listen for redrawCanvas custom event and redraw the board when triggered
 // This ensures that any part of the game can trigger a board redraw by dispatching this event
@@ -390,7 +390,6 @@ export function findSpaceDetailsByCoords(coords) {
         Next: []
       };
   
-      markPlayerFinished();
       return space;
     }
   

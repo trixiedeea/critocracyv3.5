@@ -22,6 +22,7 @@
         <div>
             <label for="human-Player-Count">Select Number of Human Players:</label>
             <select id="human-Player-Count">
+                <option value="0" id="zero-humans-option" style="display: none;">0 Humans</option>
                 <option value="1">1 Human</option>
                 <option value="2">2 Humans</option>
                 <option value="3">3 Humans</option>
@@ -326,9 +327,9 @@
                     </div>
                     <ul id="resource-Display-Container" class="display-Container">
                         <li><span id="currentPlayer">-</span></li>
-                            <li>Knowledge: <span id="KNOWLEDGE_COUNT">0</span></li>
-                            <li>Money: <span id="MONEY_COUNT">0</span></li>
-                            <li>Influence: <span id="INFLUENCE_COUNT">0</span></li>
+                            <li>Knowledge 🧠: <span id="KNOWLEDGE_COUNT">0</span></li>
+                            <li>Money 💰: <span id="MONEY_COUNT">0</span></li>
+                            <li>Influence 🎯: <span id="INFLUENCE_COUNT">0</span></li>
                     </ul>
                     <div id="dice-Container">
                         <div id="dice-Animation-Area" class="dice-Animation-Container">

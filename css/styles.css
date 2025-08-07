@@ -12,26 +12,9 @@ Button:hover {
     background-color: #a3aeab;
 }
 
-/* End Turn Button */
-#end-turn-button {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    z-index: 100;
-    padding: 12px 24px;
-    font-size: 16px;
-    font-weight: bold;
-    background-color: #2ecc71;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
 
 #end-turn-button:hover:not(:disabled) {
-    background-color: #27ae60;
+    background-color: #6c9ba1;
     transform: translateY(-2px);
     box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
 }
@@ -85,7 +68,7 @@ button {
 Button:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    background-color: #035761;
+    background-color: #d6ea8d;
 }
 
 Button:active {

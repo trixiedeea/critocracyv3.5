@@ -1194,7 +1194,7 @@ export async function applyAgeCardEffect(card, optionName = null, playerId) {
   await processAgeCardEffects(card, effects);
 }
 
-export async function applyResourceChange(resourceType, amount, source, playerId) {
+export async function applyResourceChange(resourceType, amount, source, playerId, callback = null) {
   console.log('=============applyResourceChange=============');
   
   // Get the target player
@@ -1265,14 +1265,35 @@ export async function applyResourceChange(resourceType, amount, source, playerId
     
     //console.log('Final Change After Adjustments:', adjustedAmount);
     
-    // Apply the resource change
-    const newValue = await handleCardResourceEffect({
-      currentPlayer: player,
-      resourceType,
-      amount: adjustedAmount,
-      source,
-      fromPlayer: source === 'steal' ? getCurrentPlayer() : null
-    });
+    // Determine which callback to use based on source and callback parameter
+    let newValue;
+    if (callback) {
+      // Use the provided callback function
+      newValue = await callback({
+        currentPlayer: player,
+        resourceType,
+        amount: adjustedAmount,
+        source,
+        fromPlayer: source === 'steal' ? getCurrentPlayer() : null
+      });
+    } else if (source === 'applyCardEffect') {
+      // If called from applyCardEffect, delegate to processCardEffects
+      await processCardEffects({
+        type: 'RESOURCE_CHANGE',
+        resource: resourceType,
+        amount: adjustedAmount
+      }, player);
+      newValue = (player.resources?.[resourceType] || 0) + adjustedAmount;
+    } else {
+      // Default: delegate to handleCardResourceEffect
+      newValue = await handleCardResourceEffect({
+        currentPlayer: player,
+        resourceType,
+        amount: adjustedAmount,
+        source,
+        fromPlayer: source === 'steal' ? getCurrentPlayer() : null
+      });
+    }
     
     // Log the complete transaction
     const logEntry = {

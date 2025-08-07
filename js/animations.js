@@ -367,21 +367,23 @@ export function animateTokenToPosition(player, newPosition, duration = 1000, ski
       }
     
       const segment = findSegmentByCoord(currentCoords);
-      let FINISH_SPACE = [1384, 512];
-    if (!segment.Next && currentCoords === FINISH_SPACE ) {
+      const FINISH_SPACE = { x: 1384, y: 512 };
+      const isAtFinish = currentCoords.x === FINISH_SPACE.x && currentCoords.y === FINISH_SPACE.y;
+    
+    if (!segment.Next && isAtFinish) {
       console.log("Player has reached the finish space!");
-      markPlayerFinished(player.id);
+      markPlayerFinished(player);
       resolve();
       return;
-    } else if (!segment.Next && currentCoords !== FINISH_SPACE) {
+    } else if (!segment.Next && !isAtFinish) {
         console.warn('next segment null player not at finish');
-    } else if (!segment || !segment.Next || segment.Next.length === 0 && !currentCoords === FINISH_SPACE) {
+    } else if (!segment || !segment.Next || segment.Next.length === 0 && !isAtFinish) {
         console.warn("Invalid or incomplete segment found at", currentCoords);
         resolve();
         return;
-      } else if (currentCoords === FINISH_SPACE) {
+      } else if (isAtFinish) {
         console.log("Player has reached the finish space!");
-        markPlayerFinished(player.id);
+        markPlayerFinished(player);
         resolve();
         return;
       }
@@ -618,11 +620,11 @@ export function highlightDeckRegions(player, deckType, positions, duration = 300
 
     // Map proper highlight colors by deckType
     const colorMap = {
-      ageOfExpansionDeck: 'rgba(140, 40, 234, 0.9)',   // purple
-      ageOfResistanceDeck: 'rgba(27, 71, 248, 0.89)',  // blue
-      ageOfReckoningDeck: 'rgba(39, 255, 237, 0.91)',   // cyan
-      ageOfLegacyDeck: 'rgba(162, 0, 151, 0.89)',      // pink
-      endOfTurnDeck: 'rgba(179, 196, 0, 0.9)'         // gold/yellow
+      ageOfExpansionDeck: 'rgba(200, 141, 255, 0.97)',   // purple
+      ageOfResistanceDeck: 'rgba(83, 115, 244, 0.99)',  // blue
+      ageOfReckoningDeck: 'rgba(69, 193, 221, 0.91)',   // cyan
+      ageOfLegacyDeck: 'rgba(255, 132, 247, 0.93)',      // pink
+      endOfTurnDeck: 'rgba(250, 255, 191, 0.97)'         // gold/yellow
     };
 
     const highlightColor = colorMap[deckType] || '#FF0000'; // fallback to red
@@ -689,23 +691,26 @@ export function highlightDeckRegions(player, deckType, positions, duration = 300
         const alpha = 0.4 + 0.4 * Math.sin(highlight.phase * Math.PI);
         const width = highlight.position.toprightx - highlight.position.topleft;
         const height = highlight.position.bottomleft - highlight.position.toplefty;
+        ctx.fill();
         
         // Extract base color from rgba string (remove the alpha part)
         const baseColor = highlight.color.replace(/,\s*[\d.]+\s*\)$/, '');
         
         ctx.save();
-        
+        ctx.fill();
         // Draw semi-transparent fill behind the pulsing borders
-        ctx.fillStyle = baseColor + `,${alpha * 0.3})`;
+        ctx.fillStyle = baseColor + `,${alpha * 0.9})`;
         ctx.fillRect(highlight.position.topleft, highlight.position.toplefty, width, height);
         
         // Draw border with pulsing effect
         ctx.strokeStyle = baseColor + `,${alpha})`;
+        ctx.fill();
         ctx.lineWidth = 4; // Slightly thicker border for better visibility
         ctx.strokeRect(highlight.position.topleft, highlight.position.toplefty, width, height);
         
         // Draw a second border with lower opacity for a glow effect
-        ctx.strokeStyle = baseColor + `,${alpha * 0.5})`;
+        ctx.strokeStyle = baseColor + `,${alpha * 0.9})`;
+        ctx.fill();
         ctx.lineWidth = 8;
         ctx.strokeRect(highlight.position.topleft, highlight.position.toplefty, width, height);
         

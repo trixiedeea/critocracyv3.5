@@ -3,11 +3,20 @@ const DEBUG_MODE = true;
 // Player Count Screen - Enforces exactly 6 total players
 document.addEventListener("DOMContentLoaded", () => {
     console.log("Player count screen initializing");
+
+const DEBUG_MODE = true;
     
   // Get references to the dropdown elements
 const humanPlayerCount = document.getElementById('human-Player-Count');
 const aiPlayerCount = document.getElementById('ai-Player-Count');
 const playerCountConfirmButton = document.getElementById('player-Count-Confirm-Button');
+const zeroHumansOption = document.getElementById('zero-humans-option');
+
+// Show/hide zero humans option based on debug mode
+if (DEBUG_MODE && zeroHumansOption) {
+    zeroHumansOption.style.display = 'block';
+    console.log('Debug mode enabled: Zero humans option is available');
+}
 
 // Function to update AI player options based on the number of human players selected
 function updateAIOptions() {
@@ -19,7 +28,11 @@ function updateAIOptions() {
     let minAI, maxAI;
 
     // Set AI limits based on the number of human players
-    if (humanPlayers === 6) {
+    if (humanPlayers === 0 && DEBUG_MODE) {
+        // Debug mode: Allow 1-6 AI players when no humans
+        minAI = 1;
+        maxAI = 6;
+    } else if (humanPlayers === 6) {
         minAI = 0;
         maxAI = 0;
     } else if (humanPlayers === 1) {
@@ -40,19 +53,24 @@ function updateAIOptions() {
     }
 
     // Add the options for AI players based on the min and max values
-    // The first option should always be 0 AI as a fallback.
-    const defaultOption = document.createElement('option');
-    defaultOption.value = 0;
-    defaultOption.textContent = '0 AI';
-    aiPlayerCount.appendChild(defaultOption);
+    // Only add 0 AI option if it's within the valid range
+    if (minAI === 0) {
+        const defaultOption = document.createElement('option');
+        defaultOption.value = 0;
+        defaultOption.textContent = '0 AI';
+        aiPlayerCount.appendChild(defaultOption);
+    }
 
     // Add new options for AI players within the valid range
-    for (let i = minAI; i <= maxAI; i++) {
+    for (let i = Math.max(minAI, 1); i <= maxAI; i++) {
         const option = document.createElement('option');
         option.value = i;
         option.textContent = `${i} AI`;
         aiPlayerCount.appendChild(option);
     }
+    
+    // Set default selection to the minimum valid AI count
+    aiPlayerCount.value = minAI;
 }
 
 // Initialize AI options based on the default human player selection
@@ -72,15 +90,27 @@ playerCountConfirmButton.addEventListener("click", () => {
     const aiCount = parseInt(aiPlayerCount.value);
     const totalPlayers = humanCount + aiCount;
     
-    // Validate the total is 6 players
+    // Validate player counts based on debug mode
     if (DEBUG_MODE) {
+        // Debug mode: Allow zero humans but require at least 1 total player
         if (totalPlayers < 1) {
             alert(`Total players must be at least 1. Current: ${totalPlayers}`);
             return;
         }
-    } else if (totalPlayers <=4) {
-        alert(`Total players must be at least 4. Current: ${totalPlayers}`);
-        return;
+        if (humanCount === 0 && aiCount === 0) {
+            alert('You must have at least 1 player (human or AI)');
+            return;
+        }
+    } else {
+        // Normal mode: Require at least 1 human and minimum 4 total players
+        if (humanCount === 0) {
+            alert('At least 1 human player is required in normal mode');
+            return;
+        }
+        if (totalPlayers <= 4) {
+            alert(`Total players must be at least 4. Current: ${totalPlayers}`);
+            return;
+        }
     }
     
     // Create player array
