@@ -9,7 +9,7 @@ import {
 } 
 from './board-data.js'; 
 
-import { handleSpaceAction, handleEndTurn } from './game.js';
+import { handleSpaceAction } from './game.js';
 
 
 // ===== Board Constants =====

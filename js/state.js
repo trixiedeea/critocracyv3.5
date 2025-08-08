@@ -5,6 +5,8 @@
  */
 
 import { SPACE_TYPE } from './board-data.js';
+import { showEndGameWithVictory } from './animations.js';
+import {getPlayers} from './players.js';
 
 // ===== Global Variables =====
 window.hasDrawnEndOfTurnCard = false;
@@ -76,8 +78,9 @@ export const _state = {
         gameStarted: false,
         gameOver: false,
         winner: null,
+        playerFinishPosition: 0,
         round: 1,
-        maxRounds: 10,
+        maxRounds: 50,
         playerRoles: {},
         playerPositions: {},
         board: {},
@@ -87,7 +90,30 @@ export const _state = {
             enableSpecialAbilities: true
         },
         spaceType: { ...SPACE_TYPE }, // Add spaceType to global state.
+    },
+
+    player: {
+        id: null,       
+        name: null,
+        role: null,
+        isHuman: false,
+        currentCoords:[0, 0],
+        x: 0,
+        y: 0,
+        resources: { knowledge: 0, money: 0, influence: 0 },
+        finished: false,
+        skipNextTurn: false,
+        cards: [],
+        items: [],
+        alliances: [],
+        forcePathChange: false,
+        currentAlliancePartnerId: null,
+        abilityUsed: false,
+        playerFinalScore: 0,
+        playerFinalResourceTotal: 0,
+        playerFinalRanking: 0,
     }
+    
 };
 
 // Create proxy for reactivity
@@ -424,4 +450,59 @@ export function getEffectDescription(effect) {
 
 function capitalize(word) {
     return word.charAt(0).toUpperCase() + word.slice(1);
+}
+
+/**
+ * Calculates final scores and determines the game winner
+ */
+export function endGame() {
+    console.log('=== ENDING GAME ===');
+    
+    const players = getPlayers();
+    
+    if (players.length === 0) {
+        console.error('Cannot end game: No players found');
+        return;
+    }
+    
+    // Calculate final scores for all players
+    players.forEach((player, index) => {
+        const resourceTotal = player.playerFinalResourceTotal || 0;
+        let rankingBonus = 0;
+        
+        // Assign ranking bonus based on finish position
+        switch(player.playerFinalRanking) {
+            case 1: rankingBonus = 25; break;  // 1st place
+            case 2: rankingBonus = 20; break;  // 2nd place
+            case 3:
+            case 4: rankingBonus = 15; break;  // 3rd and 4th place
+            case 5:
+            case 6: rankingBonus = 10; break;  // 5th and 6th place
+            default: rankingBonus = 0; break; // Beyond 6th place
+        }
+        
+        _state.game.players[index].playerFinalScore = resourceTotal + rankingBonus;
+        
+        console.log(`Player ${player.name}: Resources=${resourceTotal}, Ranking=${player.playerFinalRanking}, Bonus=${rankingBonus}, Final Score=${player.playerFinalScore}`);
+    });
+    
+    // Find all players with the highest final score (handles ties)
+    const maxScore = Math.max(...players.map(p => p.playerFinalScore || 0));
+    const winners = players.filter(p => p.playerFinalScore === maxScore);
+    
+    if (winners.length === 1) {
+        console.log(`Game Winner: ${winners[0].name} with score ${winners[0].playerFinalScore}`);
+    } else {
+        console.log(`Game Tie! Winners: ${winners.map(w => w.name).join(', ')} with score ${maxScore}`);
+    }
+    
+    // Update game state
+    updateGameState({
+        ended: true,
+        gameOver: true,
+        winner: winners.length === 1 ? winners[0] : winners
+    });
+    
+    // Show the end game screen with victory animation
+    showEndGameWithVictory(winners);
 }

@@ -10,6 +10,50 @@ import { state, updateGameState } from './state.js';
 export const DEBUG_MODE = false;
 
 // Initialize the game when the DOM is ready
+// Initialize UI screens directly - moved outside DOMContentLoaded to be accessible
+const screens = {
+    start: document.getElementById('start-Screen'),
+    playerCountScreen: document.getElementById('player-Count-Screen'),
+    roleSelectionScreen: document.getElementById('role-Selection-Screen'),
+    turnOrderScreen: document.getElementById('turn-Order-Screen'),
+    gameBoardScreen: document.getElementById('game-Board-Screen'),
+    endGameScreen: document.getElementById('end-Game-Screen')
+};
+
+// Function to show a specific screen and hide others - made exportable
+export function showScreen(screenName) {
+    //console.log(`--- showScreen called with: ${screenName} ---`);
+    Object.entries(screens).forEach(([name, screen]) => {
+        if (screen) {
+            if (name === screenName) {
+                //console.log(`  Showing screen element: ${name}`);
+                screen.style.display = 'block';
+                if (name === 'turnOrderScreen') {
+                    //console.log('  Turn Order Screen is now visible. Checking for dice elements...');
+                    setTimeout(() => {
+                        const diceElements = document.querySelectorAll('.dice');
+                        //console.log('  Found dice elements after screen display:', diceElements.length);
+                        if (diceElements.length > 0) {
+                            const dice = diceElements[0];
+                            const style = window.getComputedStyle(dice);
+                            //console.log('  Dice animation-related styles - animation:', style.animation, 'animation-name:', style.animationName);
+                        }
+                    }, 100);
+                }
+                if (name === 'gameBoard') {
+                    setTimeout(() => {
+                        // board redraw logic can be added here if needed
+                    }, 100);
+                }
+            } else {
+                screen.style.display = 'none';
+            }
+        } else {
+            //console.log(`Screen element ${name} not found during showScreen.`);
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     //console.log("DOM fully loaded and parsed. Initializing Critocracy...");
     //console.log("[Main] Starting game initialization sequence...");
@@ -130,50 +174,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Start the game logic
         startGame(state.playerConfigs, event.detail);
     });
-
-    // Initialize UI screens directly
-    const screens = {
-        start: document.getElementById('start-Screen'),
-        playerCountScreen: document.getElementById('player-Count-Screen'),
-        roleSelectionScreen: document.getElementById('role-Selection-Screen'),
-        turnOrderScreen: document.getElementById('turn-Order-Screen'),
-        gameBoardScreen: document.getElementById('game-Board-Screen'),
-        endGameScreen: document.getElementById('end-Game-Screen')
-    };
-
-    // Function to show a specific screen and hide others
-    function showScreen(screenName) {
-        //console.log(`--- showScreen called with: ${screenName} ---`);
-        Object.entries(screens).forEach(([name, screen]) => {
-            if (screen) {
-                if (name === screenName) {
-                    //console.log(`  Showing screen element: ${name}`);
-                    screen.style.display = 'block';
-                    if (name === 'turnOrderScreen') {
-                        //console.log('  Turn Order Screen is now visible. Checking for dice elements...');
-                        setTimeout(() => {
-                            const diceElements = document.querySelectorAll('.dice');
-                            //console.log('  Found dice elements after screen display:', diceElements.length);
-                            if (diceElements.length > 0) {
-                                const dice = diceElements[0];
-                                const style = window.getComputedStyle(dice);
-                                //console.log('  Dice animation-related styles - animation:', style.animation, 'animation-name:', style.animationName);
-                            }
-                        }, 100);
-                    }
-                    if (name === 'gameBoard') {
-                        setTimeout(() => {
-                            // board redraw logic can be added here if needed
-                        }, 100);
-                    }
-                } else {
-                    screen.style.display = 'none';
-                }
-            } else {
-                //console.log(`Screen element ${name} not found during showScreen.`);
-            }
-        });
-    }
 
     // Initially show only the start screen
     showScreen('start');

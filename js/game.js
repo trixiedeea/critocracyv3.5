@@ -45,6 +45,7 @@ import {
 
 import { 
     state, 
+    endGame,
     updateGameState, 
     isActionAllowed 
 } from './state.js';
@@ -641,7 +642,7 @@ export function processEndPlayerTurn() {
             // Check if all other players are finished
             if (allPlayersFinished()) {
                 //console.log('All players finished, triggering game over');
-                triggerGameOver().catch(console.error);
+                endGame().catch(console.error);
                 return;
             }
         }
@@ -983,7 +984,8 @@ export async function advanceToNextPlayer() {
 
     // Check for game over condition *before* advancing (in case last player finished)
     if (allPlayersFinished(state.players)) {
-        await triggerGameOver();
+        await allPlayersFinished();
+        resolve();
         return;
     }
 
@@ -1004,7 +1006,7 @@ export async function advanceToNextPlayer() {
     // If loopCheck reaches totalPlayerCount, it means everyone left is finished - trigger game over again just in case.
     if (loopCheck >= state.totalPlayerCount) {
          console.warn("Advanced player logic found only finished players. Triggering game over.");
-         await triggerGameOver();
+         await endGame();
          return;
     }
 

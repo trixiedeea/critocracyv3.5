@@ -6,7 +6,11 @@ import {
     updateGameState,
     getCurrentPlayer,
     _state,
+    endGame,
 } from './state.js';
+import { 
+    advanceToNextPlayer,
+} from './game.js';
 
 // ===== Resource & Player Constants =====
 // List of all valid resource keys used throughout the game.
@@ -149,20 +153,126 @@ export function resetPlayers() {
 }
 
 /**
- * Marks a player as finished.
+ * Marks a player as finished, updates their final scores, and handles game flow
  */
-export function markPlayerFinished(player) {
-    if (!player) return;
-    //console.log(`Marking player ${player.name} as finished.`);
-    console.trace('markPlayerFinished called from:');
-    player.finished = true;
-    // Optionally add finish time/rank later if needed
+export function markPlayerFinished(playerOrId) {
+    if (!playerOrId) {
+        console.error('markPlayerFinished: No player provided');
+        return;
+    }
+    
+    console.log('=== markPlayerFinished called ===');
+    console.log('Input:', playerOrId);
+    
+    // Get the players array from state
+    const players = getPlayers();
+    
+    if (players.length === 0) {
+        console.error('No players in game state');
+        return;
+    }
+    
+    // Find the actual player in the state
+    let player;
+    let playerIndex = -1;
+    
+    if (typeof playerOrId === 'string' || typeof playerOrId === 'number') {
+        // Find player by ID
+        playerIndex = players.findIndex(p => p.id === playerOrId);
+        if (playerIndex === -1) {
+            console.error(`Player with ID ${playerOrId} not found`);
+            return;
+        }
+        player = players[playerIndex];
+    } else if (typeof playerOrId === 'object' && playerOrId.id) {
+        // Find player by object reference
+        playerIndex = players.findIndex(p => p.id === playerOrId.id);
+        if (playerIndex === -1) {
+            console.error(`Player object not found in state`);
+            return;
+        }
+        player = players[playerIndex];
+    } else {
+        console.error('Invalid player identifier provided');
+        return;
+    }
+    
+    console.log(`Found player: ${player.name} at index ${playerIndex}`);
+    console.log(`Player finished status BEFORE: ${player.finished}`);
+    
+    // Mark player as finished DIRECTLY in the state array
+    _state.game.players[playerIndex].finished = true;
+    
+    console.log(`Player finished status AFTER: ${_state.game.players[playerIndex].finished}`);
+    
+    // Debug: Log the player object structure
+    console.log('=== RESOURCE CALCULATION DEBUG ===');
+    console.log('Full player object:', JSON.stringify(player, null, 2));
+    console.log('Player resources:', player.resources);
+    console.log('Resources type:', typeof player.resources);
+    console.log('Resources is array:', Array.isArray(player.resources));
+    
+    // Try to get resources from both the local player and state player
+    const statePlayer = _state.game.players[playerIndex];
+    console.log('State player resources:', statePlayer.resources);
+    console.log('State resources type:', typeof statePlayer.resources);
+    
+    // Calculate player's final resource total with robust error handling
+    let resources;
+    if (statePlayer.resources && typeof statePlayer.resources === 'object' && !Array.isArray(statePlayer.resources)) {
+        resources = statePlayer.resources;
+    } else if (player.resources && typeof player.resources === 'object' && !Array.isArray(player.resources)) {
+        resources = player.resources;
+    } else {
+        console.error('Player resources are invalid, using defaults');
+        resources = { money: 0, knowledge: 0, influence: 0 };
+    }
+    
+    console.log('Using resources object:', resources);
+    
+    const money = Number(resources.money || 0);
+    const knowledge = Number(resources.knowledge || 0);
+    const influence = Number(resources.influence || 0);
+    
+    console.log(`Individual resources - Money: ${money}, Knowledge: ${knowledge}, Influence: ${influence}`);
+    
+    const finalResourceTotal = money + knowledge + influence;
+    console.log(`Final resource total: ${finalResourceTotal}`);
+    
+    // Update player's final resource total
+    _state.game.players[playerIndex].playerFinalResourceTotal = finalResourceTotal;
+    
+    // Calculate and assign ranking based on finish position
+    const finishedPlayers = _state.game.players.filter(p => p.finished);
+    const finishPosition = finishedPlayers.length;
+    _state.game.players[playerIndex].playerFinalRanking = finishPosition;
+    
+    console.log(`Player ${player.name} marked as finished in position ${finishPosition} with ${finalResourceTotal} total resources`);
+    console.log('=== END RESOURCE CALCULATION DEBUG ===');
+    
+    // Trigger state update notification
+    updateGameState({
+        playerFinishPosition: Math.max(_state.game.playerFinishPosition, finishPosition)
+    });
+    
+    // Verify the change took effect
+    const verifyPlayer = _state.game.players[playerIndex];
+    console.log(`VERIFICATION - Player ${verifyPlayer.name} finished: ${verifyPlayer.finished}`);
+    
+    if (allPlayersFinished()) {
+        console.log('All players finished - ending game');
+        endGame();
+    } else {
+        console.log('Not all players finished - advancing to next player');
+        advanceToNextPlayer();
+    }
 }
 
 /**
  * Checks if all players in the game have finished.
  */
 export function allPlayersFinished() {
+    console.log('===============allPlayersFinished================');
     if (players.length === 0) return false; // No players, game can't be finished
     return players.every(p => p.finished);
 }

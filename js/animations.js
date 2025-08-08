@@ -6,9 +6,10 @@ import {
     isActionAllowed
 } from './state.js';
 
+import { showScreen } from './main.js';
+
 import {
     promptForChoicepoint,
-
 } from './ui.js';
 
 import { 
@@ -19,7 +20,8 @@ import {
 
 import { 
     scaleCoordinates,
-    drawBoard
+    drawBoard,
+    drawTokens
 } from './board.js';
 
 import { 
@@ -367,48 +369,71 @@ export function animateTokenToPosition(player, newPosition, duration = 1000, ski
       }
     
       const segment = findSegmentByCoord(currentCoords);
-      const FINISH_SPACE = { x: 1384, y: 512 };
-      const isAtFinish = currentCoords.x === FINISH_SPACE.x && currentCoords.y === FINISH_SPACE.y;
-    
-    if (!segment.Next && isAtFinish) {
-      console.log("Player has reached the finish space!");
-      markPlayerFinished(player);
-      resolve();
-      return;
-    } else if (!segment.Next && !isAtFinish) {
-        console.warn('next segment null player not at finish');
-    } else if (!segment || !segment.Next || segment.Next.length === 0 && !isAtFinish) {
-        console.warn("Invalid or incomplete segment found at", currentCoords);
-        resolve();
-        return;
-      } else if (isAtFinish) {
-        console.log("Player has reached the finish space!");
-        markPlayerFinished(player);
-        resolve();
-        return;
+      let FINISH_SPACE = [1384, 512];
+      
+      // Helper function to compare coordinates
+      function coordsMatch(coord1, coord2) {
+          // Handle object format {x: number, y: number}
+          if (typeof coord1 === 'object' && coord1.x !== undefined && coord1.y !== undefined) {
+              if (Array.isArray(coord2)) {
+                  return coord1.x === coord2[0] && coord1.y === coord2[1];
+              } else {
+                  return coord1.x === coord2.x && coord1.y === coord2.y;
+              }
+          }
+          // Handle array format [x, y]
+          if (Array.isArray(coord1)) {
+              if (typeof coord2 === 'object' && coord2.x !== undefined && coord2.y !== undefined) {
+                  return coord1[0] === coord2.x && coord1[1] === coord2.y;
+              } else {
+                  return coord1[0] === coord2[0] && coord1[1] === coord2[1];
+              }
+          }
+          return false;
       }
-    
+      
+      // Check if player is at finish space first
+      if (coordsMatch(currentCoords, FINISH_SPACE)) {
+          console.log("Player has reached the finish space!");
+          markPlayerFinished(player);
+          resolve();
+          return;
+      }
+      
+      // Check for invalid segments (but not at finish space)
+      if (!segment) {
+          console.warn("No segment found at", currentCoords);
+          resolve();
+          return;
+      }
+      
+      // Check for end of path (but not at finish space)
+      if (!segment.Next || segment.Next.length === 0) {
+          console.warn('Next segment is null/empty and player is not at finish space. Current coords:', currentCoords);
+          resolve();
+          return;
+      }
+      
       // Check if this is a choicepoint (multiple Next coordinates)
       if (segment.Next.length > 1) {
-        //console.log(`[DEBUG] Choicepoint detected at ${JSON.stringify(currentCoords)} with ${segment.Next.length} options`);
-        
-        // Store interrupted move data
-        state.interruptedMove = {
-          remainingSteps,
-          duration,
-          skipSpaceAction,
-          onComplete
-        };
-        
-        // Ensure game state is set to wait for choice
-        updateGameState({
-          pendingActionData: {
-            choiceOptions: segment.Next
-          }
-        });
-        
-        //console.log("At choicepoint - using promptForChoicepoint for both human and AI");
-        
+          //console.log(`[DEBUG] Choicepoint detected at ${JSON.stringify(currentCoords)} with ${segment.Next.length} options`);
+          
+          // Store interrupted move data
+          state.interruptedMove = {
+              remainingSteps,
+              duration,
+              skipSpaceAction,
+              onComplete
+          };
+          
+          // Ensure game state is set to wait for choice
+          updateGameState({
+              pendingActionData: {
+                  choiceOptions: segment.Next
+              }
+          });
+          
+          //console.log("At choicepoint - using promptForChoicepoint for both human and AI");
         // Prepare path names for the choice point
         let pathNames = [];
         if (Array.isArray(segment.pathNames) && segment.pathNames[0]) {
@@ -801,4 +826,199 @@ export function clearDeckHighlights() {
       ctx.clearRect(0, 0, state.board.boardCanvas.width, state.board.boardCanvas.height);
       //console.log('[CANVAS] Cleared main canvas highlight layer');
   } 
+}
+
+
+export function showEndGameWithVictory(winners) {
+  console.log('=== SHOWING END GAME SCREEN ===');
+  
+  if (!winners || (Array.isArray(winners) && winners.length === 0)) {
+      console.error('No winners provided for victory screen');
+      return;
+  }
+  
+  // Handle both single winner and array of winners
+  const winnersArray = Array.isArray(winners) ? winners : [winners];
+  const primaryWinner = winnersArray[0];
+  
+  // Transition to end game screen
+  showScreen('endGameScreen');
+  
+  // Make the new game button visible
+  const newGameButton = document.getElementById('newGameButton');
+  if (newGameButton) {
+      newGameButton.style.display = 'block';
+      newGameButton.style.visibility = 'visible';
+  }
+  
+  // Start victory celebration animation
+  startVictoryCelebration(winnersArray);
+}
+
+/**
+* Creates a victory celebration animation for the winner(s)
+*/
+function startVictoryCelebration(winners) {
+  const winnersArray = Array.isArray(winners) ? winners : [winners];
+  const primaryWinner = winnersArray[0];
+  
+  console.log(`Starting victory celebration for ${winnersArray.map(w => w.name).join(', ')}`);
+  
+  // Create or find celebration container
+  let celebrationContainer = document.getElementById('celebrationContainer');
+  if (!celebrationContainer) {
+      celebrationContainer = document.createElement('div');
+      celebrationContainer.id = 'celebrationContainer';
+      celebrationContainer.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          z-index: 1000;
+          overflow: hidden;
+      `;
+      document.body.appendChild(celebrationContainer);
+  }
+  
+  // Clear any existing celebration
+  celebrationContainer.innerHTML = '';
+  
+  // Handle winner text for single winner or tie
+  const winnerText = document.createElement('div');
+  if (winnersArray.length === 1) {
+      winnerText.textContent = `🎉 ${primaryWinner.name} Wins! 🎉`;
+  } else {
+      winnerText.textContent = `🎉 TIE! ${winnersArray.map(w => w.name).join(' & ')} Win! 🎉`;
+  }
+  
+  winnerText.style.cssText = `
+      position: absolute;
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 3em;
+      font-weight: bold;
+      color: #ffd700;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+      animation: pulse 1.5s infinite, rainbow 3s infinite;
+      text-align: center;
+      white-space: nowrap;
+      max-width: 90%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+  `;
+  celebrationContainer.appendChild(winnerText);
+  
+  // Add score display
+  const scoreText = document.createElement('div');
+  scoreText.textContent = `Final Score: ${primaryWinner.playerFinalScore}`;
+  scoreText.style.cssText = `
+      position: absolute;
+      top: 35%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.5em;
+      color: #fff;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+      text-align: center;
+  `;
+  celebrationContainer.appendChild(scoreText);
+  
+  // Create floating confetti animation
+  createConfetti(celebrationContainer);
+
+  // Add CSS animations if not already present
+  addCelebrationStyles();
+
+  // Clean up celebration after 5 seconds
+  setTimeout(() => {
+      if (celebrationContainer && celebrationContainer.parentNode) {
+          celebrationContainer.style.opacity = '0';
+          celebrationContainer.style.transition = 'opacity 1s ease-out';
+          setTimeout(() => {
+              if (celebrationContainer && celebrationContainer.parentNode) {
+                  celebrationContainer.remove();
+              }
+          }, 1000);
+      }
+  }, 5000);
+}
+
+/**
+ * Creates animated confetti elements
+ */
+function createConfetti(container) {
+  const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff'];
+  const confettiCount = 50;
+  
+  for (let i = 0; i < confettiCount; i++) {
+    const confetti = document.createElement('div');
+    confetti.style.cssText = `
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background-color: ${colors[Math.floor(Math.random() * colors.length)]};
+      top: -10px;
+      left: ${Math.random() * 100}%;
+      animation: confettiFall ${3 + Math.random() * 3}s linear infinite;
+      animation-delay: ${Math.random() * 2}s;
+      transform: rotate(${Math.random() * 360}deg);
+    `;
+    container.appendChild(confetti);
+  }
+}
+
+/**
+* Adds CSS styles for celebration animations
+*/
+function addCelebrationStyles() {
+  const styleId = 'celebrationStyles';
+  
+  // Prevent duplicate style injection
+  if (document.getElementById(styleId)) return;
+  
+  const style = document.createElement('style');
+  style.id = styleId;
+  style.textContent = `
+      @keyframes pulse {
+          0% { transform: translateX(-50%) scale(1); }
+          50% { transform: translateX(-50%) scale(1.05); }
+          100% { transform: translateX(-50%) scale(1); }
+      }
+      
+      @keyframes rainbow {
+          0% { color: #ff6b6b; }
+          16.66% { color: #4ecdc4; }
+          33.33% { color: #45b7d1; }
+          50% { color: #96ceb4; }
+          66.66% { color: #feca57; }
+          83.33% { color: #ff9ff3; }
+          100% { color: #ff6b6b; }
+      }
+      
+      @keyframes confettiFall {
+          to {
+              transform: translateY(100vh) rotate(720deg);
+          }
+      }
+      
+      @keyframes fadeInUp {
+          from {
+              opacity: 0;
+              transform: translateY(30px);
+          }
+          to {
+              opacity: 1;
+              transform: translateY(0);
+          }
+      }
+  `;
+  
+  try {
+      document.head.appendChild(style);
+  } catch (error) {
+      console.warn('Could not add celebration styles:', error);
+  }
 }

@@ -32,6 +32,9 @@ function updateAIOptions() {
         // Debug mode: Allow 1-6 AI players when no humans
         minAI = 1;
         maxAI = 6;
+    } else if (humanPlayers === 1 && DEBUG_MODE) {
+        minAI = 0;
+        maxAI = 5;
     } else if (humanPlayers === 6) {
         minAI = 0;
         maxAI = 0;
