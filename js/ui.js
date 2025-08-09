@@ -187,6 +187,7 @@ function setupEventListeners() {
 
     // --- Game Board Buttons ---
     gameBoard.endTurnButton.addEventListener('click', () => {
+        playClickSound();
         //console.log("End Turn button clicked.");
         gameBoard.endTurnButton.classList.remove('shake');
         console.log('*************CALL advanceToNextPlayer *************');
@@ -194,6 +195,7 @@ function setupEventListeners() {
     });
     // Dice Roll
     gameBoard.dice.addEventListener('click', () => {
+        rollDiceSound();
         if (state.currentPhase !== 'ROLLING') return; // Only act during ROLLING phase
     
         console.log('🎯========== Dice clicked in ROLLING phase==========');
@@ -259,6 +261,7 @@ function setupEventListeners() {
 
     // --- End Game Screen Button ---
     endGame.newGameButton.addEventListener('click', () => {
+        playClickSound();
         //console.log("--------New Game button clicked. Reloading page.--------");
         window.location.reload();
     });
@@ -354,6 +357,7 @@ export function handleCanvasCardClick(event, coords = null, player = null) {
                 if (boardX >= pos.topleft && boardX <= pos.bottomrightx && 
                     boardY >= pos.toplefty && boardY <= pos.bottomright) {
                     clickedDeckType = region.deckType;
+                    playClickSound();
                     //console.log(`Clicked on ${region.pathName} deck: ${clickedDeckType}`);
                     break;
                 }
@@ -363,6 +367,7 @@ export function handleCanvasCardClick(event, coords = null, player = null) {
     }
 
     if (clickedDeckType) {
+        playClickSound();
         //console.log(`Drawing from deck: ${clickedDeckType}`);
         clearHighlights();
         
@@ -377,7 +382,8 @@ export function handleCanvasCardClick(event, coords = null, player = null) {
         
         drawCard(clickedDeckType);
     } else {
-        //console.log(`No valid deck region clicked at coordinates (${boardX}, ${boardY})`);
+        playErrorSound()
+        console.log(`No valid deck region clicked at coordinates (${boardX}, ${boardY})`);
     }
     console.log('=============handleCanvasCardClick END=============');
 };
@@ -841,3 +847,27 @@ export function updatePlayerInfo(currentPlayer = getCurrentPlayer(), newValues =
     panelUpdated.querySelector('.INFLUENCE_COUNT').textContent = `Influence ${player.resources.influence}`;
 };
   
+// Create the audio object once
+const clickSound = new Audio('assets/sounds/click.mp3');
+
+export function playClickSound() {
+    clickSound.currentTime = 0; // rewind to start so it can replay quickly
+    clickSound.play();
+}
+
+// Create the audio object once
+const diceSound = new Audio('assets/sounds/dice.mp3');
+
+export function rollDiceSound () {
+    diceSound.currentTime = 0; // rewind to start so it can replay quickly
+    diceSound.play();
+}
+
+const errorSound = new Audio('assets/sounds/error.mp3');
+
+export function playErrorSound () {
+    errorSound.currentTime = 0; // rewind to start so it can replay quickly
+    errorSound.play();
+}
+
+

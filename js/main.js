@@ -225,6 +225,7 @@ import './cards.js';
 import './animations.js';
 import './game.js';
 
+
 // Initialize UI state when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
     // The UI initialization is already handled by the main game initialization

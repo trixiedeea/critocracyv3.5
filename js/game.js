@@ -35,6 +35,7 @@ import {
     promptForPathChoice, 
     updateGameControls,
     updatePlayerInfo,
+    rollDiceSound,
 } from './ui.js';
 import {
     animateDiceRoll,
@@ -723,6 +724,7 @@ export function handleAITurn(aiPlayer) {
     
     // Debug log
     //console.log(`🔄 AI ${aiPlayer.name}'s turn starting...`);
+    rollDiceSound();
     
     // 1. Generate a random roll (1-6)
     const rollResult = Math.floor(Math.random() * 6) + 1;
