@@ -698,6 +698,7 @@ select, input[type="text"] {
     flex-direction: column;
     align-items: center;
     height: 15vh;
+    background-color: rgba(44, 128, 161, 0.363);
     list-style: none;
     flex-wrap: wrap;              
     justify-content: center; 
@@ -721,15 +722,17 @@ select, input[type="text"] {
 
 
 ul {
-    display: flex;
-    flex-direction: column;
+    background: rgba(44, 128, 161, 0.363);
+    color: #ffffff; 
+    border-radius: 8px;
+    z-index:40;
+    gap: 15px;
+    justify-content: center;
     align-items: center;
-    justify-content: center; /* centers all <li> horizontally */
-    padding: 0; /* remove default padding */
-    list-style: none; /* optional: remove bullets */
-}
+    flex-direction: row;
+  }
 
-li {
+  li {
     gap: 15px;
     justify-content: center;
     align-items: center;
@@ -740,8 +743,8 @@ li {
 
 ul.display-Container li {
     display: flex;
-    flex-direction: column;
-    gap: 5px;
+    flex-wrap: wrap;
+    gap: 15px;
     justify-content: center;
     align-items: center;
     list-style: none;
@@ -750,25 +753,30 @@ ul.display-Container li {
 }
 
 #player-Info-Panel {
-    background-color: rgba(8, 144, 130, 0.48);
-    justify-content: space-evenly;
     display: flex;
-    flex-direction: row;
     flex-wrap: wrap;
-    width: 80%;
-    border-radius: 12px;
-    align-items:center;
-    padding: 5px;
-    margin-top: auto;
+    position: fixed;
+    height: 15vh;
+    width: 90%;
+    bottom: 1vh;
+    left: 20px;
+    justify-content: center;
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(44, 128, 161, 0.363);
+    padding: 10px;
+    list-style: none; 
+    z-index: 20;
+  
 }
 
 #resource-Display-Container {
-    background-color: #0440565d;
+    background-color: #093d505d;
     color: white;
     list-style: none;
     justify-content: center;
     align-items: center;
-    border-radius: 6px;
+    border-radius: 8px;
     width: 40%;
     z-index:40;
 }
@@ -879,16 +887,15 @@ ul.role-Effect li {
     padding: 0;
 }
   
-#board-Container{
+#board-Container {
     flex: 1; /* Take up all available space */
     width: 100vw;
     height: 100vh;
     position: relative;
     display: flex;
     flex-direction: column;
-    align-items: center;
-}
 
+}
 
 #board-Canvas,
 #board-Token-Canvas {
@@ -1164,7 +1171,7 @@ dialog.popover::backdrop {
 }
 
 .cyan-Popover-Content {
-    background: linear-gradient(145deg, #1abcbc, #7dced9);
+    background: linear-gradient(145deg, #099c9c, #65d6e6);
     border: 3px solid #00FFFF;
     color: #e6fffc;
 }
@@ -1294,38 +1301,14 @@ dialog.popover::backdrop {
     width: 100%;
     max-width: 150px;
 }
-
-
-#age-Of-Expansion-Path ,
-.path-Choice-Button.path-purple,
-.choicepoint-button.purple {
-    background-color: #9c54de;
-    border: 2px solid #b56aff;
-} 
-
-#age-Of-Resistance-Path ,
-.path-Choice-Button.path-blue,
-.choicepoint-button.blue {
-    background-color: #1b3de5;
-    border: 2px solid #4a6aff;
+  
+.choice-button:hover {
+    background-color: #022432;
 }
-
-#age-Of-Reckoning-Path ,
-.path-Choice-Button.path-cyan,
-.choicepoint-button.cyan {
-    background-color: #00ffff;
-    border: 2px solid #99ffff;
-}
-
-#age-Of-Legacy-Path ,
-.path-Choice-Button.path-pink,
-.choicepoint-button.pink {
-    background-color: #ff66ff;
-    border: 2px solid #ff99ff;
-
-}
-
-.path-Choice-Button {
+/* Path and Choicepoint Buttons Shared Styles */
+/* Path and Choicepoint Buttons Shared Styles */
+.path-Choice-Button,
+.choicepoint-Button {
     width: 60%;
     padding: 15px 20px;
     font-size: 1.1em;
@@ -1353,7 +1336,38 @@ dialog.popover::backdrop {
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-#path-Choice-Options {
+/* Color Variants */  
+#age-Of-Expansion-Path ,
+.path-Choice-Button.path-purple,
+.choicepoint-button.purple {
+    background-color: #9c54de;
+    border: 2px solid #b56aff;
+} 
+
+#age-Of-Resistance-Path ,
+.path-Choice-Button.path-blue,
+.choicepoint-button.blue {
+    background-color: #1b3de5;
+    border: 2px solid #4a6aff;
+}
+
+#age-Of-Reckoning-Path ,
+.path-Choice-Button.path-cyan,
+.choicepoint-button.cyan {
+    background-color: #00ffff;
+    border: 2px solid #99ffff;
+}
+
+#age-Of-Legacy-Path ,
+.path-Choice-Button.path-pink,
+.choicepoint-button.pink {
+    background-color: #ff66ff;
+    border: 2px solid #ff99ff;
+    margin: 15px;
+}
+
+#path-Choice-Options,
+#choicepoint-Options {
     background-color: #0b0e1e;
     flex-direction: column;
     gap: 15px;
@@ -1370,6 +1384,7 @@ dialog.popover::backdrop {
     border: 3px solid rgba(139, 138, 138, 0.5);
     border-radius: 10%;
     color: #fff;
+    width:90%;
 }
 
 .path-Choice-Button {
@@ -1430,67 +1445,13 @@ dialog.popover::backdrop {
     align-items: center;
 }
 
-.path-Choice-Popover-Container {
-    background-color: rgba(0, 0, 0, 0);
-    border: 3px solid rgba(255, 255, 255, 0);
-    padding: 25px;
-    border-radius: 15px;
-    max-width: 450px;
-    margin: auto;
-}
-  
-.choice-button:hover {
-    background-color: #022432;
-}
-/* Path and Choicepoint Buttons Shared Styles */
-/* Path and Choicepoint Buttons Shared Styles */
-
-#path-Choice-Options {
-    display: flex;
-    width:100%;
-    position: relative;
-    border-radius: 10px;
-    flex-direction: column;
-    color: rgb(255, 255, 255);
-
-}
-
-
-/* Dialog container (optional: center & size control) */
-#choicepoint-Popover {
-    border: none;
-    padding: 0;
-    border-radius: 10px;
-}
-
-/* Dialog inner container styling */
-#choicepoint-Popover-Container {
-    border: 1em solid #f3eaa3;
-    border-radius: 24px; /* Outer radius */
-    background-color: #5f8c97;
-    max-width: 50%;
-    justify-content: center;
-    align-items: center;
-}
-
-#choicepoint-Popover h3 {
-    font-size: 1.6em;
-    margin-bottom: 25px;
-    color: #ffffff;
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
-    justify-content: center;
-    align-items: center;
-}
 
 /* Base style for all choicepoint buttons */
 .choicepoint-button {
     color: white;
     margin: 10px;
-    padding: 10px;
+    padding: 10px 20px;
     border: none;
-    justify-content: center;
-    align-items: center;
-    max-width: 80%;
     border-radius: 6px;
     font-size: 16px;
     cursor: pointer;
@@ -1498,7 +1459,7 @@ dialog.popover::backdrop {
     /* Enable smooth scale transform animation */
     transition: transform 0.3s ease, background-color 0.3s ease;
     transform-origin: center center;
-}
+  }
   
   /* Path-specific color classes (match these names exactly to your path names) */
   .path-button.purple {
@@ -1521,84 +1482,6 @@ dialog.popover::backdrop {
   .choicepoint-button.default-path-color {
     background-color: gray;
   }
-
-  #age-Of-Expansion-Path ,
-  .path-Choice-Button.path-purple,
-  .choicepoint-button.purple {
-      background-color: #9c54de;
-      border: 2px solid #b56aff;
-  } 
-  
-  #age-Of-Resistance-Path ,
-  .path-Choice-Button.path-blue,
-  .choicepoint-button.blue {
-      background-color: #1b3de5;
-      border: 2px solid #4a6aff;
-  }
-  
-  #age-Of-Reckoning-Path ,
-  .path-Choice-Button.path-cyan,
-  .choicepoint-button.cyan {
-      background-color: #00ffff;
-      border: 2px solid #99ffff;
-  }
-  
-  #age-Of-Legacy-Path ,
-  .path-Choice-Button.path-pink,
-  .choicepoint-button.pink {
-      background-color: #ff66ff;
-      border: 2px solid #ff99ff;
-      margin-bottom: 15px;
-  
-  }
-  
-  .path-Choice-Button {
-      width: 60%;
-      padding: 15px 20px;
-      font-size: 1.1em;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      color: white;
-      font-weight: bold;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-      margin: 8px 0;
-      transition: transform 0.3s ease, background-color 0.3s ease;
-      transform-origin: center center;
-  }
-  
-  #path-Choice-Popover {
-      background-color: #ccd63e;
-      flex-direction: column;
-      color: rgb(255, 255, 255);
-      justify-content: center;
-      align-items: center;
-      border-radius: 2em;
-      width: 60%;
-  }
-  
-  #path-Choice-Popover-Container {
-      background-color: rgb(47, 123, 136);
-      border-radius: 24px; /* Outer radius */
-      max-width: 100%;
-      padding: 20px;
-      justify-content: center;
-      align-items: center;
-  }
-  
-  #path-Choice-Options {
-      display: flex;
-      width:100%;
-      background-color: #00283e;
-      position: relative;
-      justify-content: center;
-      align-content: center;
-      align-items: center;
-      border-radius: 10px;
-      flex-direction: column;
-      color: rgb(255, 255, 255);
-}
   
 
 @keyframes ai-choice-pulse {
@@ -1698,4 +1581,3 @@ canvas:focus {
     color: white;
     align-items: center;
 }
-    
