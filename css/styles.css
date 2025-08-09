@@ -824,15 +824,6 @@ h4 {
     z-index:30;
 };
 
-ul li {
-    padding-left: 1rem;
-    flex-wrap: wrap;
-    list-style-type: inside;
-    margin-bottom: 1rem;
-    justify-content: left;
-    gap: 15px;
-}
-
 ul.role-Effect li {
     gap: 15px;
     justify-content: center;
