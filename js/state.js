@@ -59,7 +59,7 @@ export const _state = {
         aiPlayerCount: 0,
         totalPlayerCount: 0,
         humanPlayerCount: 0,
-        debugMode: true,
+        debugMode: false,
         currentPlayerIndex: -1,
         turnOrder: [],
         currentPath: null,
