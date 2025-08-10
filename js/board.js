@@ -766,67 +766,78 @@ function drawPathSpaces() {
     }
 }
 
-setTimeout(() => {
-    drawTokens();
-}, 5000); // 100ms just to confirm it's a render timing issue
+// Initialize token update system
+let isResizeHandlerAttached = false;
+
+function updateAllTokenPositions() {
+    const tokens = document.querySelectorAll('.token');
+    
+    tokens.forEach(token => {
+        const playerId = token.dataset.playerId;
+        const player = state.players.find(p => p.id === playerId);
+        if (!player) return;
+    
+        const [scaledX, scaledY] = scaleCoordinates(player.currentCoords.x, player.currentCoords.y);
+        token.style.transform = `translate(${scaledX}px, ${scaledY}px)`;
+    });
+}
+
+function setupResizeHandler() {
+    if (isResizeHandlerAttached) return;
+    
+    // Throttle the resize handler
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            updateAllTokenPositions();
+        }, 100);
+    });
+    
+    isResizeHandlerAttached = true;
+}
 
 export function drawTokens() {
-    const tokenLayer = document.getElementById('token-Layer');
+    const tokenLayer = document.getElementById('token-layer') || document.getElementById('token-Layer');
     if (!tokenLayer) {
-        console.error('[drawTokens] #token-Layer not found in DOM. Skipping.');
+        console.error('[drawTokens] Token layer not found in DOM');
         return;
     }
 
-    const players = state.players;
-    tokenLayer.innerHTML = ''; // Clear existing token
-    players.forEach(player => {
+    // Clear existing tokens
+    tokenLayer.innerHTML = '';
+
+    state.players.forEach(player => {
         if (!player || !player.currentCoords || player.currentCoords.x == null || player.currentCoords.y == null) {
             console.warn(`[drawTokens] Skipping ${player?.name || 'unknown player'} — missing currentCoords`);
             return;
         }
-''
-        const roleInitial = player.role?.[0]?.toUpperCase(); // Uppercase to match filenames like "A.png"
+
+        const roleInitial = player.role?.[0]?.toUpperCase();
         if (!roleInitial) {
             console.warn(`[drawTokens] Skipping ${player.name} — invalid role`);
             return;
         }
 
         const [scaledX, scaledY] = scaleCoordinates(player.currentCoords.x, player.currentCoords.y);
-      //  console.log(`[drawTokens] ${player.name} scaled to [${scaledX}, ${scaledY}]`);
-
+        
         const token = document.createElement('img');
-        token.src = `./assets/tokens/${roleInitial}.png`; // Ensure this path works
+        token.src = `./assets/tokens/${roleInitial}.png`;
         token.alt = `${player.name}'s token`;
+        token.id = `token-${player.id}`;
         token.style.position = 'absolute';
         token.style.width = '40px';
         token.style.height = '40px';
         token.classList.add('token', 'normal');
         token.dataset.playerId = player.id;
-
-        window.addEventListener('resize', () => {
-            updateAllTokenPositions();
-          });
-
         token.style.transform = `translate(${scaledX}px, ${scaledY}px)`;
-
-        function updateAllTokenPositions() {
-            console.log('=============--------updateAllTokenPositions=============--------');
-            const tokens = document.querySelectorAll('.token');
-          
-            tokens.forEach(token => {
-              const playerId = token.dataset.playerId;
-              const player = state.players.find(p => p.id === playerId);
-              if (!player) return;
-          
-              const [scaledX, scaledY] = scaleCoordinates(player.currentCoords.x, player.currentCoords.y);
-              token.style.transform = `translate(${scaledX}px, ${scaledY}px)`;
-            });
-          }
-          
-
+        
         tokenLayer.appendChild(token);
     });
-};
+    
+    // Set up the resize handler once
+    setupResizeHandler();
+}
 
 /**
  * Debug function to draw all path spaces and deck regions when DEBUG_MODE is true

@@ -1,54 +1,58 @@
-Button {
-    padding: 8px 10px;
-    background-color: #0f5a75;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-Button:hover {
-    background-color: #a3aeab;
-}
-
-
-#end-turn-button:hover:not(:disabled) {
-    background-color: #6c9ba1;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-}
-
-#end-turn-button:active:not(:disabled) {
-    transform: translateY(0);
-}
-
-#end-turn-button:disabled {
-    background-color: #95a5a6;
-    cursor: not-allowed;
-    opacity: 0.7;
-}
-
 /* Shake animation for end turn button */
 @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    75% { transform: translateX(5px); }
+    0% { transform: translate(0, 0) rotate(0deg); }
+    10% { transform: translate(-5px, -5px) rotate(-5deg); }
+    20% { transform: translate(5px, 5px) rotate(5deg); }
+    30% { transform: translate(-5px, 5px) rotate(-5deg); }
+    40% { transform: translate(5px, -5px) rotate(5deg); }
+    50% { transform: translate(-5px, -5px) rotate(-5deg); }
+    60% { transform: translate(5px, 5px) rotate(5deg); }
+    70% { transform: translate(-5px, 5px) rotate(-5deg); }
+    80% { transform: translate(5px, -5px) rotate(5deg); }
+    90% { transform: translate(-5px, -5px) rotate(-5deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
 }
 
 .shake {
     animation: shake 0.5s ease-in-out infinite;
 }
 
-/* Pulse animation for end turn button */
 @keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7);
+        transform: scale(1);
+    }
+    70% {
+        box-shadow: 0 0 0 15px rgba(255, 215, 0, 0);
+        transform: scale(1.05);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
+        transform: scale(1);
+    }
 }
 
 .pulse {
     animation: pulse 1.5s ease-in-out infinite;
+}
+
+.deck {
+    position: absolute;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.deck-highlight {
+    animation: glow 1.5s infinite ease-in-out !important;
+    transform: translateZ(0);
+    will-change: transform, box-shadow;
+    z-index: 100;
+}
+
+/* Ensure the deck is clickable even when highlighted */
+.deck-highlight * {
+    pointer-events: auto;
 }
 
 /* Button styles */
@@ -75,124 +79,15 @@ Button:active {
     transform: translateY(0);
 }
 
-
-
 Button:disabled {
     background-color: #cccccc;
     cursor: not-allowed;
     transform: none;
 }
 
-/* Deck Highlight Animation */
-@keyframes pulse {
-    0% {
-        box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7);
-        transform: scale(1);
-    }
-    70% {
-        box-shadow: 0 0 0 15px rgba(255, 215, 0, 0);
-        transform: scale(1.05);
-    }
-    100% {
-        box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
-        transform: scale(1);
-    }
-}
-
-@keyframes glow {
-    0% { 
-        box-shadow: 0 0 5px 2px rgba(255, 215, 0, 0.5);
-        filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.7));
-    }
-    50% { 
-        box-shadow: 0 0 20px 10px rgba(255, 215, 0, 0.8);
-        filter: drop-shadow(0 0 10px rgba(255, 215, 0, 1));
-    }
-    100% { 
-        box-shadow: 0 0 5px 2px rgba(255, 215, 0, 0.5);
-        filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.7));
-    }
-}
-
-.deck {
-    position: absolute;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    z-index: 10;
-}
-
-.deck-highlight {
-    animation: glow 1.5s infinite ease-in-out !important;
-    transform: translateZ(0);
-    will-change: transform, box-shadow;
-    z-index: 100;
-}
-
-.deck-highlight::after {
-    content: '';
-    position: absolute;
-    top: -5px;
-    left: -5px;
-    right: -5px;
-    bottom: -5px;
-    border: 2px solid rgba(255, 215, 0, 0.8);
-    border-radius: 8px;
-    animation: pulse 2s infinite;
-    pointer-events: none;
-    z-index: 99;
-}
-
-/* Ensure the deck is clickable even when highlighted */
-.deck-highlight * {
-    pointer-events: auto;
-}
-
-/* Dice Shake Animation */
-@keyframes shake {
-    0% { transform: translate(0, 0) rotate(0deg); }
-    10% { transform: translate(-5px, -5px) rotate(-5deg); }
-    20% { transform: translate(5px, 5px) rotate(5deg); }
-    30% { transform: translate(-5px, 5px) rotate(-5deg); }
-    40% { transform: translate(5px, -5px) rotate(5deg); }
-    50% { transform: translate(-5px, -5px) rotate(-5deg); }
-    60% { transform: translate(5px, 5px) rotate(5deg); }
-    70% { transform: translate(-5px, 5px) rotate(-5deg); }
-    80% { transform: translate(5px, -5px) rotate(5deg); }
-    90% { transform: translate(-5px, -5px) rotate(-5deg); }
-    100% { transform: translate(0, 0) rotate(0deg); }
-}
-
-/* Dice Styles */
-#dice {
-    cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    transform-style: preserve-3d;
-    position: relative;
-    z-index: 10;
-}
-
-#dice:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
-}
-
-#dice.disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    animation: none !important;
-}
-
-#dice.shake {
-    animation: shake 0.8s cubic-bezier(.36,.07,.19,.97) infinite;
-    transform: translate3d(0, 0, 0);
-    backface-visibility: hidden;
-    perspective: 1000px;
-}
-
 .hidden {
     display: none;
 }
-
 
 /* Screen base styles */
 .screen {
@@ -221,9 +116,7 @@ Button:disabled {
     align-items: center;
 } 
 
-
-/* start-screen */
-
+/*start screen*/
 #start-Button {
     background-color: #026776;
     color: white;
@@ -260,7 +153,6 @@ Button:disabled {
 }
 
 /* Player-count-screen */
-
 #player-Count-Screen {
 	background-image: url('../assets/Critocracy.jpg');
     background-size: cover;
@@ -333,8 +225,6 @@ select, input[type="text"] {
 }
 
 /* Role-selection-screen */
-
-
 #role-Selection-Screen {
     background-image: url('../assets/Critocracy.jpg');
     background-size: cover;
@@ -486,7 +376,6 @@ select, input[type="text"] {
 }
 
 /* Turn-order-screen */
-
 #turn-Order-Container {
     color: #ffffff;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
@@ -503,6 +392,7 @@ select, input[type="text"] {
     overflow: hidden; 
     max-height: 80vh; 
 }
+
 #turn-Order-Screen {
     background-image: url('../assets/Critocracy.jpg');
     background-size: cover;
@@ -692,170 +582,7 @@ select, input[type="text"] {
     margin-left: 45%;
 }
 
-.resource-Score-Container {
-    display: flex;
-    position: relative;
-    flex-direction: column;
-    align-items: center;
-    height: 15vh;
-    background-color: rgba(44, 128, 161, 0.363);
-    list-style: none;
-    flex-wrap: wrap;              
-    justify-content: center; 
-    border-radius: 2ch;     
-    z-index: 20;          
-} 
-
-.player-Score-Display {          
-    width: 95%;
-    height:80%;
-    align-items: center;
-    display: flex;  
-    margin: 10px;
-    border-radius: 1ch;
-    flex-direction: row;           /* lays out children side by side */
-    justify-content: space-around;
-    background-color: rgba(44, 128, 161, 0.363);
-    box-shadow: 0.2ch 0.3ch rgba(0,0,0,0.4);
-    z-index: 30;
-}
-
-
-ul {
-    background: rgba(44, 128, 161, 0.363);
-    color: #ffffff; 
-    border-radius: 8px;
-    z-index:40;
-    gap: 15px;
-    justify-content: center;
-    align-items: center;
-    flex-direction: row;
-  }
-
-  li {
-    gap: 15px;
-    justify-content: center;
-    align-items: center;
-    list-style: none;
-    z-index:100;
-    margin: 10px;
-  }
-
-ul.display-Container li {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    justify-content: center;
-    align-items: center;
-    list-style: none;
-    z-index:100;
-    margin: 10px;
-}
-
-#player-Info-Panel {
-    display: flex;
-    flex-wrap: wrap;
-    position: fixed;
-    height: 15vh;
-    width: 90%;
-    bottom: 1vh;
-    left: 20px;
-    justify-content: center;
-    flex-direction: row;
-    align-items: center;
-    background-color: rgba(44, 128, 161, 0.363);
-    padding: 10px;
-    list-style: none; 
-    z-index: 20;
-  
-}
-
-#resource-Display-Container {
-    background-color: #093d505d;
-    color: white;
-    list-style: none;
-    justify-content: center;
-    align-items: center;
-    border-radius: 8px;
-    width: 40%;
-    z-index:40;
-}
-
-h3 {
-    color: #ffffff;
-    text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.7);
-    z-index: 40;
-}
-
-h4 {
-    color: #ffffff;
-    padding: 5px;
-    text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.829);
-    z-index: 40;
-}
-
-#end-Turn-Button {        /* stays at the bottom */
-    background-color: #093d50;
-    color: white;
-    font-weight: bold;
-    font-size: 0.87rem;
-    padding: 34px 15px;
-    border: #01242b;
-    border-width: 4px;
-    border-style: solid;
-    position: absolute;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: background-color 0.5s;
-    display: inline-block;
-    flex-wrap: wrap;
-    margin: 5px;
-    z-index:40;
-}
-
-#end-Turn-Button-Container {
-    display: flex;  
-    flex-wrap: wrap;
-    position: static; 
-    width: 20%;
-    height: 90px;
-    align-items: right;
-    justify-content: space-evenly;
-    z-index:30;
-};
-
-ul.role-Effect li {
-    gap: 15px;
-    justify-content: center;
-    align-items: center;
-    list-style: none;
-    z-index:100;
-    margin: 10px;
-}
-
-#dice-Container {          /* stays at the bottom */
-    display: flex;  
-    flex-wrap: wrap;
-    position: static; 
-    width: 20%;
-    height: 90px;
-    align-items: right;
-    justify-content: space-evenly;
-    perspective: 2000px;
-    z-index: 30;
-}
-
-#dice {
-  	width: 90px;
-  	height: 90px;
-    flex-direction: column;
-    flex-wrap: wrap;
-  	background-size: cover;
-  	transform-style: preserve-3d;
-    perspective: 1000;
-    z-index: 40;
-}
-
+/*game board screen*/
 #game-Board-Screen {
     margin: 0;
     padding: 0;
@@ -871,21 +598,14 @@ ul.role-Effect li {
     position: relative;
 }
   
-.container {
-    position: relative;
-    box-shadow: 0 0 10px rgba(0,0,0,0.5);
-    margin: 0;
-    padding: 0;
-}
-  
 #board-Container {
-    flex: 1; /* Take up all available space */
+    flex: 1;  
     width: 100vw;
     height: 100vh;
     position: relative;
     display: flex;
     flex-direction: column;
-
+    align-items: center;
 }
 
 #board-Canvas,
@@ -923,6 +643,169 @@ ul.role-Effect li {
     left: 0;
 }
 
+.resource-Score-Container {
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    align-items: center;
+    height: 15vh;
+    background-color: rgba(44, 128, 161, 0.363);
+    list-style: none;
+    flex-wrap: wrap;              
+    justify-content: center; 
+    border-radius: 2ch;     
+    z-index: 20;          
+} 
+
+.player-Score-Display {          
+    width: 95%;
+    height:80%;
+    align-items: center;
+    display: flex;  
+    margin: 10px;
+    border-radius: 1ch;
+    flex-direction: row;           /* lays out children side by side */
+    justify-content: space-around;
+    background-color: rgba(44, 128, 161, 0.363);
+    box-shadow: 0.2ch 0.3ch rgba(0,0,0,0.4);
+    z-index: 30;
+}
+
+h3 {
+    color: #ffffff;
+    text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.7);
+    z-index: 40;
+}
+
+h4 {
+    color: #ffffff;
+    padding: 5px;
+    text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.829);
+    z-index: 40;
+}
+
+ul {
+    background: rgba(44, 128, 161, 0.363);
+    color: #ffffff; 
+    border-radius: 8px;
+    z-index:40;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+  }
+
+  li {
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+    list-style: none;
+    z-index:100;
+    margin: 10px;
+  }
+
+ul.display-Container li {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+    list-style: none;
+    z-index:100;
+    margin: 10px;
+}
+
+#player-Info-Panel {
+    display: flex;
+    flex-wrap: wrap;
+    position: fixed;
+    height: 15vh;
+    left: 20px;
+    right: 40px;
+    bottom: 60px;
+    justify-content: center;
+    flex-direction: row;
+    align-items: center;
+    padding: 10px;
+    list-style: none; 
+    z-index: 20;
+    box-sizing: border-box;
+    border-radius: 10px;
+}
+
+#resource-Display-Container {
+    background-color: #093d505d;
+    color: white;
+    list-style: none;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+    width: 40%;
+    z-index:40;
+}
+
+#end-Turn-Button {        /* stays at the bottom */
+    background-color: #093d50;
+    color: white;
+    font-weight: bold;
+    font-size: 0.70rem;
+    padding: 30px 12px;
+    border: #01242b;
+    border-width: 4px;
+    border-style: solid;
+    position: relative;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.5s;
+    display: inline-block;
+    flex-wrap: wrap;
+    margin: 5px;
+    z-index:40;
+}
+
+#end-Turn-Button-Container {
+    display: flex;  
+    flex-wrap: wrap;
+    position: static; 
+    width: 20%;
+    height: 80px;
+    align-items: right;
+    justify-content: space-evenly;
+    z-index:30;
+};
+
+ul.role-Effect li {
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+    list-style: none;
+    z-index:100;
+    margin: 10px;
+}
+
+#dice-Container {          /* stays at the bottom */
+    display: flex;  
+    flex-wrap: wrap;
+    position: static; 
+    width: 20%;
+    height: 80px;
+    align-items: right;
+    justify-content: space-evenly;
+    perspective: 2000px;
+    z-index: 30;
+}
+
+#dice {
+  	width: 80px;
+  	height: 80px;
+    flex-direction: column;
+    flex-wrap: wrap;
+  	background-size: cover;
+  	transform-style: preserve-3d;
+    perspective: 1000;
+    z-index: 40;
+}
+
 /* Animation Classes */
 .animating-card {
     opacity: 0;
@@ -939,23 +822,23 @@ ul.role-Effect li {
     display: none;
 }
 
-.animating-token {
+.token {
     transition: transform 0.3s ease;
 }
 
-.animating-token.enlarged {
-    transform: scale(1.2);
+.token.enlarged {
+    transform: scale(1.5);
 }
 
-.animating-token.normal {
+.token.normal {
     transform: scale(1);
 }
 
-.animating-resource {
+.resource {
     transition: all 0.3s ease;
 }
 
-.animating-resource.changed {
+.resource.changed {
     color: #19628ffc;
     font-weight: bold;
 }
