@@ -474,9 +474,9 @@ export function endGame() {
         switch(player.playerFinalRanking) {
             case 1: rankingBonus = 25; break;  // 1st place
             case 2: rankingBonus = 20; break;  // 2nd place
-            case 3:
+            case 3: rankingBonus = 15; break
             case 4: rankingBonus = 15; break;  // 3rd and 4th place
-            case 5:
+            case 5: rankingBonus = 10; break;
             case 6: rankingBonus = 10; break;  // 5th and 6th place
             default: rankingBonus = 0; break; // Beyond 6th place
         }
