@@ -37,7 +37,7 @@ import {
 import {drawCard } from './cards.js';
 import { markPlayerFinished } from './players.js';
 
-const debug_mode = false;
+const debug_mode = true;
 
 // Animation timing constants
 export const TIMING = {
@@ -363,42 +363,45 @@ export function animateTokenToPosition(player, newPosition, duration = 1000, ski
             p.id === player.id ? { ...p, currentCoords: { ...player.currentCoords } } : p
           )
         });
+        
+        // Check if player finished at the finish space AFTER completing movement
+        let FINISH_SPACE = [1384, 512];
+        
+        // Helper function to compare coordinates
+        function coordsMatch(coord1, coord2) {
+            // Handle object format {x: number, y: number}
+            if (typeof coord1 === 'object' && coord1.x !== undefined && coord1.y !== undefined) {
+                if (Array.isArray(coord2)) {
+                    return coord1.x === coord2[0] && coord1.y === coord2[1];
+                } else {
+                    return coord1.x === coord2.x && coord1.y === coord2.y;
+                }
+            }
+            // Handle array format [x, y]
+            if (Array.isArray(coord1)) {
+                if (typeof coord2 === 'object' && coord2.x !== undefined && coord2.y !== undefined) {
+                    return coord1[0] === coord2.x && coord1[1] === coord2.y;
+                } else {
+                    return coord1[0] === coord2[0] && coord1[1] === coord2[1];
+                }
+            }
+            return false;
+        }
+        
+        // Handle end of move first (regular space actions)
         await handleEndOfMove(player.currentCoords);
+        
+        // Then check if player finished at the finish space
+        if (coordsMatch(currentCoords, FINISH_SPACE)) {
+            console.log("Player has reached the finish space!");
+            markPlayerFinished(player);
+        }
+        
         resolve();
         return;
       }
     
       const segment = findSegmentByCoord(currentCoords);
-      let FINISH_SPACE = [1384, 512];
-      
-      // Helper function to compare coordinates
-      function coordsMatch(coord1, coord2) {
-          // Handle object format {x: number, y: number}
-          if (typeof coord1 === 'object' && coord1.x !== undefined && coord1.y !== undefined) {
-              if (Array.isArray(coord2)) {
-                  return coord1.x === coord2[0] && coord1.y === coord2[1];
-              } else {
-                  return coord1.x === coord2.x && coord1.y === coord2.y;
-              }
-          }
-          // Handle array format [x, y]
-          if (Array.isArray(coord1)) {
-              if (typeof coord2 === 'object' && coord2.x !== undefined && coord2.y !== undefined) {
-                  return coord1[0] === coord2.x && coord1[1] === coord2.y;
-              } else {
-                  return coord1[0] === coord2[0] && coord1[1] === coord2[1];
-              }
-          }
-          return false;
-      }
-      
-      // Check if player is at finish space first
-      if (coordsMatch(currentCoords, FINISH_SPACE)) {
-          console.log("Player has reached the finish space!");
-          markPlayerFinished(player);
-          resolve();
-          return;
-      }
       
       // Check for invalid segments (but not at finish space)
       if (!segment) {
@@ -409,6 +412,47 @@ export function animateTokenToPosition(player, newPosition, duration = 1000, ski
       
       // Check for end of path (but not at finish space)
       if (!segment.Next || segment.Next.length === 0) {
+          // Before warning, check if we're at the finish space
+          let FINISH_SPACE_CHECK = [1384, 512];
+          
+          // Helper function to compare coordinates
+          function coordsMatch(coord1, coord2) {
+              // Handle object format {x: number, y: number}
+              if (typeof coord1 === 'object' && coord1.x !== undefined && coord1.y !== undefined) {
+                  if (Array.isArray(coord2)) {
+                      return coord1.x === coord2[0] && coord1.y === coord2[1];
+                  } else {
+                      return coord1.x === coord2.x && coord1.y === coord2.y;
+                  }
+              }
+              // Handle array format [x, y]
+              if (Array.isArray(coord1)) {
+                  if (typeof coord2 === 'object' && coord2.x !== undefined && coord2.y !== undefined) {
+                      return coord1[0] === coord2.x && coord1[1] === coord2.y;
+                  } else {
+                      return coord1[0] === coord2[0] && coord1[1] === coord2[1];
+                  }
+              }
+              return false;
+          }
+          
+          if (coordsMatch(currentCoords, FINISH_SPACE_CHECK)) {
+              console.log("Player has reached the finish space during animation!");
+              // Complete remaining animation and handle as finished
+              token.classList.remove('enlarged');
+              token.classList.add('normal');
+              player.currentCoords = { ...currentCoords };
+              updateGameState({
+                players: state.players.map(p => 
+                  p.id === player.id ? { ...p, currentCoords: { ...player.currentCoords } } : p
+                )
+              });
+              await handleEndOfMove(player.currentCoords);
+              markPlayerFinished(player);
+              resolve();
+              return;
+          }
+          
           console.warn('Next segment is null/empty and player is not at finish space. Current coords:', currentCoords);
           resolve();
           return;
@@ -840,10 +884,7 @@ export function showEndGameWithVictory(winners) {
   // Handle both single winner and array of winners
   const winnersArray = Array.isArray(winners) ? winners : [winners];
   const primaryWinner = winnersArray[0];
-  
-  // Transition to end game screen
-  showScreen('endGameScreen');
-  
+
   // Make the new game button visible
   const newGameButton = document.getElementById('newGameButton');
   if (newGameButton) {

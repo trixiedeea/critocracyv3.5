@@ -111,7 +111,7 @@ playerCountConfirmButton.addEventListener("click", () => {
             return;
         }
         if (totalPlayers <= 4) {
-            alert(`Total players must be at least 4. Current: ${totalPlayers}`);
+            alert(`Total players must be at least 3. Current: ${totalPlayers}`);
             return;
         }
     }

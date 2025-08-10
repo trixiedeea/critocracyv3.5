@@ -748,8 +748,8 @@ ul.display-Container li {
     background-color: #093d50;
     color: white;
     font-weight: bold;
-    font-size: 0.70rem;
-    padding: 30px 12px;
+    font-size: 0.75rem;
+    padding: 30px 15px;
     border: #01242b;
     border-width: 4px;
     border-style: solid;
@@ -1032,7 +1032,7 @@ dialog.popover::backdrop {
 
 /* Card color coding by deck type */
 .purple-Popover-Content {
-    background: linear-gradient(145deg, #4d0988, #660e7a);
+    background: linear-gradient(145deg, #3e1662, #8b3f9c);
     border: 3px solid #760490;
     color: #f0e6ff;
     z-index: 25;
@@ -1258,7 +1258,6 @@ dialog.popover::backdrop {
     border: 3px solid rgba(139, 138, 138, 0.5);
     border-radius: 10%;
     color: #fff;
-    width:90%;
 }
 
 .path-Choice-Button {

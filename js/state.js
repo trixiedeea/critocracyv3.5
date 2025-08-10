@@ -481,9 +481,9 @@ export function endGame() {
             default: rankingBonus = 0; break; // Beyond 6th place
         }
         
-        _state.game.players[index].playerFinalScore = resourceTotal + rankingBonus;
+        _state.game.players[index].playerFinalScore = player.playerFinalResourceTotal + player.playerFinalRanking;
         
-        console.log(`Player ${player.name}: Resources=${resourceTotal}, Ranking=${player.playerFinalRanking}, Bonus=${rankingBonus}, Final Score=${player.playerFinalScore}`);
+        console.log(`Player ${player.name}: Resources=${player.playerFinalResourceTotal}, Ranking=${player.playerFinalRanking}, Bonus=${player.playerFinalRanking}, Final Score=${player.playerFinalScore}`);
     });
     
     // Find all players with the highest final score (handles ties)
@@ -502,7 +502,7 @@ export function endGame() {
         gameOver: true,
         winner: winners.length === 1 ? winners[0] : winners
     });
-    
+    showScreen('endGameScreen');
     // Show the end game screen with victory animation
     showEndGameWithVictory(winners);
 }
