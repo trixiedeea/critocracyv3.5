@@ -4,7 +4,7 @@ const DEBUG_MODE = true;
 document.addEventListener("DOMContentLoaded", () => {
     console.log("Player count screen initializing");
 
-const DEBUG_MODE = true;
+const DEBUG_MODE = false;
     
   // Get references to the dropdown elements
 const humanPlayerCount = document.getElementById('human-Player-Count');

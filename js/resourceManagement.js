@@ -196,100 +196,113 @@ const resourceLog = [];
  * @param {Object} gameState - The current game state (optional, will use global state if not provided)
  */
 export function updateResourceDisplays(gameState = state) {
-    console.log('=============updateResourceDisplays=============');
-    
-    const players = gameState.players || [];
-    const currentPlayerIndex = gameState.currentPlayerIndex || 0;
-    
-    if (!players.length) {
-        console.warn('No players found in game state');
-        return;
-    }
+  console.log('=============updateResourceDisplays=============');
+  
+  const players = gameState.players || [];
+  const currentPlayerIndex = gameState.currentPlayerIndex || 0;
+  
+  if (!players.length) {
+      console.warn('No players found in game state');
+      return;
+  }
 
-    // Get the display containers from the HTML
-    const resourceDisplayContainer = document.getElementById('resource-Display-Container');
-    const playerScoreDisplay = document.querySelector('.player-Score-Display');
+  // Get the display containers from the HTML
+  const resourceDisplayContainer = document.getElementById('resource-Display-Container');
+  const playerScoreDisplay = document.querySelector('.player-Score-Display');
 
-    // Safety check to ensure the containers exist in your HTML
-    if (!resourceDisplayContainer || !playerScoreDisplay) {
-        console.warn("Resource display containers not found. Please check the IDs in your index.html.");
-        return;
-    }
+  // Safety check to ensure the containers exist in your HTML
+  if (!resourceDisplayContainer || !playerScoreDisplay) {
+      console.warn("Resource display containers not found. Please check the IDs in your index.html.");
+      return;
+  }
 
-    // Clear the current content of the displays before updating
-    resourceDisplayContainer.innerHTML = '';
-    playerScoreDisplay.innerHTML = '';
+  // No need to clear anything - just update existing elements
+  // Get existing player score elements
+  const playerScoreElements = playerScoreDisplay.querySelectorAll('h4');
 
-    const currentPlayer = players[currentPlayerIndex];
-    const humanPlayers = players.filter(p => p.isHuman);
-    const aiPlayers = players.filter(p => !p.isHuman);
+  const currentPlayer = players[currentPlayerIndex];
+  const humanPlayers = players.filter(p => p.isHuman);
+  const aiPlayers = players.filter(p => !p.isHuman);
 
-    let playerForBottomDisplay = null;
+  let playerForBottomDisplay = null;
 
-    // --- Logic for the Bottom Display Container ---
-    // If there's only one human player, always show them.
-    if (humanPlayers.length === 1) {
-        playerForBottomDisplay = humanPlayers[0];
-    } 
-    // If there are multiple human players, show the one whose turn it is.
-    else if (humanPlayers.length > 1) {
-        if (currentPlayer?.isHuman) {
-            playerForBottomDisplay = currentPlayer;
-        }
-    }
+  // --- Logic for the Bottom Display Container ---
+  // If there's only one human player, always show them.
+  if (humanPlayers.length === 1) {
+      playerForBottomDisplay = humanPlayers[0];
+  } 
+  // If there are multiple human players, show the one whose turn it is.
+  else if (humanPlayers.length > 1) {
+      if (currentPlayer?.isHuman) {
+          playerForBottomDisplay = currentPlayer;
+      }
+  }
 
-    // Populate the bottom display if a player has been selected
-    if (playerForBottomDisplay) {
-        const playerInfoList = document.createElement('ul');
-        playerInfoList.innerHTML = `
-            <li><span id="currentPlayer">${playerForBottomDisplay.role || 'Player'}</span></li>
-            <li>Knowledge: <span id="KNOWLEDGE_COUNT">${playerForBottomDisplay.resources?.knowledge || 0}</span></li>
-            <li>Money: <span id="MONEY_COUNT">${playerForBottomDisplay.resources?.money || 0}</span></li>
-            <li>Influence: <span id="INFLUENCE_COUNT">${playerForBottomDisplay.resources?.influence || 0}</span></li>
-        `;
-        resourceDisplayContainer.appendChild(playerInfoList);
-    }
+  // Populate the bottom display if a player has been selected
+  if (playerForBottomDisplay) {
+      // Update existing DOM elements directly
+      const currentPlayerSpan = document.getElementById('currentPlayer');
+      const knowledgeCount = document.getElementById('KNOWLEDGE_COUNT');
+      const moneyCount = document.getElementById('MONEY_COUNT');
+      const influenceCount = document.getElementById('INFLUENCE_COUNT');
+      
+      if (currentPlayerSpan) {
+          currentPlayerSpan.textContent = playerForBottomDisplay.role || 'Player';
+      }
+      if (knowledgeCount) {
+          knowledgeCount.textContent = playerForBottomDisplay.resources?.knowledge || 0;
+      }
+      if (moneyCount) {
+          moneyCount.textContent = playerForBottomDisplay.resources?.money || 0;
+      }
+      if (influenceCount) {
+          influenceCount.textContent = playerForBottomDisplay.resources?.influence || 0;
+      }
+  }
 
-    // --- Logic for the Top Score Display ---
-    const playersForTopDisplay = [];
-    
-    // Add all AI players who are active in the game
-    aiPlayers.forEach(player => {
-        if (players.includes(player)) {
-            playersForTopDisplay.push(player);
-        }
-    });
-    
-    // Add any human players who are NOT being shown in the bottom display
-    humanPlayers.forEach(player => {
-        if (player !== playerForBottomDisplay && players.includes(player)) {
-            playersForTopDisplay.push(player);
-        }
-    });
+  // --- Logic for the Top Score Display ---
+  const playersForTopDisplay = [];
+  
+  // Add all AI players who are active in the game
+  aiPlayers.forEach(player => {
+      if (players.includes(player)) {
+          playersForTopDisplay.push(player);
+      }
+  });
+  
+  // Add any human players who are NOT being shown in the bottom display
+  humanPlayers.forEach(player => {
+      if (player !== playerForBottomDisplay && players.includes(player)) {
+          playersForTopDisplay.push(player);
+      }
+  });
 
-    // Add header to score display
-    const header = document.createElement('h3');
-    header.textContent = 'Player Scores';
-    playerScoreDisplay.appendChild(header);
-
-    // Populate the top display with the selected players
-    playersForTopDisplay.forEach(player => {
-        const playerScoreElement = document.createElement('h4');
-        const roleName = player.role || `Player ${player.id?.slice(0, 4) || '?'}`;
-        const resources = player.resources || {};
-        
-        playerScoreElement.innerHTML = `
-            <span class="role-Name">${roleName}</span>
-            <p>
-                ${resources.money || 0} 💰, 
-                ${resources.knowledge || 0} 🧠, 
-                ${resources.influence || 0} 🎯
-            </p>
-        `;
-        playerScoreDisplay.appendChild(playerScoreElement);
-    });
-    
-    console.log('=============updateResourceDisplays END=============');
+  // Update existing player score elements
+  playerScoreElements.forEach((element, index) => {
+      const roleNameSpan = element.querySelector('.role-Name');
+      const resourceParagraph = element.querySelector('p');
+      
+      if (index < playersForTopDisplay.length) {
+          const player = playersForTopDisplay[index];
+          const roleName = player.role || `Player ${player.id?.slice(0, 4) || '?'}`;
+          const resources = player.resources || {};
+          
+          if (roleNameSpan) {
+              roleNameSpan.textContent = roleName;
+          }
+          if (resourceParagraph) {
+              resourceParagraph.textContent = `${resources.money || 0} 💰, ${resources.knowledge || 0} 🧠, ${resources.influence || 0} 🎯`;
+          }
+          
+          // Make sure the element is visible
+          element.style.display = '';
+      } else {
+          // Hide unused elements
+          element.style.display = 'none';
+      }
+  });
+  
+  console.log('=============updateResourceDisplays END=============');
 }
 
 /**

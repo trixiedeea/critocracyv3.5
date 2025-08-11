@@ -602,7 +602,6 @@ select, input[type="text"] {
     flex: 1;  
     width: 100vw;
     height: 100vh;
-    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -643,105 +642,104 @@ select, input[type="text"] {
     left: 0;
 }
 
+
 .resource-Score-Container {
     display: flex;
     position: relative;
-    flex-direction: column;
     align-items: center;
     height: 15vh;
-    background-color: rgba(44, 128, 161, 0.363);
-    list-style: none;
-    flex-wrap: wrap;              
-    justify-content: center; 
+    width:60vw;
+    background-color: rgba(27, 91, 126, 0.528);
+    list-style: none;            
+    justify-content: space-between; 
     border-radius: 2ch;     
-    z-index: 20;          
+    z-index: 10;          
 } 
 
-.player-Score-Display {          
-    width: 95%;
-    height:80%;
+.player-Score-Display {         
     align-items: center;
-    display: flex;  
-    margin: 10px;
+    display: flex; 
     border-radius: 1ch;
-    flex-direction: row;           /* lays out children side by side */
-    justify-content: space-around;
-    background-color: rgba(44, 128, 161, 0.363);
-    box-shadow: 0.2ch 0.3ch rgba(0,0,0,0.4);
-    z-index: 30;
+    flex-direction: row;
+    justify-content: space-between;
+    z-index: 20;
+    padding: 10px;
 }
 
 h3 {
     color: #ffffff;
-    text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.7);
+    text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.9);
     z-index: 40;
+    border-radius: 6px;
 }
 
 h4 {
     color: #ffffff;
-    padding: 5px;
     text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.829);
     z-index: 40;
 }
 
-ul {
-    background: rgba(44, 128, 161, 0.363);
-    color: #ffffff; 
+.card-Popover-Container {
+    z-index: 10;
+    border-radius: 6px;
+}
+
+ul.card-Effects {
+    color: rgb(255, 255, 255);
     border-radius: 8px;
-    z-index:40;
-    gap: 15px;
-    justify-content: center;
-    align-items: center;
-    flex-direction: row;
-  }
-
-  li {
-    gap: 15px;
-    justify-content: center;
-    align-items: center;
+    text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.9);
+    padding-inline-start: 10px;
+    padding-inline-end: 10px;
+    justify-content: space-between;
     list-style: none;
-    z-index:100;
-    margin: 10px;
-  }
+}
 
-ul.display-Container li {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    justify-content: center;
-    align-items: center;
+ul {
+    display: block;
+    list-style-type: disc;
+    margin-block-start: 0.5em;
+    margin-block-end: 0,5em;
+    padding-inline-start: 20px;
     list-style: none;
-    z-index:100;
-    margin: 10px;
+    text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.9);
+}
+
+li {
+    color: rgb(255, 251, 251);
+    list-style: circle;
+    justify-content: space-between;
+    text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.9);
+    display: grid !important;
+    grid-template-rows: auto;   
+    grid-template-columns: auto;    
+    width: 100%;
+    max-width: 100%;
+    max-height: 100dvh;
+    margin: 20px auto 20px auto;
 }
 
 #player-Info-Panel {
     display: flex;
-    flex-wrap: wrap;
     position: fixed;
-    height: 15vh;
-    left: 20px;
-    right: 40px;
-    bottom: 60px;
-    justify-content: center;
     flex-direction: row;
-    align-items: center;
+    width: 70%;
+    background-color: rgba(23, 69, 79, 0.378);
+    color: rgb(250, 255, 253);
+    left: 20px;
+    right: 20px;
+    bottom: 40px;
+    justify-content: space-between;
     padding: 10px;
     list-style: none; 
     z-index: 20;
     box-sizing: border-box;
     border-radius: 10px;
+
 }
 
-#resource-Display-Container {
-    background-color: #093d505d;
-    color: white;
-    list-style: none;
-    justify-content: center;
-    align-items: center;
-    border-radius: 8px;
-    width: 40%;
-    z-index:40;
+#end-Turn-Button-Container {
+    background-color: rgba(255, 255, 255, 0);
+    border-radius: 6px;
 }
 
 #end-Turn-Button {        /* stays at the bottom */
@@ -753,35 +751,41 @@ ul.display-Container li {
     border: #01242b;
     border-width: 4px;
     border-style: solid;
-    position: relative;
     border-radius: 10px;
     cursor: pointer;
-    transition: background-color 0.5s;
-    display: inline-block;
-    flex-wrap: wrap;
     margin: 5px;
-    z-index:40;
 }
 
-#end-Turn-Button-Container {
-    display: flex;  
-    flex-wrap: wrap;
-    position: static; 
-    width: 20%;
-    height: 80px;
-    align-items: right;
-    justify-content: space-evenly;
-    z-index:30;
-};
+#resource-Display-Container {
+    display: flex;
+    background-color: #1d697861;
+    color: white;
+    list-style: none;
+    justify-content: space-between;
+    padding: 5px;
+    align-items: center;
+    flex-direction: row;
+    border-radius: 8px;
+    z-index: 40;
+    margin: auto;
+}
 
-ul.role-Effect li {
-    gap: 15px;
+ul.resource-Display{
+    color: #ffffff;
+    border-radius: 8px;
+    padding-inline-start: 0px;
+    padding-inline-end: 0px;
+    display:flex;
+}
+
+li.resource-Display {
+    gap: 10px;
     justify-content: center;
     align-items: center;
     list-style: none;
-    z-index:100;
-    margin: 10px;
-}
+    margin: 5px;
+    border-radius:6px;
+  }
 
 #dice-Container {          /* stays at the bottom */
     display: flex;  
@@ -995,6 +999,8 @@ dialog.popover {
     left: 50%;
     transform: translate(-50%, -50%);
     margin: 0;
+    justify-content: center;
+    align-items: center;
     z-index: 200;
 }
 
@@ -1004,6 +1010,8 @@ dialog.popover {
     overflow-y: auto;
     top: 50%;
     left: 50%;
+    justify-content: center;
+    align-items: center;
     background-color: #01044a;
     padding: 2em 2em;
     border-radius: 10px;
@@ -1061,6 +1069,8 @@ dialog.popover::backdrop {
     border: 3px solid #d4af37;
     color: #3a3000;
     z-index: 200;
+    justify-content: center;
+    align-items: center;
 }
 
 .card-end-of-turn h3 {
@@ -1069,7 +1079,10 @@ dialog.popover::backdrop {
     font-weight: bold;
 }
 
-  
+.role-effect.current-role {
+    font-weight: bold;
+}
+
   /* Title */
 #card-Title {
     font-size: 1.5em;
@@ -1168,12 +1181,12 @@ dialog.popover::backdrop {
     padding: 12px 18px;
     font-size: 1rem;
     color: white;
-    border: none;
-    border-radius: 6px;
     cursor: pointer;
     transition: background-color 0.2s ease;
     width: 100%;
     max-width: 150px;
+    justify-content: center;
+    align-items: center;
 }
   
 .choice-button:hover {

@@ -292,6 +292,25 @@ export function drawCard(deckType) {
 export function discardCard(card, deckType) {
     console.log('===============discardCard===============')
     //console.log(`Discarding card: ${card?.name || 'Unknown'}`);
+
+    function clearCardDialogContent(dialog) {
+        const titleEl = dialog.querySelector('#card-Title');
+        const descEl = dialog.querySelector('#card-Description');
+        const effectsEl = dialog.querySelector('#card-Effects');
+        const choiceCols = dialog.querySelectorAll('.card-Choice-A-Column, .card-Choice-B-Column');
+    
+        if (titleEl) titleEl.textContent = ''; // keeps element intact
+        if (descEl) {
+            // Remove only paragraphs, spans, etc., but keep static UI
+            descEl.querySelectorAll('p, span, li, div').forEach(node => node.remove());
+        }
+        if (effectsEl) {
+            effectsEl.querySelectorAll('li, p, span, div').forEach(node => node.remove());
+        }
+        choiceCols.forEach(col => {
+            col.querySelectorAll('p').forEach(node => node.remove()); // only remove effect lines
+        });
+    }
     
     // Try to determine deck type if not provided
     if (!deckType && card) {
@@ -480,7 +499,7 @@ export async function showCard(card) {
             let explanationHTML = '';
             if (isEndOfTurnCard && player?.role) {
                 const allRoles = ['COLONIALIST', 'REVOLUTIONARY', 'HISTORIAN', 'ENTREPRENEUR', 'POLITICIAN', 'ARTIST'];
-                explanationHTML += "<div class='role-effects-container'><h3>Effects for All Roles:</h3><ul class='role-effects-list'>";
+                explanationHTML += "<div class='role-effects-container'><h3>Effects for All Roles:</h3><ul class='card--Effects'>";
                 allRoles.forEach(role => {
                     const roleEffect = card.effects[role];
                     if (roleEffect) {
@@ -499,7 +518,7 @@ export async function showCard(card) {
                     } else {
                         // Convert role to display format (PascalCase for display)
                         const displayRole = role.charAt(0) + role.slice(1).toLowerCase();
-                        explanationHTML += `<li class='role-effect'><span class='role-name'>${displayRole}:</span> No effect defined.</li>`;
+                        explanationHTML += `<li class='rcard-Effects'><span class='role-name'>${displayRole}:</span> No effect defined.</li>`;
                     }
                 });
                 explanationHTML += "</ul></div>";

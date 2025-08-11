@@ -37,7 +37,7 @@ import {
 import {drawCard } from './cards.js';
 import { markPlayerFinished } from './players.js';
 
-const debug_mode = true;
+const debug_mode = false;
 
 // Animation timing constants
 export const TIMING = {
