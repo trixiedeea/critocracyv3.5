@@ -1,168 +1,218 @@
 const DEBUG_MODE = true;
 
 // Player Count Screen - Enforces exactly 6 total players
+// Player Count Screen - Enforces exactly 6 total players
 document.addEventListener("DOMContentLoaded", () => {
     console.log("Player count screen initializing");
 
-const DEBUG_MODE = false;
-    
-  // Get references to the dropdown elements
-const humanPlayerCount = document.getElementById('human-Player-Count');
-const aiPlayerCount = document.getElementById('ai-Player-Count');
-const playerCountConfirmButton = document.getElementById('player-Count-Confirm-Button');
-const zeroHumansOption = document.getElementById('zero-humans-option');
+    // Get references to the dropdown elements
+    const humanPlayerCount = document.getElementById('human-Player-Count');
+    const aiPlayerCount = document.getElementById('ai-Player-Count');
+    const playerCountConfirmButton = document.getElementById('player-Count-Confirm-Button');
+    const zeroHumansOption = document.getElementById('zero-humans-option');
 
-// Show/hide zero humans option based on debug mode
-if (DEBUG_MODE && zeroHumansOption) {
-    zeroHumansOption.style.display = 'block';
-    console.log('Debug mode enabled: Zero humans option is available');
-}
+    // Debug: Check if elements exist
+    console.log("Human player dropdown:", humanPlayerCount);
+    console.log("AI player dropdown:", aiPlayerCount);
+    console.log("Current human player value:", humanPlayerCount?.value);
 
-// Function to update AI player options based on the number of human players selected
-function updateAIOptions() {
-    const humanPlayers = parseInt(humanPlayerCount.value);
-    
-    // Clear existing AI options
-    aiPlayerCount.innerHTML = ''; // Clear the dropdown options
-
-    let minAI, maxAI;
-
-    // Set AI limits based on the number of human players
-    if (humanPlayers === 0 && DEBUG_MODE) {
-        // Debug mode: Allow 1-6 AI players when no humans
-        minAI = 1;
-        maxAI = 6;
-    } else if (humanPlayers === 1 && DEBUG_MODE) {
-        minAI = 0;
-        maxAI = 5;
-    } else if (humanPlayers === 6) {
-        minAI = 0;
-        maxAI = 0;
-    } else if (humanPlayers === 1) {
-        minAI = 3;
-        maxAI = 5;
-    } else if (humanPlayers === 2) {
-        minAI = 2;
-        maxAI = 4;
-    } else if (humanPlayers === 3) {
-        minAI = 1;
-        maxAI = 3;
-    } else if (humanPlayers === 4) {
-        minAI = 0;
-        maxAI = 2;
-    } else if (humanPlayers === 5) {
-        minAI = 0;
-        maxAI = 1;
+    // Make sure DEBUG_MODE is defined
+    if (typeof DEBUG_MODE === 'undefined') {
+        window.DEBUG_MODE = false; // Default to false if not defined
+        console.warn("DEBUG_MODE was undefined, defaulting to false");
     }
 
-    // Add the options for AI players based on the min and max values
-    // Only add 0 AI option if it's within the valid range
-    if (minAI === 0) {
-        const defaultOption = document.createElement('option');
-        defaultOption.value = 0;
-        defaultOption.textContent = '0 AI';
-        aiPlayerCount.appendChild(defaultOption);
+    // Show/hide zero humans option based on debug mode
+    if (DEBUG_MODE && zeroHumansOption) {
+        zeroHumansOption.style.display = 'block';
+        console.log('Debug mode enabled: Zero humans option is available');
     }
 
-    // Add new options for AI players within the valid range
-    for (let i = Math.max(minAI, 1); i <= maxAI; i++) {
-        const option = document.createElement('option');
-        option.value = i;
-        option.textContent = `${i} AI`;
-        aiPlayerCount.appendChild(option);
-    }
-    
-    // Set default selection to the minimum valid AI count
-    aiPlayerCount.value = minAI;
-}
-
-// Initialize AI options based on the default human player selection
-updateAIOptions();
-
-// Listen for changes to the human players dropdown
-humanPlayerCount.addEventListener('change', updateAIOptions);
-
-// Get reference to screens
-const playerCountScreen = document.getElementById('player-Count-Screen');
-const roleSelectionScreen = document.getElementById('role-Selection-Screen');
-
-// Handle confirm button click
-playerCountConfirmButton.addEventListener("click", () => {
-    // Get selected values
-    const humanCount = parseInt(humanPlayerCount.value);
-    const aiCount = parseInt(aiPlayerCount.value);
-    const totalPlayers = humanCount + aiCount;
-    
-    // Validate player counts based on debug mode
-    if (DEBUG_MODE) {
-        // Debug mode: Allow zero humans but require at least 1 total player
-        if (totalPlayers < 1) {
-            alert(`Total players must be at least 1. Current: ${totalPlayers}`);
+    // Function to update AI player options based on the number of human players selected
+    function updateAIOptions() {
+        console.log("updateAIOptions called");
+        
+        if (!aiPlayerCount) {
+            console.error("AI player count dropdown not found!");
             return;
         }
-        if (humanCount === 0 && aiCount === 0) {
-            alert('You must have at least 1 player (human or AI)');
-            return;
+
+        const humanPlayers = parseInt(humanPlayerCount.value);
+        console.log("Human players selected:", humanPlayers);
+        
+        // Clear existing AI options
+        aiPlayerCount.innerHTML = ''; // Clear the dropdown options
+        console.log("Cleared AI dropdown options");
+
+        let minAI, maxAI;
+
+        // Set AI limits based on the number of human players
+        if (humanPlayers === 0 && DEBUG_MODE) {
+            // Debug mode: Allow 1-6 AI players when no humans
+            minAI = 1;
+            maxAI = 6;
+        } else if (humanPlayers === 1 && DEBUG_MODE) {
+            minAI = 0;
+            maxAI = 5;
+        } else if (humanPlayers === 6) {
+            minAI = 0;
+            maxAI = 0;
+        } else if (humanPlayers === 1) {
+            minAI = 3;
+            maxAI = 5;
+        } else if (humanPlayers === 2) {
+            minAI = 2;
+            maxAI = 4;
+        } else if (humanPlayers === 3) {
+            minAI = 1;
+            maxAI = 3;
+        } else if (humanPlayers === 4) {
+            minAI = 0;
+            maxAI = 2;
+        } else if (humanPlayers === 5) {
+            minAI = 0;
+            maxAI = 1;
+        } else {
+            // Default case if humanPlayers is unexpected value
+            console.warn("Unexpected human player count:", humanPlayers);
+            minAI = 1;
+            maxAI = 3;
         }
+
+        console.log(`AI range: ${minAI} to ${maxAI}`);
+
+        // Add the options for AI players based on the min and max values
+        // Only add 0 AI option if it's within the valid range
+        if (minAI === 0) {
+            const defaultOption = document.createElement('option');
+            defaultOption.value = 0;
+            defaultOption.textContent = '0 AI';
+            aiPlayerCount.appendChild(defaultOption);
+            console.log("Added 0 AI option");
+        }
+
+        // Add new options for AI players within the valid range
+        for (let i = Math.max(minAI, 1); i <= maxAI; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = `${i} AI`;
+            aiPlayerCount.appendChild(option);
+            console.log(`Added ${i} AI option`);
+        }
+        
+        // Set default selection to the minimum valid AI count
+        aiPlayerCount.value = minAI;
+        console.log(`Set default AI selection to: ${minAI}`);
+        console.log(`AI dropdown now has ${aiPlayerCount.children.length} options`);
+    }
+
+    // Only initialize if elements exist
+    if (humanPlayerCount && aiPlayerCount) {
+        // Initialize AI options based on the default human player selection
+        console.log("Initializing AI options...");
+        updateAIOptions();
+
+        // Listen for changes to the human players dropdown
+        humanPlayerCount.addEventListener('change', () => {
+            console.log("Human player selection changed");
+            updateAIOptions();
+        });
     } else {
-        // Normal mode: Require at least 1 human and minimum 4 total players
-        if (humanCount === 0) {
-            alert('At least 1 human player is required in normal mode');
-            return;
-        }
-        if (totalPlayers <= 4) {
-            alert(`Total players must be at least 3. Current: ${totalPlayers}`);
-            return;
-        }
+        console.error("Required dropdown elements not found!");
+        console.error("humanPlayerCount exists:", !!humanPlayerCount);
+        console.error("aiPlayerCount exists:", !!aiPlayerCount);
     }
-    
-    // Create player array
-    const playerArray = [];
-    
-    // Add human players
-    for (let i = 0; i < humanCount; i++) {
-        playerArray.push({
-            id: `Human${i+1}`,
-            type: "human",
-            role: null, // Will be assigned in role selection
-            name: `Human ${i+1}`
-        });
-    }
-    
-    // Add AI players
-    for (let i = 0; i < aiCount; i++) {
-        playerArray.push({
-            id: `AI${i+1}`,
-            type: "ai",
-            role: null, // Will be assigned in role selection
-            name: `AI ${i+1}`
-        });
-    }
-    
-    // Update game state
-    window.gameState = window.gameState || {};
-    gameState.humanPlayerCount = humanCount;
-    gameState.aiPlayerCount = aiCount;
-    gameState.playerArray = playerArray;
-    gameState.currentPhase = "ROLE_SELECTION";
-    
-    console.log(`Created player array with ${humanCount} humans and ${aiCount} AI:`, playerArray);
-    
-    // Move to role selection screen
-    playerCountScreen.style.display = "none";
-    roleSelectionScreen.style.display = "block";
-    
-    // Dispatch event to notify role selection screen
-    const playersSelectedEvent = new CustomEvent("playersSelected", {
-        detail: playerArray
-    });
-    window.dispatchEvent(playersSelectedEvent);
-    console.log("Dispatched playersSelected event with player array:", playerArray);
-    
-    // Call role selection setup if it exists
-    if (typeof setupRoleSelectionUI === 'function') {
-        setupRoleSelectionUI(humanCount);
-    }
-});
 
+    // Get reference to screens
+    const playerCountScreen = document.getElementById('player-Count-Screen');
+    const roleSelectionScreen = document.getElementById('role-Selection-Screen');
+
+    // Handle confirm button click
+    if (playerCountConfirmButton) {
+        playerCountConfirmButton.addEventListener("click", () => {
+            // Get selected values
+            const humanCount = parseInt(humanPlayerCount.value);
+            const aiCount = parseInt(aiPlayerCount.value);
+            const totalPlayers = humanCount + aiCount;
+            
+            console.log(`Selected: ${humanCount} humans, ${aiCount} AI, ${totalPlayers} total`);
+            
+            // Validate player counts based on debug mode
+            if (DEBUG_MODE) {
+                // Debug mode: Allow zero humans but require at least 1 total player
+                if (totalPlayers < 1) {
+                    alert(`Total players must be at least 1. Current: ${totalPlayers}`);
+                    return;
+                }
+                if (humanCount === 0 && aiCount === 0) {
+                    alert('You must have at least 1 player (human or AI)');
+                    return;
+                }
+            } else {
+                // Normal mode: Require at least 1 human and minimum 4 total players
+                if (humanCount === 0) {
+                    alert('At least 1 human player is required in normal mode');
+                    return;
+                }
+                if (totalPlayers < 4) { // Fixed: was <= 4, should be < 4
+                    alert(`Total players must be at least 4. Current: ${totalPlayers}`);
+                    return;
+                }
+            }
+            
+            // Create player array
+            const playerArray = [];
+            
+            // Add human players
+            for (let i = 0; i < humanCount; i++) {
+                playerArray.push({
+                    id: `Human${i+1}`,
+                    type: "human",
+                    role: null, // Will be assigned in role selection
+                    name: `Human ${i+1}`
+                });
+            }
+            
+            // Add AI players
+            for (let i = 0; i < aiCount; i++) {
+                playerArray.push({
+                    id: `AI${i+1}`,
+                    type: "ai",
+                    role: null, // Will be assigned in role selection
+                    name: `AI ${i+1}`
+                });
+            }
+            
+            // Update game state
+            window.gameState = window.gameState || {};
+            gameState.humanPlayerCount = humanCount;
+            gameState.aiPlayerCount = aiCount;
+            gameState.playerArray = playerArray;
+            gameState.currentPhase = "ROLE_SELECTION";
+            
+            console.log(`Created player array with ${humanCount} humans and ${aiCount} AI:`, playerArray);
+            
+            // Move to role selection screen
+            if (playerCountScreen && roleSelectionScreen) {
+                playerCountScreen.style.display = "none";
+                roleSelectionScreen.style.display = "block";
+                
+                // Dispatch event to notify role selection screen
+                const playersSelectedEvent = new CustomEvent("playersSelected", {
+                    detail: playerArray
+                });
+                window.dispatchEvent(playersSelectedEvent);
+                console.log("Dispatched playersSelected event with player array:", playerArray);
+                
+                // Call role selection setup if it exists
+                if (typeof setupRoleSelectionUI === 'function') {
+                    setupRoleSelectionUI(humanCount);
+                }
+            } else {
+                console.error("Screen elements not found for transition");
+            }
+        });
+    } else {
+        console.error("Confirm button not found!");
+    }
 });
