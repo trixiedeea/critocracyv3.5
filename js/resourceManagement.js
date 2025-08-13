@@ -218,7 +218,7 @@ export function updateResourceDisplays(gameState = state) {
 
   // No need to clear anything - just update existing elements
   // Get existing player score elements
-  const playerScoreElements = playerScoreDisplay.querySelectorAll('h4');
+  const playerScoreElements = playerScoreDisplay.querySelectorAll('h5');
 
   const currentPlayer = players[currentPlayerIndex];
   const humanPlayers = players.filter(p => p.isHuman);

@@ -33,6 +33,7 @@ import {
     applyResourceChange, 
     handleCardMovement,
     applyAgeCardEffect,
+    updateResourceDisplays
 } from './resourceManagement.js';
 
 // Helper function for promise-based delays
@@ -831,7 +832,8 @@ export async function processCardEffects(card, targetPlayer = null) {
         console.warn(`Effect for ${matchedRole} is not a resource change or has no changes`);
         //console.log('Available effect:', roleEffect);
         console.log('------------processCardEffects END------------')
-        updatePlayerInfo(currentPlayer);
+        console.log('*****************call updateResourceDisplays*****************');
+        updateResourceDisplays();
         processEndPlayerTurn(card);
         return;
     }
@@ -864,7 +866,7 @@ export async function processCardEffects(card, targetPlayer = null) {
     //console.log(`- influence: ${changes.influence || 0}`);
     //console.log(`- Explanation: ${roleEffect.explanation}`);
     
-    //console.log('---------processCardEffects END---------');
+    console.log('---------processCardEffects END---------');
     // Call processEndPlayerTurn when complete, passing the card
     updatePlayerInfo(currentPlayer);
     processEndPlayerTurn(card);

@@ -26,7 +26,7 @@ export function showScreen(screenName) {
     Object.entries(screens).forEach(([name, screen]) => {
         if (screen) {
             if (name === screenName) {
-                //console.log(`  Showing screen element: ${name}`);
+                console.log(`  Showing screen element: ${name}`);
                 screen.style.display = 'block';
                 if (name === 'turnOrderScreen') {
                     //console.log('  Turn Order Screen is now visible. Checking for dice elements...');

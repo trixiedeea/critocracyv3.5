@@ -5,8 +5,7 @@
  */
 
 import { SPACE_TYPE } from './board-data.js';
-import { showEndGameWithVictory } from './animations.js';
-import {getPlayers} from './players.js';
+
 
 // ===== Global Variables =====
 window.hasDrawnEndOfTurnCard = false;
@@ -77,42 +76,29 @@ export const _state = {
         phase: 'setup',
         gameStarted: false,
         gameOver: false,
-        winner: null,
+        winners: null,
         playerFinishPosition: 0,
         round: 1,
         maxRounds: 50,
         playerRoles: {},
+        playerFinalScore: 0,
+        playerFinalResourceTotal: 0,
+        playerFinalRanking: 0,
         playerPositions: {},
+        abilityUsed: false,
         board: {},
         settings: {
             maxPlayers: 6,
             minPlayers: 4,
             enableSpecialAbilities: true
         },
+        resources: {
+            knowledge: 0,
+            money: 0,
+            influence: 0,
+        },
         spaceType: { ...SPACE_TYPE }, // Add spaceType to global state.
     },
-
-    player: {
-        id: null,       
-        name: null,
-        role: null,
-        isHuman: false,
-        currentCoords:[0, 0],
-        x: 0,
-        y: 0,
-        resources: { knowledge: 0, money: 0, influence: 0 },
-        finished: false,
-        skipNextTurn: false,
-        cards: [],
-        items: [],
-        alliances: [],
-        forcePathChange: false,
-        currentAlliancePartnerId: null,
-        abilityUsed: false,
-        playerFinalScore: 0,
-        playerFinalResourceTotal: 0,
-        playerFinalRanking: 0,
-    }
     
 };
 
@@ -131,7 +117,7 @@ export const state = new Proxy(_state.game, {
 });
 
 // Set window.gameState for backward compatibility
-window.gameState = state;
+window.gameState = state.game;
 
 // Expose _state for direct access (used by animations to bypass proxy)
 window._state = _state;
@@ -193,7 +179,7 @@ export function getCurrentPlayer() {
 export function updatePlayerResources(playerId, resources) {
     console.log('=============updatePlayerResources=============');
     if (!playerId || !resources) return;
-    _state.playerResources[playerId] = JSON.parse(JSON.stringify(resources));
+    _state.game.players[playerId].resources = JSON.parse(JSON.stringify(resources));
     notifySubscribers();  
 }
 
@@ -281,7 +267,7 @@ export function updateUIState(updates) {
  * @returns {boolean} True if player was found and updated
  */
 export function updatePlayer(playerId, updates) {
-    //console.log('=============updatePlayer=============');
+    console.log('=============updatePlayer=============');
     const playerIndex = _state.game.players.findIndex(p => p.id === playerId);
     if (playerIndex !== -1) {
         _state.game.players[playerIndex] = { 
@@ -403,7 +389,10 @@ export const EFFECT_PARSERS = {
         return spaces > 0
             ? `Move forward ${spaces} ${spaces === 1 ? 'space' : 'spaces'}.`
             : `Move back ${Math.abs(spaces)} ${Math.abs(spaces) === 1 ? 'space' : 'spaces'}.`;
-    }
+    },
+    SKIP_TURN: (player, turns) => 
+        `Skip ${turns} turn${turns === 1 ? 'turn' : 'turns'} for ${player.name}.`,
+    
 };
 
 // Action validation system
@@ -414,6 +403,7 @@ const FORBIDDEN_ACTIONS = {
     'AWAITING_PATH_CHOICE': ['advanceToNextPlayer', 'animateDiceRoll', 'animateTokenToPosition', 'drawCard'],
     'AWAITING_CARD_ACTION': ['advanceToNextPlayer', 'animateDiceRoll', 'animateTokenToPosition, processEndPlayerTurn', 'handlePlayerAction'],
     'TURN_TRANSITION': ['animateTokenToPosition', 'processEndPlayerTurn', 'handleEndOfMove, handleEndTurn, handlePlayerAction', 'drawCard', 'showCard'],
+    'GAME_OVER': ['advanceToNextPlayer', 'animateDiceRoll', 'animateTokenToPosition', 'drawCard', 'showCard'],
 };
 
 export function isActionAllowed(action) {
@@ -452,57 +442,3 @@ function capitalize(word) {
     return word.charAt(0).toUpperCase() + word.slice(1);
 }
 
-/**
- * Calculates final scores and determines the game winner
- */
-export function endGame() {
-    console.log('=== ENDING GAME ===');
-    
-    const players = getPlayers();
-    
-    if (players.length === 0) {
-        console.error('Cannot end game: No players found');
-        return;
-    }
-    
-    // Calculate final scores for all players
-    players.forEach((player, index) => {
-        const resourceTotal = player.playerFinalResourceTotal || 0;
-        let rankingBonus = 0;
-        
-        // Assign ranking bonus based on finish position
-        switch(player.playerFinalRanking) {
-            case 1: rankingBonus = 25; break;  // 1st place
-            case 2: rankingBonus = 20; break;  // 2nd place
-            case 3: rankingBonus = 15; break
-            case 4: rankingBonus = 15; break;  // 3rd and 4th place
-            case 5: rankingBonus = 10; break;
-            case 6: rankingBonus = 10; break;  // 5th and 6th place
-            default: rankingBonus = 0; break; // Beyond 6th place
-        }
-        
-        _state.game.players[index].playerFinalScore = player.playerFinalResourceTotal + player.playerFinalRanking;
-        
-        console.log(`Player ${player.name}: Resources=${player.playerFinalResourceTotal}, Ranking=${player.playerFinalRanking}, Bonus=${player.playerFinalRanking}, Final Score=${player.playerFinalScore}`);
-    });
-    
-    // Find all players with the highest final score (handles ties)
-    const maxScore = Math.max(...players.map(p => p.playerFinalScore || 0));
-    const winners = players.filter(p => p.playerFinalScore === maxScore);
-    
-    if (winners.length === 1) {
-        console.log(`Game Winner: ${winners[0].name} with score ${winners[0].playerFinalScore}`);
-    } else {
-        console.log(`Game Tie! Winners: ${winners.map(w => w.name).join(', ')} with score ${maxScore}`);
-    }
-    
-    // Update game state
-    updateGameState({
-        ended: true,
-        gameOver: true,
-        winner: winners.length === 1 ? winners[0] : winners
-    });
-    showScreen('endGameScreen');
-    // Show the end game screen with victory animation
-    showEndGameWithVictory(winners);
-}

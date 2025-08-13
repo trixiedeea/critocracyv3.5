@@ -151,7 +151,6 @@ function initializeElementReferences() {
                 endGame: {
                     endGameScreen: document.getElementById('end-Game-Screen'),
                     winnerDisplay: document.getElementById('winner-Display'),
-                    finalScores: document.getElementById('final-Scores'),
                     newGameButton: document.getElementById('new-Game-Button'),
                 }
             }
@@ -188,7 +187,7 @@ function setupEventListeners() {
 
     // --- Game Board Buttons ---
     gameBoard.endTurnButton.addEventListener('click', () => {
-        playClickSound();
+        //playClickSound();
         //console.log("End Turn button clicked.");
         gameBoard.endTurnButton.classList.remove('shake');
         console.log('*************CALL advanceToNextPlayer *************');
@@ -196,7 +195,7 @@ function setupEventListeners() {
     });
     // Dice Roll
     gameBoard.dice.addEventListener('click', () => {
-        rollDiceSound();
+        //rollDiceSound();
         if (state.currentPhase !== 'ROLLING') return; // Only act during ROLLING phase
     
         console.log('🎯========== Dice clicked in ROLLING phase==========');
@@ -262,7 +261,7 @@ function setupEventListeners() {
 
     // --- End Game Screen Button ---
     endGame.newGameButton.addEventListener('click', () => {
-        playClickSound();
+        //playClickSound();
         //console.log("--------New Game button clicked. Reloading page.--------");
         window.location.reload();
     });
@@ -383,7 +382,7 @@ export function handleCanvasCardClick(event, coords = null, player = null) {
         
         drawCard(clickedDeckType);
     } else {
-        playErrorSound()
+        //playErrorSound()
         console.log(`No valid deck region clicked at coordinates (${boardX}, ${boardY})`);
     }
     console.log('=============handleCanvasCardClick END=============');
@@ -650,7 +649,7 @@ export function promptForChoicepoint(options, onChoice, delayMs = 3000) {
 }
   
 export function updateGameControls() {
-    //console.log('=============updateGameControls=============');
+    console.log('=============updateGameControls=============');
     const player = getCurrentPlayer();
     let rollEnabled = false;
     let endTurnEnabled = false;
@@ -677,7 +676,11 @@ export function updateGameControls() {
 
     const dice = state.ui.elements.gameBoard?.dice;
     if (dice) {
-        dice.style.pointerEvents = rollEnabled ? 'auto' : 'none';
+        if (rollEnabled) {
+            dice.style.cursor = 'pointer';
+        }else{
+            dice.style.cursor = 'none';
+        }
         if (rollEnabled) {
             startDiceShake();
         } else {
@@ -691,7 +694,7 @@ export function updateGameControls() {
     }
 
     //console.log(`UI Controls Updated: Roll=${rollEnabled}, EndTurn=${endTurnEnabled}, Phase=${state.currentPhase}`);
-    //console.log('=============updateGameControls END=============');
+    console.log('=============updateGameControls END=============');
 };
   
   /**
@@ -729,7 +732,7 @@ export function showResourceChangeFeedback(playerId, resourceType, amount) {
  * @param {string|Object} playerId - The ID of the player to display, or a player object.
  */
 export function updatePlayerInfo(currentPlayer = getCurrentPlayer(), newValues = {}) {
-    //console.log('==============updatePlayerInfo=============')
+    console.log('==============updatePlayerInfo=============')
     //console.log('[UI] updatePlayerInfo called with:', playerId);
     
     try {
@@ -802,7 +805,7 @@ export function updatePlayerInfo(currentPlayer = getCurrentPlayer(), newValues =
         const influence = resources.influence ?? 0;
   
         
-        //console.log('[UI] Updating UI with resources:', { knowledge, money, influence });
+        console.log('[UI] Updating UI with resources:', { knowledge, money, influence });
         
         // Update the UI elements
         playerElement.textContent = `${currentPlayer.name} (${currentPlayer.role || 'No Role'})`;
@@ -843,8 +846,8 @@ export function updatePlayerInfo(currentPlayer = getCurrentPlayer(), newValues =
     }
   
     panelUpdated.querySelector('.player-name').textContent = player.name;
-    panelUpdated.querySelector('.KNOWLEDGE_COUNT').textContent = `Knowledge ${player.resources.money}`;
-    panelUpdated.querySelector('.MONEY_COUNT').textContent = `Money ${player.resources.knowledge}`;
+    panelUpdated.querySelector('.KNOWLEDGE_COUNT').textContent = `Knowledge ${player.resources.knowledge}`;
+    panelUpdated.querySelector('.MONEY_COUNT').textContent = `Money ${player.resources.money}`;
     panelUpdated.querySelector('.INFLUENCE_COUNT').textContent = `Influence ${player.resources.influence}`;
 };
   

@@ -194,6 +194,12 @@
     <div id="game-Board-Screen" class="screen">
         <div id="board-Container-Wrapper" class="wrapper">
             <div id="board-Container" class="board-Container">
+                <div class="resource-Score-Container">
+                    <div class="player-Score-Display">
+                        <h3>Player Scores</h3>
+                            <h5><span class="role-Name"></span><p>0 💰, 0 🧠, 0 ⚡</p></h5><h5><span class="role-Name"></span><p>0 💰, 0 🧠, 0 ⚡</p></h5><h5><span class="role-Name"></span><p>0 💰, 0 🧠, 0 ⚡</p></h5><h5><span class="role-Name"></span><p>0 💰, 0 🧠, 0 ⚡</p></h5><h5><span class="role-Name"></span><p>0 💰, 0 🧠, 0 ⚡</p></h5>
+                    </div>
+                </div>
                 <canvas id="board-Canvas" class="board-Layer" style="aspect-ratio: 3/2;"></canvas>
                 <canvas id="board-Token-Canvas" class="board-Token-Layer" style="aspect-ratio: 3/2;"></canvas>
                 <div id="token-Layer" class="token-Layer" style="aspect-ratio: 3/2;"></div>
@@ -311,27 +317,13 @@
                         </div>
                     </div>
                 </dialog>
-                <div class="resource-Score-Container">
-                    <div class="player-Score-Display">
-                        <h3>Player Scores</h3>
-                            <h4><span class="role-Name"></span><p>0 💰, 0 🧠, 0 🎯</p></h4>
-                            <h4><span class="role-Name"></span><p>0 💰, 0 🧠, 0 🎯</p></h4>
-                            <h4><span class="role-Name"></span><p>0 💰, 0 🧠, 0 🎯</p></h4>
-                            <h4><span class="role-Name"></span><p>0 💰, 0 🧠, 0 🎯</p></h4>
-                            <h4><span class="role-Name"></span><p>0 💰, 0 🧠, 0 🎯</p></h4>
-                    </div>
-                </div>
                 <div id="player-Info-Panel" class="container">
                     <div id="end-Turn-Button-Container" class="button-Container">
                         <button id="end-Turn-Button">End Turn</button>
                     </div>
                     <div id="resource-Display-Container" class="display-Container">
-                        <span id="currentPlayer"></span>
-                            <ul class="resource-Display">
-                                <li class="resource-Display">Knowledge : <span id="KNOWLEDGE_COUNT">0</span></li>
-                                <li class="resource-Display">Money : <span id="MONEY_COUNT">0</span></li>
-                                <li class="resource-Display">Influence : <span id="INFLUENCE_COUNT">0</span></li>
-                            </ul>
+                            <h4 id="currentPlayer">Player:</h4>
+                                <p class="resource-Display">Knowledge -<span id="KNOWLEDGE_COUNT"> 0</span>Money -<span id="MONEY_COUNT">0</span>Influence -<span id="INFLUENCE_COUNT">0</span></p>
                     </div>
                     <div id="dice-Container">
                         <div id="dice-Animation-Area" class="dice-Animation-Container">
@@ -349,13 +341,28 @@
             </div>
         </div>
     </div>
-
     <!-- End Game Screen -->
     <div id="end-Game-Screen" class="screen hidden">
         <h2>Game Over</h2>
-        <div id="end-game-container">
+        <div id="end-Game-Container">
+            <table id="scores-Table" class="scores-Table">
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Rank</th>
+                        <th>Player</th>
+                        <th>Role</th>
+                        <th>Resources</th>
+                        <th>Ranking Bonus</th>
+                        <th>Final Score</th>
+                    </tr>
+                </thead>
+                <tbody id="scores-Table-Body">
+                    <!-- This will be populated by JavaScript -->
+                </tbody>
+            </table>
             <div id="winner-Display"></div>
-            <div id="final-Scores"></div>
+                <!-- This will be populated by JavaScript -->
             <button id="new-Game-Button">New Game</button>
         </div>
     </div>

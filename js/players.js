@@ -1,16 +1,20 @@
 
 import { START_SPACE } from './board-data.js';
-import { updatePlayerInfo } from './ui.js'; // Corrected import name
+
 import { 
     notifySubscribers, 
     updateGameState,
     getCurrentPlayer,
-    _state,
-    endGame,
+    state,
 } from './state.js';
+
+import { updatePlayerInfo} from './ui.js';
+
 import { 
     advanceToNextPlayer,
 } from './game.js';
+import {endGame} from './endGameScreen.js';
+
 
 // ===== Resource & Player Constants =====
 // List of all valid resource keys used throughout the game.
@@ -155,6 +159,10 @@ export function resetPlayers() {
 /**
  * Marks a player as finished, updates their final scores, and handles game flow
  */
+/**
+ * Marks a player as finished, calculates final scores, and updates game state
+ * @param {string|Object} playerOrId - Player ID or player object
+ */
 export function markPlayerFinished(playerOrId) {
     if (!playerOrId) {
         console.error('markPlayerFinished: No player provided');
@@ -162,17 +170,15 @@ export function markPlayerFinished(playerOrId) {
     }
     
     console.log('=== markPlayerFinished called ===');
-    console.log('Input:', playerOrId);
     
     // Get the players array from state
     const players = getPlayers();
-    
     if (players.length === 0) {
         console.error('No players in game state');
         return;
     }
     
-    // Find the actual player in the state
+    // Find the player in the state
     let player;
     let playerIndex = -1;
     
@@ -188,7 +194,7 @@ export function markPlayerFinished(playerOrId) {
         // Find player by object reference
         playerIndex = players.findIndex(p => p.id === playerOrId.id);
         if (playerIndex === -1) {
-            console.error(`Player object not found in state`);
+            console.error('Player object not found in state');
             return;
         }
         player = players[playerIndex];
@@ -197,66 +203,57 @@ export function markPlayerFinished(playerOrId) {
         return;
     }
     
-    console.log(`Found player: ${player.name} at index ${playerIndex}`);
-    console.log(`Player finished status BEFORE: ${player.finished}`);
+    console.log(`Marking player as finished: ${player.name} (ID: ${player.id})`);
     
-    // Mark player as finished DIRECTLY in the state array
-    _state.game.players[playerIndex].finished = true;
+    // Mark player as finished in the state
+    state.players[playerIndex] = {
+        ...state.players[playerIndex],
+        finished: true,
+        finishedAt: new Date().toISOString()
+    };
     
-    console.log(`Player finished status AFTER: ${_state.game.players[playerIndex].finished}`);
+    // Get the most up-to-date resources using our synchronized function
+    const resources = getPlayerResources(player.id);
+    console.log('Final resources for player:', resources);
     
-    // Debug: Log the player object structure
-    console.log('=== RESOURCE CALCULATION DEBUG ===');
-    console.log('Full player object:', JSON.stringify(player, null, 2));
-    console.log('Player resources:', player.resources);
-    console.log('Resources type:', typeof player.resources);
-    console.log('Resources is array:', Array.isArray(player.resources));
+    // Calculate final resource total
+    const finalResourceTotal = (resources?.money || 0) + 
+                             (resources?.knowledge || 0) + 
+                             (resources?.influence || 0);
     
-    // Try to get resources from both the local player and state player
-    const statePlayer = _state.game.players[playerIndex];
-    console.log('State player resources:', statePlayer.resources);
-    console.log('State resources type:', typeof statePlayer.resources);
+    console.log(`Calculated final resource total: ${finalResourceTotal}`);
     
-    // Calculate player's final resource total with robust error handling
-    let resources;
-    if (statePlayer.resources && typeof statePlayer.resources === 'object' && !Array.isArray(statePlayer.resources)) {
-        resources = statePlayer.resources;
-    } else if (player.resources && typeof player.resources === 'object' && !Array.isArray(player.resources)) {
-        resources = player.resources;
-    } else {
-        console.error('Player resources are invalid, using defaults');
-        resources = { money: 0, knowledge: 0, influence: 0 };
-    }
+    // Update player's final resource total in state
+    state.players[playerIndex].playerFinalResourceTotal = finalResourceTotal;
     
-    console.log('Using resources object:', resources);
-    
-    const money = Number(resources.money || 0);
-    const knowledge = Number(resources.knowledge || 0);
-    const influence = Number(resources.influence || 0);
-    
-    console.log(`Individual resources - Money: ${money}, Knowledge: ${knowledge}, Influence: ${influence}`);
-    
-    const finalResourceTotal = money + knowledge + influence;
-    console.log(`Final resource total: ${finalResourceTotal}`);
-    
-    // Update player's final resource total
-    _state.game.players[playerIndex].playerFinalResourceTotal = finalResourceTotal;
-    
-    // Calculate and assign ranking based on finish position
-    const finishedPlayers = _state.game.players.filter(p => p.finished);
+    // Calculate finish position (1st, 2nd, etc.)
+    const finishedPlayers = state.players.filter(p => p.finished);
     const finishPosition = finishedPlayers.length;
-    _state.game.players[playerIndex].playerFinalRanking = finishPosition;
+    
+    // Update player's final ranking
+    state.players[playerIndex].playerFinalRanking = finishPosition;
+    
+    console.log(`Player ${player.name} finished in position ${finishPosition} with ${finalResourceTotal} total resources`);
+    
+    // Update the player in the global state
+    if (typeof updateGameState === 'function') {
+        updateGameState({
+            players: [...state.players],
+            playerFinishPosition: Math.max(state.game?.playerFinishPosition || 0, finishPosition)
+        });
+    }
+    state.players[playerIndex].playerFinalRanking = finishPosition;
     
     console.log(`Player ${player.name} marked as finished in position ${finishPosition} with ${finalResourceTotal} total resources`);
     console.log('=== END RESOURCE CALCULATION DEBUG ===');
     
     // Trigger state update notification
     updateGameState({
-        playerFinishPosition: Math.max(_state.game.playerFinishPosition, finishPosition)
+        playerFinishPosition: Math.max(state.players.playerFinishPosition, finishPosition)
     });
     
     // Verify the change took effect
-    const verifyPlayer = _state.game.players[playerIndex];
+    const verifyPlayer = state.players[playerIndex];
     console.log(`VERIFICATION - Player ${verifyPlayer.name} finished: ${verifyPlayer.finished}`);
     
     if (allPlayersFinished()) {
@@ -285,11 +282,9 @@ export function allPlayersFinished() {
  */
 export function getPlayerById(playerId) {
     console.log('=============getPlayerById=============');
-    const player = _state.game.players.find(p => p.id === playerId);
+    const player = state.players.find(p => p.id === playerId);
     return player ? { ...player } : null;
 }
-
-
 /**
  * Calculates the score for a single player (sum of resources).
  */
@@ -417,13 +412,17 @@ export function updatePlayerResources(currentPlayer, changes) {
   }
 
   // Apply validated changes to the player object
-  Object.assign(currentPlayer.resources, newValues);
-  //console.log(`Resources updated for ${currentPlayer.name}:`, currentPlayer.resources);
-
+  currentPlayer.resources = { ...newValues };
+  
   // Update the global state with the modified player
   const updatedPlayers = players.map(p => 
-      p.id === currentPlayer.id ? { ...p, resources: { ...currentPlayer.resources } } : p
+      p.id === currentPlayer.id ? { ...p, resources: { ...newValues } } : p
   );
+  
+  // Update module-level state
+  if (state.playerResources[currentPlayer.id]) {
+      state.playerResources[currentPlayer.id] = { ...newValues };
+  }
   
   // Update global state (if function exists)
   if (typeof updateGameState === 'function') {
@@ -440,27 +439,62 @@ export function updatePlayerResources(currentPlayer, changes) {
       updatePlayerInfo(currentPlayer, newValues);
   }
   
+  console.log(`[Resources] Updated resources for ${currentPlayer.name}:`, newValues);
+  
   return true;
 }
 
 /**
-* Get a player's resources from global state
+* Get a player's resources
 * @param {string} playerId - The ID of the player
 * @returns {Object} Player's resources or null if not found
 */
 export function getPlayerResources(playerId) {
-    console.log('=============getPlayerResources=============');
-    if (!playerId || !_state.playerResources[playerId]) return null;
-    return JSON.parse(JSON.stringify(_state.playerResources[playerId]));
+    if (!playerId) {
+        console.warn('getPlayerResources: No player ID provided');
+        return null;
+    }
+    
+    // First try to get from the player object
+    const player = getPlayerById(playerId);
+    if (player?.resources) {
+        return { ...player.resources };
+    }
+    
+    // Fall back to module state
+    if (state.playerResources[playerId]) {
+        return { ...state.playerResources[playerId] };
+    }
+    
+    console.warn(`getPlayerResources: No resources found for player ${playerId}`);
+    return { knowledge: 0, money: 0, influence: 0 };
 }
 
 /**
- * Initialize player resources in global state
+ * Initialize player resources in both module state and player object
  * @param {string} playerId - The ID of the player
  * @param {Object} initialResources - Initial resource values
  */
 export function initPlayerResources(playerId, initialResources) {
-    console.log('=============initPlayerResources=============');
-    if (!playerId || !initialResources) return;
-    _state.playerResources[playerId] = JSON.parse(JSON.stringify(initialResources));
+    if (!playerId || !initialResources) {
+        console.warn('initPlayerResources: Missing playerId or initialResources');
+        return;
+    }
+    
+    const resources = {
+        knowledge: Number(initialResources.knowledge) || 0,
+        money: Number(initialResources.money) || 0,
+        influence: Number(initialResources.influence) || 0
+    };
+    
+    // Update module state
+    state.playerResources[playerId] = { ...resources };
+    
+    // Update player object if it exists
+    const player = getPlayerById(playerId);
+    if (player) {
+        player.resources = { ...resources };
+    }
+    
+    console.log(`[Resources] Initialized resources for player ${playerId}:`, resources);
 }

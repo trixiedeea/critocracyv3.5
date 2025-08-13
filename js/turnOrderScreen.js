@@ -1,4 +1,8 @@
 
+import { endGame } from './endGameScreen.js';
+import { updateGameState, state } from './state.js';
+
+const DEBUG_MODE = false
 // Ensure global turnOrderUI namespace
 window.turnOrderUI = window.turnOrderUI || {};
 
@@ -170,6 +174,7 @@ function renderTurnOrderUI() {
 }
 
 function finalizeTurnOrder() {
+    console.log('==============finalizeTurnOrderStart==============')
     //console.log('[TurnOrder] Finalizing turn order');
     
     const sorted = [...window.turnOrderUI.players].sort((a, b) => {
@@ -212,6 +217,42 @@ function finalizeTurnOrder() {
 window.turnOrderUI.handleStartGame = async function () {
     console.log('[TurnOrder] Starting game with player order:', window.turnOrderUI.orderedPlayerIds);
     
+    // Debug mode: Skip directly to endGame with mock data
+    if (DEBUG_MODE) {
+        console.log('[TurnOrder] DEBUG_MODE enabled - updating real state before endGame');
+        
+        // Get the real players and update the two required fields
+        const players = window.turnOrderUI.players || [];
+        const orderedPlayerIds = window.turnOrderUI.orderedPlayerIds || [];
+        
+        const orderedPlayers = orderedPlayerIds.map(id =>
+            players.find(p => p.id === id)
+        ).filter(Boolean);
+        
+        // Update the two required fields for each player
+        orderedPlayers.forEach((player, index) => {
+            player.playerFinalResourceTotal = 22; // Set mock resource total for each player
+            player.playerFinalRanking = index + 1; // Set ranking for each player (1st, 2nd, 3rd, etc.)
+        });
+        
+        // Update state.game.players with the modified players
+        updateGameState({
+            game: {
+                ...state.game, // Keep all existing game state
+                players: orderedPlayers // Update with the modified players
+            }
+        });
+        
+        // Hide turn order screen
+        document.getElementById("turn-Order-Screen").style.display = "none";
+        
+        // Call endGame
+        endGame();
+        
+        return;
+    }
+    
+    // Normal game flow
     document.getElementById("turn-Order-Screen").style.display = "none";
     document.getElementById("game-Board-Screen").style.display = "block";
 

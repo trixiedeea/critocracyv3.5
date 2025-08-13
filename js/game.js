@@ -34,8 +34,8 @@ import {
 import {  
     promptForPathChoice, 
     updateGameControls,
-    updatePlayerInfo,
     rollDiceSound,
+    updatePlayerInfo,
 } from './ui.js';
 import {
     animateDiceRoll,
@@ -46,10 +46,13 @@ import {
 
 import { 
     state, 
-    endGame,
     updateGameState, 
     isActionAllowed 
 } from './state.js';
+
+import { updateResourceDisplays } from './resourceManagement.js';
+
+import { endGame } from './endGameScreen.js';
 
 // Game logic imports-
 
@@ -690,13 +693,7 @@ export async function triggerGameOver() {
         ended: true,
         currentPhase: 'GAME_OVER'
     });
-
-    // Calculate final scores/rankings
-    const finalRankings = getPlayerRanking();
-    //console.log("Final Rankings:", finalRankings);
-
-    // Display end game screen
-    showEndGameScreen(finalRankings);
+    endGame();
 };
 
 // Track if an AI turn is in progress to prevent overlapping turns
