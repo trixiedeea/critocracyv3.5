@@ -1387,8 +1387,8 @@ p {
 
 .dice-face {
     position: absolute;
-    width: 70px;
-    height: 70px;
+    width: 80px;
+    height: 80px;
     background-size: cover;
     backface-visibility: visible;
     transform-style: preserve-3d;
@@ -1555,9 +1555,8 @@ p {
 }
 
 img {
-    width: 120px;
-    height:  140px;
-    border-radius: 50%;
+    width: 110px;
+    height:  110px;
 }
 
 .rank-1 { 

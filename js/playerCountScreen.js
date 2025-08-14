@@ -1,4 +1,4 @@
-const DEBUG_MODE = true;
+const DEBUG_MODE = false;
 
 // Player Count Screen - Enforces exactly 6 total players
 // Player Count Screen - Enforces exactly 6 total players
