@@ -115,14 +115,14 @@ let currentOnComplete = null;
  * Initializes card decks from imported data and shuffles them.
  */
 export function setupDecks() {
-    //console.log("Setting up card decks...");
+    console.log("Setting up card decks...");
     try {
-        // Load and shuffle Age of Expansion (Purple)
+        //Load and shuffle Age of Expansion (Purple)
         if (Array.isArray(ageOfExpansionDeck) && ageOfExpansionDeck.length > 0) {
             cardState.decks[deckType.ageOfExpansionDeck] = [...ageOfExpansionDeck];
             cardState.discardPiles[deckType.ageOfExpansionDeck] = [];
             shuffleDeck(deckType.ageOfExpansionDeck);
-            //console.log(`Deck ${deckType.ageOfExpansionDeck} loaded with ${cardState.decks[deckType.ageOfExpansionDeck].length} cards.`);
+            console.log(`Deck ${deckType.ageOfExpansionDeck} loaded with ${cardState.decks[deckType.ageOfExpansionDeck].length} cards.`);
         } else {
             console.error(`Failed to load Age of Expansion cards.ageOfExpansionDeck=${ageOfExpansionDeck ? 'exists' : 'undefined'}`);
             return false;
@@ -133,9 +133,9 @@ export function setupDecks() {
             cardState.decks[deckType.ageOfResistanceDeck] = [...ageOfResistanceDeck];
             cardState.discardPiles[deckType.ageOfResistanceDeck] = [];
             shuffleDeck(deckType.ageOfResistanceDeck);
-            //console.log(`Deck ${deckType.ageOfResistanceDeck} loaded with ${cardState.decks[deckType.ageOfResistanceDeck].length} cards.`);
+            console.log(`Deck ${deckType.ageOfResistanceDeck} loaded with ${cardState.decks[deckType.ageOfResistanceDeck].length} cards.`);
         } else {
-            //console.log(`Failed to load Age of Resistance (ageOfResistanceDeck) cards. Data is missing, empty, or not an array.`);
+            onsole.log(`Failed to load Age of Resistance (ageOfResistanceDeck) cards. Data is missing, empty, or not an array.`);
             return false;
         }
 
@@ -144,9 +144,9 @@ export function setupDecks() {
             cardState.decks[deckType.ageOfReckoningDeck] = [...ageOfReckoningDeck];
             cardState.discardPiles[deckType.ageOfReckoningDeck] = [];
             shuffleDeck(deckType.ageOfReckoningDeck);
-            //console.log(`Deck ${deckType.ageOfReckoningDeck} loaded with ${cardState.decks[deckType.ageOfReckoningDeck].length} cards.`);
+            console.log(`Deck ${deckType.ageOfReckoningDeck} loaded with ${cardState.decks[deckType.ageOfReckoningDeck].length} cards.`);
         } else {
-            //console.log(`Failed to load Age of Reckoning (ageOfReckoningDeck) cards. Data is missing, empty, or not an array.`);
+            console.log(`Failed to load Age of Reckoning (ageOfReckoningDeck) cards. Data is missing, empty, or not an array.`);
             return false;
         }
 
@@ -155,9 +155,9 @@ export function setupDecks() {
             cardState.decks[deckType.ageOfLegacyDeck] = [...ageOfLegacyDeck];
             cardState.discardPiles[deckType.ageOfLegacyDeck] = [];
             shuffleDeck(deckType.ageOfLegacyDeck);
-            //console.log(`Deck ${deckType.ageOfLegacyDeck} loaded with ${cardState.decks[deckType.ageOfLegacyDeck].length} cards.`);
+            console.log(`Deck ${deckType.ageOfLegacyDeck} loaded with ${cardState.decks[deckType.ageOfLegacyDeck].length} cards.`);
         } else {
-            //console.log(`Failed to load Age of Legacy (ageOfLegacyDeck) cards. Data is missing, empty, or not an array.`);
+            console.log(`Failed to load Age of Legacy (ageOfLegacyDeck) cards. Data is missing, empty, or not an array.`);
             return false;
         }
 
@@ -166,14 +166,14 @@ export function setupDecks() {
             cardState.decks[deckType.endOfTurnDeck] = [...endOfTurnDeck];
             cardState.discardPiles[deckType.endOfTurnDeck] = [];
             shuffleDeck(deckType.endOfTurnDeck);
-            //console.log(`End of Turn deck loaded with ${cardState.decks[deckType.endOfTurnDeck].length} cards.`);
+            console.log(`End of Turn deck loaded with ${cardState.decks[deckType.endOfTurnDeck].length} cards.`);
         } else {
-            //console.log("Failed to load End of Turn (endOfTurnDeck) cards. Data is missing, empty, or not an array.");
+            console.log("Failed to load End of Turn (endOfTurnDeck) cards. Data is missing, empty, or not an array.");
             return false;
         }
 
         cardState.initialized = true;
-        //console.log("All card decks have been set up successfully.");
+        console.log("All card decks have been set up successfully.");
         return true;
     } catch (error) {
         console.error("An unexpected error occurred during deck setup:", error);

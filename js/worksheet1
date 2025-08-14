@@ -124,3 +124,464 @@ Would you like me to help implement any of these changes? I can make the updates
     // Clear the current content of the displays before updating
     resourceDisplayContainer.innerHTML = '';
     playerScoreDisplay.innerHTML = '';
+
+
+
+
+
+
+### Card 37: -2,-1,-3 | +1,+3,+4 | -1,+4,+1 | -3,-1,-2 | +1,-2,-4 | +2,+1,+4
+**COLONIALIST**: Money: -80, Knowledge: -35, Influence: -58
+**REVOLUTIONARY**: Money: +20, Knowledge: +68, Influence: +66
+**HISTORIAN**: Money: +12, Knowledge: +153, Influence: +27
+**ENTREPRENEUR**: Money: -42, Knowledge: -14, Influence: -13
+**POLITICIAN**: Money: +18, Knowledge: -46, Influence: +65
+**ARTIST**: Money: +31, Knowledge: +56, Influence: +88
+
+### Card 38: -6,-3,-4 | +3,+3,+5 | +1,+5,+2 | -5,-2,-3 | -3,-2,-4 | +2,+3,+5
+**COLONIALIST**: Money: -86, Knowledge: -38, Influence: -62
+**REVOLUTIONARY**: Money: +23, Knowledge: +71, Influence: +71
+**HISTORIAN**: Money: +13, Knowledge: +158, Influence: +29
+**ENTREPRENEUR**: Money: -47, Knowledge: -16, Influence: -16
+**POLITICIAN**: Money: +15, Knowledge: -48, Influence: +61
+**ARTIST**: Money: +33, Knowledge: +59, Influence: +93
+
+### Card 39: -5,-1,-3 | +2,+2,+5 | -1,+4,+1 | -4,-1,-2 | +1,+1,+3 | +1,+2,+4
+**COLONIALIST**: Money: -91, Knowledge: -39, Influence: -65
+**REVOLUTIONARY**: Money: +25, Knowledge: +73, Influence: +76
+**HISTORIAN**: Money: +12, Knowledge: +162, Influence: +30
+**ENTREPRENEUR**: Money: -51, Knowledge: -17, Influence: -18
+**POLITICIAN**: Money: +16, Knowledge: -47, Influence: +64
+**ARTIST**: Money: +34, Knowledge: +61, Influence: +97
+
+### Card 40: -3,-2,-2 | +1,-1,-5 | +1,+4,+1 | -4,-1,-2 | +2,-1,+5 | -1,-1,-4
+**COLONIALIST**: Money: -94, Knowledge: -41, Influence: -67
+**REVOLUTIONARY**: Money: +24, Knowledge: +72, Influence: +71
+**HISTORIAN**: Money: +13, Knowledge: +166, Influence: +31
+**ENTREPRENEUR**: Money: -55, Knowledge: -18, Influence: -20
+**POLITICIAN**: Money: +18, Knowledge: -48, Influence: +69
+**ARTIST**: Money: +33, Knowledge: +60, Influence: +93
+
+### Card 41: -6,-2,-1 | +2,+2,+5 | -1,+4,+1 | -5,-1,-1 | -2,-2,-2 | +2,+2,+5
+**COLONIALIST**: Money: -100, Knowledge: -43, Influence: -68
+**REVOLUTIONARY**: Money: +26, Knowledge: +74, Influence: +76
+**HISTORIAN**: Money: +12, Knowledge: +170, Influence: +32
+**ENTREPRENEUR**: Money: -60, Knowledge: -19, Influence: -21
+**POLITICIAN**: Money: +16, Knowledge: -50, Influence: +67
+**ARTIST**: Money: +35, Knowledge: +62, Influence: +98
+
+### Card 42: +6,+2,+3 | -2,-6,-2 | +1,+5,0 | +7,+1,+3 | +3,-1,+6 | -2,0,-5
+**COLONIALIST**: Money: -94, Knowledge: -41, Influence: -65
+**REVOLUTIONARY**: Money: +24, Knowledge: +68, Influence: +74
+**HISTORIAN**: Money: +13, Knowledge: +175, Influence: +32
+**ENTREPRENEUR**: Money: -53, Knowledge: -18, Influence: -18
+**POLITICIAN**: Money: +19, Knowledge: -51, Influence: +73
+**ARTIST**: Money: +33, Knowledge: +62, Influence: +93
+
+### Card 43: -3,-2,-3 | +1,+4,+2 | +1,+4,+1 | +4,+1,+1 | -2,-2,-3 | +2,+2,+3
+**COLONIALIST**: Money: -97, Knowledge: -43, Influence: -68
+**REVOLUTIONARY**: Money: +25, Knowledge: +72, Influence: +76
+**HISTORIAN**: Money: +14, Knowledge: +179, Influence: +33
+**ENTREPRENEUR**: Money: -49, Knowledge: -17, Influence: -17
+**POLITICIAN**: Money: +17, Knowledge: -53, Influence: +70
+**ARTIST**: Money: +35, Knowledge: +64, Influence: +96
+
+### Card 44: -1,-2,-4 | +2,+1,+5 | +1,+4,0 | +4,+2,+1 | -1,-2,-3 | +1,+1,+3
+**COLONIALIST**: Money: -98, Knowledge: -45, Influence: -72
+**REVOLUTIONARY**: Money: +27, Knowledge: +73, Influence: +81
+**HISTORIAN**: Money: +15, Knowledge: +183, Influence: +33
+**ENTREPRENEUR**: Money: -45, Knowledge: -15, Influence: -16
+**POLITICIAN**: Money: +16, Knowledge: -55, Influence: +67
+**ARTIST**: Money: +36, Knowledge: +65, Influence: +99
+
+### Card 45: -2,-3,-6 | +1,+6,+2 | 0,+5,+1 | -5,-1,-2 | -1,-2,+5 | -2,-1,-5
+**COLONIALIST**: Money: -100, Knowledge: -48, Influence: -78
+**REVOLUTIONARY**: Money: +28, Knowledge: +79, Influence: +83
+**HISTORIAN**: Money: +15, Knowledge: +188, Influence: +34
+**ENTREPRENEUR**: Money: -50, Knowledge: -16, Influence: -18
+**POLITICIAN**: Money: +15, Knowledge: -57, Influence: +72
+**ARTIST**: Money: +34, Knowledge: +64, Influence: +94
+
+### Card 46: -4,-1,-2 | +1,+4,+3 | +1,+5,+2 | -3,-1,-2 | -2,-1,-3 | +1,+3,+4
+**COLONIALIST**: Money: -104, Knowledge: -49, Influence: -80
+**REVOLUTIONARY**: Money: +29, Knowledge: +83, Influence: +86
+**HISTORIAN**: Money: +16, Knowledge: +193, Influence: +36
+**ENTREPRENEUR**: Money: -53, Knowledge: -17, Influence: -20
+**POLITICIAN**: Money: +13, Knowledge: -58, Influence: +69
+**ARTIST**: Money: +35, Knowledge: +67, Influence: +98
+
+### Card 47: -3,-1,-4 | +1,+3,+4 | +1,+4,0 | -4,-1,-2 | +1,-1,+4 | +2,+2,+3
+**COLONIALIST**: Money: -107, Knowledge: -50, Influence: -84
+**REVOLUTIONARY**: Money: +30, Knowledge: +86, Influence: +90
+**HISTORIAN**: Money: +17, Knowledge: +197, Influence: +36
+**ENTREPRENEUR**: Money: -57, Knowledge: -18, Influence: -22
+**POLITICIAN**: Money: +14, Knowledge: -59, Influence: +73
+**ARTIST**: Money: +37, Knowledge: +69, Influence: +101
+
+### Card 48: -5,-1,-3 | +1,+2,+5 | -1,+4,+1 | -4,-1,-2 | -1,-2,-3 | +2,+1,+5
+**COLONIALIST**: Money: -112, Knowledge: -51, Influence: -87
+**REVOLUTIONARY**: Money: +31, Knowledge: +88, Influence: +95
+**HISTORIAN**: Money: +16, Knowledge: +201, Influence: +37
+**ENTREPRENEUR**: Money: -61, Knowledge: -19, Influence: -24
+**POLITICIAN**: Money: +13, Knowledge: -61, Influence: +70
+**ARTIST**: Money: +39, Knowledge: +70, Influence: +106
+
+### Card 49: -4,-2,-3 | +1,+4,+3 | -1,+4,+1 | -5,-2,-1 | -2,-1,-3 | +2,+2,+4
+**COLONIALIST**: Money: -116, Knowledge: -53, Influence: -90
+**REVOLUTIONARY**: Money: +32, Knowledge: +92, Influence: +98
+**HISTORIAN**: Money: +15, Knowledge: +205, Influence: +38
+**ENTREPRENEUR**: Money: -66, Knowledge: -21, Influence: -25
+**POLITICIAN**: Money: +11, Knowledge: -62, Influence: +67
+**ARTIST**: Money: +41, Knowledge: +72, Influence: +110
+
+### Card 50: -3,-1,-4 | +1,+3,+4 | +1,+4,0 | -4,-1,-2 | +1,-1,+4 | +2,+2,+3
+**COLONIALIST**: Money: -119, Knowledge: -54, Influence: -94
+**REVOLUTIONARY**: Money: +33, Knowledge: +95, Influence: +102
+**HISTORIAN**: Money: +16, Knowledge: +209, Influence: +38
+**ENTREPRENEUR**: Money: -70, Knowledge: -22, Influence: -27
+**POLITICIAN**: Money: +12, Knowledge: -63, Influence: +71
+**ARTIST**: Money: +43, Knowledge: +74, Influence: +113
+
+### Card 51: -5,-2,-4 | +3,+4,+4 | +1,+5,+2 | -4,-1,-3 | -3,-2,-4 | +2,+3,+5
+**COLONIALIST**: Money: -124, Knowledge: -56, Influence: -98
+**REVOLUTIONARY**: Money: +36, Knowledge: +99, Influence: +106
+**HISTORIAN**: Money: +17, Knowledge: +214, Influence: +40
+**ENTREPRENEUR**: Money: -74, Knowledge: -23, Influence: -30
+**POLITICIAN**: Money: +9, Knowledge: -65, Influence: +67
+**ARTIST**: Money: +45, Knowledge: +77, Influence: +118
+
+### Card 52: -2,-3,-3 | +1,+3,+4 | -1,+4,+1 | -3,-1,-2 | -1,-2,-4 | +1,+3,+3
+**COLONIALIST**: Money: -126, Knowledge: -59, Influence: -101
+**REVOLUTIONARY**: Money: +37, Knowledge: +102, Influence: +110
+**HISTORIAN**: Money: +16, Knowledge: +218, Influence: +41
+**ENTREPRENEUR**: Money: -77, Knowledge: -24, Influence: -32
+**POLITICIAN**: Money: +8, Knowledge: -67, Influence: +63
+**ARTIST**: Money: +46, Knowledge: +80, Influence: +121
+
+### Card 53: -4,-2,-3 | +2,+4,+4 | +1,+5,+2 | -5,-2,-3 | -3,-2,-4 | +2,+3,+5
+**COLONIALIST**: Money: -130, Knowledge: -61, Influence: -104
+**REVOLUTIONARY**: Money: +39, Knowledge: +106, Influence: +114
+**HISTORIAN**: Money: +17, Knowledge: +223, Influence: +43
+**ENTREPRENEUR**: Money: -82, Knowledge: -26, Influence: -35
+**POLITICIAN**: Money: +5, Knowledge: -69, Influence: +59
+**ARTIST**: Money: +48, Knowledge: +83, Influence: +126
+
+### Card 54: -2,-1,-3 | +1,+4,+2 | 0,+4,+1 | +4,+1,+1 | -1,-2,-4 | +2,+1,+4
+**COLONIALIST**: Money: -132, Knowledge: -62, Influence: -107
+**REVOLUTIONARY**: Money: +40, Knowledge: +110, Influence: +116
+**HISTORIAN**: Money: +17, Knowledge: +227, Influence: +44
+**ENTREPRENEUR**: Money: -78, Knowledge: -25, Influence: -34
+**POLITICIAN**: Money: +4, Knowledge: -71, Influence: +55
+**ARTIST**: Money: +50, Knowledge: +84, Influence: +130
+
+### Card 55: -3,-2,-3 | +1,+3,+4 | -1,+5,+1 | -3,-1,-2 | -1,-1,-3 | +1,+4,+3
+**COLONIALIST**: Money: -135, Knowledge: -64, Influence: -110
+**REVOLUTIONARY**: Money: +41, Knowledge: +113, Influence: +120
+**HISTORIAN**: Money: +16, Knowledge: +232, Influence: +45
+**ENTREPRENEUR**: Money: -81, Knowledge: -26, Influence: -36
+**POLITICIAN**: Money: +3, Knowledge: -72, Influence: +52
+**ARTIST**: Money: +51, Knowledge: +88, Influence: +133
+
+### Card 56: -5,-4,-3 | +1,+5,+3 | +2,+4,+2 | -2,-1,-2 | -1,-2,-3 | +1,+3,+3
+**COLONIALIST**: Money: -140, Knowledge: -68, Influence: -113
+**REVOLUTIONARY**: Money: +42, Knowledge: +118, Influence: +123
+**HISTORIAN**: Money: +18, Knowledge: +236, Influence: +47
+**ENTREPRENEUR**: Money: -83, Knowledge: -27, Influence: -38
+**POLITICIAN**: Money: +2, Knowledge: -74, Influence: +49
+**ARTIST**: Money: +52, Knowledge: +91, Influence: +136
+
+### Card 57: -3,-2,-2 | +1,+3,+4 | +2,+5,+2 | -3,-1,-2 | -1,-1,-4 | +2,+3,+4
+**COLONIALIST**: Money: -143, Knowledge: -70, Influence: -115
+**REVOLUTIONARY**: Money: +43, Knowledge: +121, Influence: +127
+**HISTORIAN**: Money: +20, Knowledge: +241, Influence: +49
+**ENTREPRENEUR**: Money: -86, Knowledge: -28, Influence: -40
+**POLITICIAN**: Money: +1, Knowledge: -75, Influence: +45
+**ARTIST**: Money: +54, Knowledge: +94, Influence: +140
+
+### Card 1: -5,-3,-4 | +3,+2,+5 | +1,+4,+2 | -4,0,-2 | +2,-1,+3 | +2,+3,+4
+**COLONIALIST**: Money: -5, Knowledge: -3, Influence: -4
+**REVOLUTIONARY**: Money: +3, Knowledge: +2, Influence: +5
+**HISTORIAN**: Money: +1, Knowledge: +4, Influence: +2
+**ENTREPRENEUR**: Money: -4, Knowledge: 0, Influence: -2
+**POLITICIAN**: Money: +2, Knowledge: -1, Influence: +3
+**ARTIST**: Money: +2, Knowledge: +3, Influence: +4
+
+### Card 2: +5,+2,-3 | -2,-3,+1 | +1,+5,-2 | +4,+1,-1 | -1,-3,+6 | -2,+3,-4
+**COLONIALIST**: Money: 0, Knowledge: -1, Influence: -7
+**REVOLUTIONARY**: Money: +1, Knowledge: -1, Influence: +6
+**HISTORIAN**: Money: +2, Knowledge: +9, Influence: 0
+**ENTREPRENEUR**: Money: 0, Knowledge: +1, Influence: -3
+**POLITICIAN**: Money: +1, Knowledge: -4, Influence: +9
+**ARTIST**: Money: 0, Knowledge: +6, Influence: 0
+
+### Card 3: -3,+1,-4 | +1,+3,+3 | +2,+4,+1 | -4,-1,+3 | -2,-2,-2 | +1,+2,+5
+**COLONIALIST**: Money: -3, Knowledge: 0, Influence: -11
+**REVOLUTIONARY**: Money: +2, Knowledge: +2, Influence: +9
+**HISTORIAN**: Money: +4, Knowledge: +13, Influence: +1
+**ENTREPRENEUR**: Money: -4, Knowledge: 0, Influence: +1
+**POLITICIAN**: Money: -1, Knowledge: -6, Influence: +7
+**ARTIST**: Money: +1, Knowledge: +8, Influence: +5
+
+### Card 4: -6,-2,-2 | +2,+1,+6 | 0,+5,+1 | -5,-1,-2 | +2,0,+5 | +1,+2,+6
+**COLONIALIST**: Money: -9, Knowledge: -2, Influence: -13
+**REVOLUTIONARY**: Money: +4, Knowledge: +3, Influence: +15
+**HISTORIAN**: Money: +4, Knowledge: +18, Influence: +2
+**ENTREPRENEUR**: Money: -9, Knowledge: -1, Influence: -1
+**POLITICIAN**: Money: +1, Knowledge: -6, Influence: +12
+**ARTIST**: Money: +2, Knowledge: +10, Influence: +11
+
+### Card 6: -4,-1,-2 | +1,+4,+2 | -2,-5,+1 | -3,-2,+1 | +2,+1,+4 | +1,+2,+3
+**COLONIALIST**: Money: -16, Knowledge: -6, Influence: -20
+**REVOLUTIONARY**: Money: +8, Knowledge: +9, Influence: +22
+**HISTORIAN**: Money: +3, Knowledge: +18, Influence: +4
+**ENTREPRENEUR**: Money: -16, Knowledge: -3, Influence: -2
+**POLITICIAN**: Money: +5, Knowledge: -7, Influence: +20
+**ARTIST**: Money: +5, Knowledge: +15, Influence: +19
+
+### Card 7: -6,-3,-2 | +2,+3,+5 | +1,+5,+2 | -5,-2,-1 | +3,+1,+4 | +2,+2,+5
+**COLONIALIST**: Money: -22, Knowledge: -9, Influence: -22
+**REVOLUTIONARY**: Money: +10, Knowledge: +12, Influence: +27
+**HISTORIAN**: Money: +4, Knowledge: +23, Influence: +6
+**ENTREPRENEUR**: Money: -21, Knowledge: -5, Influence: -3
+**POLITICIAN**: Money: +8, Knowledge: -6, Influence: +24
+**ARTIST**: Money: +7, Knowledge: +17, Influence: +24
+
+### Card 8: +2,-3,-4 | -1,+5,+2 | +1,+3,-1 | +5,+2,+1 | -2,-3,-3 | +1,+1,+4
+**COLONIALIST**: Money: -20, Knowledge: -12, Influence: -26
+**REVOLUTIONARY**: Money: +9, Knowledge: +17, Influence: +29
+**HISTORIAN**: Money: +5, Knowledge: +26, Influence: +5
+**ENTREPRENEUR**: Money: -16, Knowledge: -3, Influence: -2
+**POLITICIAN**: Money: +6, Knowledge: -9, Influence: +21
+**ARTIST**: Money: +8, Knowledge: +18, Influence: +28
+
+### Card 9: -5,-3,-4 | +4,+4,+5 | +1,+5,+2 | -4,-1,-2 | +3,-1,+5 | +2,+3,+4
+**COLONIALIST**: Money: -25, Knowledge: -15, Influence: -30
+**REVOLUTIONARY**: Money: +13, Knowledge: +21, Influence: +34
+**HISTORIAN**: Money: +6, Knowledge: +31, Influence: +7
+**ENTREPRENEUR**: Money: -20, Knowledge: -4, Influence: -4
+**POLITICIAN**: Money: +9, Knowledge: -10, Influence: +26
+**ARTIST**: Money: +10, Knowledge: +21, Influence: +32
+
+### Card 11: -3,-2,-6 | +2,+6,+4 | +1,+5,+1 | -5,-1,-2 | -2,-1,+5 | +2,+3,+7
+**COLONIALIST**: Money: -30, Knowledge: -18, Influence: -40
+**REVOLUTIONARY**: Money: +16, Knowledge: +31, Influence: +41
+**HISTORIAN**: Money: +7, Knowledge: +40, Influence: +9
+**ENTREPRENEUR**: Money: -28, Knowledge: -7, Influence: -6
+**POLITICIAN**: Money: +8, Knowledge: -13, Influence: +36
+**ARTIST**: Money: +13, Knowledge: +27, Influence: +43
+
+### Card 12: +7,+2,+3 | -2,-3,-5 | +1,+6,0 | -5,-2,-2 | +3,+1,+6 | -2,-1,-5
+**COLONIALIST**: Money: -23, Knowledge: -16, Influence: -37
+**REVOLUTIONARY**: Money: +14, Knowledge: +28, Influence: +36
+**HISTORIAN**: Money: +8, Knowledge: +46, Influence: +9
+**ENTREPRENEUR**: Money: -33, Knowledge: -9, Influence: -8
+**POLITICIAN**: Money: +11, Knowledge: -12, Influence: +42
+**ARTIST**: Money: +11, Knowledge: +26, Influence: +38
+
+### Card 13: -2,-3,-6 | +2,+6,+4 | +1,+5,+1 | +7,+1,+3 | -1,-2,+5 | +3,+4,+6
+**COLONIALIST**: Money: -25, Knowledge: -19, Influence: -43
+**REVOLUTIONARY**: Money: +16, Knowledge: +34, Influence: +40
+**HISTORIAN**: Money: +9, Knowledge: +51, Influence: +10
+**ENTREPRENEUR**: Money: -26, Knowledge: -8, Influence: -5
+**POLITICIAN**: Money: +10, Knowledge: -14, Influence: +47
+**ARTIST**: Money: +14, Knowledge: +30, Influence: +44
+
+### Card 14: -5,-2,-1 | -1,+2,+6 | 0,+5,+1 | -5,-1,-2 | +3,-1,+7 | -1,+2,+6
+**COLONIALIST**: Money: -30, Knowledge: -21, Influence: -44
+**REVOLUTIONARY**: Money: +15, Knowledge: +36, Influence: +46
+**HISTORIAN**: Money: +9, Knowledge: +56, Influence: +11
+**ENTREPRENEUR**: Money: -31, Knowledge: -9, Influence: -7
+**POLITICIAN**: Money: +13, Knowledge: -15, Influence: +54
+**ARTIST**: Money: +13, Knowledge: +32, Influence: +50
+
+### Card 15: -4,-2,-1 | +1,+2,+5 | -1,+4,+1 | -5,-2,+1 | -2,-1,-3 | +2,+1,+4
+**COLONIALIST**: Money: -34, Knowledge: -23, Influence: -45
+**REVOLUTIONARY**: Money: +16, Knowledge: +38, Influence: +51
+**HISTORIAN**: Money: +8, Knowledge: +60, Influence: +12
+**ENTREPRENEUR**: Money: -36, Knowledge: -11, Influence: -6
+**POLITICIAN**: Money: +11, Knowledge: -16, Influence: +51
+**ARTIST**: Money: +15, Knowledge: +33, Influence: +54
+
+### Card 16: +1,+2,+4 | -2,-1,-3 | 0,+4,+1 | +3,+1,+1 | +2,-1,+4 | -1,-2,-4
+**COLONIALIST**: Money: -33, Knowledge: -21, Influence: -41
+**REVOLUTIONARY**: Money: +14, Knowledge: +37, Influence: +48
+**HISTORIAN**: Money: +8, Knowledge: +64, Influence: +13
+**ENTREPRENEUR**: Money: -33, Knowledge: -10, Influence: -5
+**POLITICIAN**: Money: +13, Knowledge: -17, Influence: +55
+**ARTIST**: Money: +14, Knowledge: +31, Influence: +50
+
+### Card 17: +2,+1,+3 | -1,-2,-4 | +1,+4,0 | -4,-1,-2 | +1,-1,+4 | +2,+2,+4
+**COLONIALIST**: Money: -31, Knowledge: -20, Influence: -38
+**REVOLUTIONARY**: Money: +13, Knowledge: +35, Influence: +44
+**HISTORIAN**: Money: +9, Knowledge: +68, Influence: +13
+**ENTREPRENEUR**: Money: -37, Knowledge: -11, Influence: -7
+**POLITICIAN**: Money: +14, Knowledge: -18, Influence: +59
+**ARTIST**: Money: +16, Knowledge: +33, Influence: +54
+
+### Card 18: -2,-3,-4 | +1,+5,+2 | +1,+3,-1 | +4,+1,+1 | -2,-3,-3 | +1,+1,+4
+**COLONIALIST**: Money: -33, Knowledge: -23, Influence: -42
+**REVOLUTIONARY**: Money: +14, Knowledge: +40, Influence: +46
+**HISTORIAN**: Money: +10, Knowledge: +71, Influence: +12
+**ENTREPRENEUR**: Money: -33, Knowledge: -10, Influence: -6
+**POLITICIAN**: Money: +12, Knowledge: -21, Influence: +56
+**ARTIST**: Money: +17, Knowledge: +34, Influence: +58
+
+### Card 19: -4,-1,-2 | +1,+2,+5 | +1,+3,+1 | -4,-2,-1 | +2,-1,+3 | +2,+1,+4
+**COLONIALIST**: Money: -37, Knowledge: -24, Influence: -44
+**REVOLUTIONARY**: Money: +15, Knowledge: +42, Influence: +51
+**HISTORIAN**: Money: +11, Knowledge: +74, Influence: +13
+**ENTREPRENEUR**: Money: -37, Knowledge: -12, Influence: -7
+**POLITICIAN**: Money: +14, Knowledge: -22, Influence: +59
+**ARTIST**: Money: +19, Knowledge: +35, Influence: +62
+
+### Card 21: -3,-1,-3 | +1,+3,+3 | 0,+4,+1 | -3,-2,0 | -2,-1,-3 | +1,+3,+4
+**COLONIALIST**: Money: -43, Knowledge: -27, Influence: -50
+**REVOLUTIONARY**: Money: +17, Knowledge: +49, Influence: +56
+**HISTORIAN**: Money: +12, Knowledge: +82, Influence: +15
+**ENTREPRENEUR**: Money: -36, Knowledge: -13, Influence: -6
+**POLITICIAN**: Money: +10, Knowledge: -25, Influence: +53
+**ARTIST**: Money: +22, Knowledge: +40, Influence: +69
+
+### Card 22: -1,+2,+4 | -2,-1,-3 | 0,+4,+1 | +3,+1,+1 | +2,-1,+4 | -1,-2,-4
+**COLONIALIST**: Money: -44, Knowledge: -25, Influence: -46
+**REVOLUTIONARY**: Money: +15, Knowledge: +48, Influence: +53
+**HISTORIAN**: Money: +12, Knowledge: +86, Influence: +16
+**ENTREPRENEUR**: Money: -33, Knowledge: -12, Influence: -5
+**POLITICIAN**: Money: +12, Knowledge: -26, Influence: +57
+**ARTIST**: Money: +21, Knowledge: +38, Influence: +65
+
+### Card 23: +5,+3,+4 | -3,-3,-4 | -1,+4,0 | +6,+3,+2 | +2,-1,+3 | -2,+2,-3
+**COLONIALIST**: Money: -39, Knowledge: -22, Influence: -42
+**REVOLUTIONARY**: Money: +12, Knowledge: +45, Influence: +49
+**HISTORIAN**: Money: +11, Knowledge: +90, Influence: +16
+**ENTREPRENEUR**: Money: -27, Knowledge: -9, Influence: -3
+**POLITICIAN**: Money: +14, Knowledge: -27, Influence: +60
+**ARTIST**: Money: +19, Knowledge: +40, Influence: +62
+
+### Card 24: -2,-1,-3 | +1,+4,+2 | 0,+4,+1 | +4,+1,+1 | -1,-2,-4 | +2,+1,+4
+**COLONIALIST**: Money: -41, Knowledge: -23, Influence: -45
+**REVOLUTIONARY**: Money: +13, Knowledge: +49, Influence: +51
+**HISTORIAN**: Money: +11, Knowledge: +94, Influence: +17
+**ENTREPRENEUR**: Money: -23, Knowledge: -8, Influence: -2
+**POLITICIAN**: Money: +13, Knowledge: -29, Influence: +56
+**ARTIST**: Money: +21, Knowledge: +41, Influence: +66
+
+### Card 25: -3,-2,-2 | +1,-1,-5 | +1,+4,+1 | -4,-1,-2 | +2,-1,+5 | -1,-1,-4
+**COLONIALIST**: Money: -44, Knowledge: -25, Influence: -47
+**REVOLUTIONARY**: Money: +12, Knowledge: +48, Influence: +46
+**HISTORIAN**: Money: +12, Knowledge: +98, Influence: +18
+**ENTREPRENEUR**: Money: -27, Knowledge: -9, Influence: -4
+**POLITICIAN**: Money: +15, Knowledge: -30, Influence: +61
+**ARTIST**: Money: +20, Knowledge: +40, Influence: +62
+
+### Card 26: -4,-1,-3 | +2,+2,+5 | -1,+4,+1 | -5,-1,-2 | +1,+1,+3 | +1,+2,+4
+**COLONIALIST**: Money: -48, Knowledge: -26, Influence: -50
+**REVOLUTIONARY**: Money: +14, Knowledge: +50, Influence: +51
+**HISTORIAN**: Money: +11, Knowledge: +102, Influence: +19
+**ENTREPRENEUR**: Money: -32, Knowledge: -10, Influence: -6
+**POLITICIAN**: Money: +16, Knowledge: -29, Influence: +64
+**ARTIST**: Money: +21, Knowledge: +42, Influence: +66
+
+### Card 27: +4,+2,+1 | -1,-5,-2 | +1,+5,-1 | -4,-1,-2 | -1,-3,-4 | +1,+2,+3
+**COLONIALIST**: Money: -44, Knowledge: -24, Influence: -49
+**REVOLUTIONARY**: Money: +13, Knowledge: +45, Influence: +49
+**HISTORIAN**: Money: +12, Knowledge: +107, Influence: +18
+**ENTREPRENEUR**: Money: -36, Knowledge: -11, Influence: -8
+**POLITICIAN**: Money: +15, Knowledge: -32, Influence: +60
+**ARTIST**: Money: +22, Knowledge: +44, Influence: +69
+
+### Card 28: -5,0,+6 | -2,+6,-2 | +1,+5,0 | +6,+1,+1 | +3,-1,+6 | +3,+4,+6
+**COLONIALIST**: Money: -49, Knowledge: -24, Influence: -43
+**REVOLUTIONARY**: Money: +11, Knowledge: +51, Influence: +47
+**HISTORIAN**: Money: +13, Knowledge: +112, Influence: +18
+**ENTREPRENEUR**: Money: -30, Knowledge: -10, Influence: -7
+**POLITICIAN**: Money: +18, Knowledge: -33, Influence: +66
+**ARTIST**: Money: +25, Knowledge: +48, Influence: +75
+
+### Card 29: -2,0,-6 | +1,+6,+2 | 0,+5,+1 | -5,-1,-2 | -1,-2,+5 | -2,-1,-5
+**COLONIALIST**: Money: -51, Knowledge: -24, Influence: -49
+**REVOLUTIONARY**: Money: +12, Knowledge: +57, Influence: +49
+**HISTORIAN**: Money: +13, Knowledge: +117, Influence: +19
+**ENTREPRENEUR**: Money: -35, Knowledge: -11, Influence: -9
+**POLITICIAN**: Money: +17, Knowledge: -35, Influence: +71
+**ARTIST**: Money: +23, Knowledge: +47, Influence: +70
+
+### Card 30: -6,-2,-1 | +2,+1,+5 | -1,+5,+1 | -5,-1,-1 | -1,-2,-4 | +2,+2,+6
+**COLONIALIST**: Money: -57, Knowledge: -26, Influence: -50
+**REVOLUTIONARY**: Money: +14, Knowledge: +58, Influence: +54
+**HISTORIAN**: Money: +12, Knowledge: +122, Influence: +20
+**ENTREPRENEUR**: Money: -40, Knowledge: -12, Influence: -10
+**POLITICIAN**: Money: +16, Knowledge: -37, Influence: +67
+**ARTIST**: Money: +25, Knowledge: +49, Influence: +76
+
+
+
+## FINAL TOTALS:
+**COLONIALIST**: Money: -143, Knowledge: -70, Influence: -115
+**REVOLUTIONARY**: Money: +43, Knowledge: +121, Influence: +127
+**HISTORIAN**: Money: +20, Knowledge: +241, Influence: +49
+**ENTREPRENEUR**: Money: -86, Knowledge: -28, Influence: -40
+**POLITICIAN**: Money: +1, Knowledge: -75, Influence: +45
+**ARTIST**: Money: +54, Knowledge: +94, Influence: +140
+
+## GAINS AND LOSSES BREAKDOWN:
+
+### COLONIALIST:
+- **Money**: Total gains: 28, Total losses: -171 (Net: -143)
+- **Knowledge**: Total gains: 7, Total losses: -77 (Net: -70)
+- **Influence**: Total gains: 25, Total losses: -140 (Net: -115)
+
+### REVOLUTIONARY:
+- **Money**: Total gains: 59, Total losses: -16 (Net: +43)
+- **Knowledge**: Total gains: 129, Total losses: -8 (Net: +121)
+- **Influence**: Total gains: 134, Total losses: -7 (Net: +127)
+
+### HISTORIAN:
+- **Money**: Total gains: 20, Total losses: 0 (Net: +20)
+- **Knowledge**: Total gains: 241, Total losses: 0 (Net: +241)
+- **Influence**: Total gains: 49, Total losses: 0 (Net: +49)
+
+### ENTREPRENEUR:
+- **Money**: Total gains: 32, Total losses: -118 (Net: -86)
+- **Knowledge**: Total gains: 10, Total losses: -38 (Net: -28)
+- **Influence**: Total gains: 9, Total losses: -49 (Net: -40)
+
+### POLITICIAN:
+- **Money**: Total gains: 29, Total losses: -28 (Net: +1)
+- **Knowledge**: Total gains: 4, Total losses: -79 (Net: -75)
+- **Influence**: Total gains: 189, Total losses: -144 (Net: +45)
+
+### ARTIST:
+- **Money**: Total gains: 54, Total losses: 0 (Net: +54)
+- **Knowledge**: Total gains: 94, Total losses: 0 (Net: +94)
+- **Influence**: Total gains: 140, Total losses: 0 (Net: +140)
+
+## MAJOR IMBALANCES IDENTIFIED:
+
+1. **COLONIALIST** has severe disadvantages across all resources 
+with heavy losses and minimal gains
+
+2. **HISTORIAN** and **ARTIST** never lose resources - only gain or stay neutral
+
+3. **REVOLUTIONARY** is heavily favored with large gains and minimal losses
+
+4. **ENTREPRENEUR** faces harsh penalties especially in money 
+(-118 losses vs +32 gains)
+
+5. **POLITICIAN** shows mixed results but generally disadvantaged 
+in money and knowledge# Running Totals Analysis
+
+
+
+
+
+
+
+
+
+
+
+this is an array of cards that has different effects for different rols. there are three resources money knowledge and influence. my concern is that  the amounts players can lose or gain of a resource are unequal giving a potential unfair advantage to one role over another. there are 57 cards in this deck i want you to add up all possible gains and losses for each resource for each role so for example: artist knowledge: total points that can be gained 80, total that can be lost 60, influence total that can be gained 50, that can be lost 70, and so on for each role for each card. do not overcomplicate it just analyze one card at a time and keep a running total for each role for each resource for both positive and negative resource changes.
+
+
+sheet5, sheet4, sheet7, sheet6, sheet8, sheet1

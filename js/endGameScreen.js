@@ -335,7 +335,7 @@ function createConfetti(container) {
       'rgb(226, 133, 214)',
       'rgb(33, 133, 145)'
     ];
-    const count = 400; // 400 pieces
+    const count = 800; // 400 pieces
 
     for (let i = 0; i < count; i++) {
       const piece = document.createElement('div');
@@ -343,11 +343,11 @@ function createConfetti(container) {
       piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
 
       // Wider horizontal drift (px)
-      const driftX = (Math.random() - 0.5) * 400 + 'px';
+      const driftX = (Math.random() - 0.5) * 800 + 'px';
       piece.style.setProperty('--drift-x', driftX);
 
       // Random position near bottom center
-      piece.style.left = `${window.innerWidth / 2 + (Math.random() - 0.5) * 200}px`;
+      piece.style.left = `${window.innerWidth / 2 + (Math.random() - 0.5) * 400}px`;
       piece.style.bottom = `0px`;
 
       // Random scale/rotation start using matrix

@@ -1387,8 +1387,8 @@ p {
 
 .dice-face {
     position: absolute;
-    width: 80px;
-    height: 80px;
+    width: 70px;
+    height: 70px;
     background-size: cover;
     backface-visibility: visible;
     transform-style: preserve-3d;
@@ -1584,7 +1584,7 @@ img {
       transform: translate(0, 0) rotate(0deg);
     }
     30% {
-      transform: translate(var(--drift-x), -450px) rotate(180deg); /* 3x height */
+      transform: translate(var(--drift-x), -800px) rotate(180deg); /* 3x height */
     }
     100% {
       transform: translate(calc(var(--drift-x) * 3), 100vh) rotate(720deg);
