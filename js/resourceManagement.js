@@ -291,7 +291,7 @@ export function updateResourceDisplays(gameState = state) {
               roleNameSpan.textContent = roleName;
           }
           if (resourceParagraph) {
-              resourceParagraph.textContent = `${resources.money || 0} 💰, ${resources.knowledge || 0} 🧠, ${resources.influence || 0} 🎯`;
+              resourceParagraph.textContent = `${resources.money || 0} 💰, ${resources.knowledge || 0} 🧠, ${resources.influence || 0} ⚡`;
           }
           
           // Make sure the element is visible

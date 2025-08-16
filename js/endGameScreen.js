@@ -197,7 +197,7 @@ export function endGame() {
             // Now run the rest of the end game functions (victory celebration)
             showEndGameWithVictory(winners);
             
-        }, 60000);
+        }, 10000);
     } else {
         console.error('Could not find scores table elements');
     }
