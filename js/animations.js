@@ -1,36 +1,36 @@
 import {  
-    getUIState, 
-    updateUIState,
-    state,
-    updateGameState,
-    isActionAllowed
+  getUIState, 
+  updateUIState,
+  state,
+  updateGameState,
+  isActionAllowed
 } from './state.js';
 
 import { showScreen } from './main.js';
 
 import {
-    promptForChoicepoint,
+  promptForChoicepoint,
 } from './ui.js';
 
 import { 
-    getCurrentPlayer,
-    handleEndOfMove,
-    handlePlayerAction
+  getCurrentPlayer,
+  handleEndOfMove,
+  handlePlayerAction
 } from './game.js';
 
 import { 
-    scaleCoordinates,
-    drawBoard,
-    drawTokens
+  scaleCoordinates,
+  drawBoard,
+  drawTokens
 } from './board.js';
 
 import { 
-    fullDeckRegionPathMap, 
-    ageOfExpansionPath, 
-    ageOfResistancePath, 
-    ageOfReckoningPath, 
-    ageOfLegacyPath, 
-    FINISH_SPACE
+  fullDeckRegionPathMap, 
+  ageOfExpansionPath, 
+  ageOfResistancePath, 
+  ageOfReckoningPath, 
+  ageOfLegacyPath, 
+  FINISH_SPACE
 } from './board-data.js';
 
 
@@ -41,332 +41,380 @@ const debug_mode = false;
 
 // Animation timing constants
 export const TIMING = {
-    // Card animations
-    CARD_FLIP: 500,
-    CARD_DISCARD: 1000,
-    CARD_DRAW: 1000,
-    
-    // Player turns
-    CPU_CARD_DISPLAY: 4000,
-    CPU_DECK_FLASH: 4000,
-    CPU_MOVE_DELAY: 1000,
-    
-    // Dice
-    DICE_ROLL: 1000,
-    DICE_SHAKE: 300,
-    
-    // UI effects
-    FADE_IN: 300,
-    FADE_OUT: 300,
-    PULSE: 1500,
-    TOKEN_MOVE: 1000
+  // Card animations
+  CARD_FLIP: 500,
+  CARD_DISCARD: 1000,
+  CARD_DRAW: 1000,
+  
+  // Player turns
+  CPU_CARD_DISPLAY: 4000,
+  CPU_DECK_FLASH: 4000,
+  CPU_MOVE_DELAY: 1000,
+  
+  // Dice
+  DICE_ROLL: 1000,
+  DICE_SHAKE: 300,
+  
+  // UI effects
+  FADE_IN: 300,
+  FADE_OUT: 300,
+  PULSE: 1500,
+  TOKEN_MOVE: 1000
 };
 
 /**
- * Animates a value from start to end over a duration
- * @param {number} start - Starting value
- * @param {number} end - Ending value
- * @param {number} duration - Duration in milliseconds
- * @param {Function} callback - Callback function with current value
- */
+* Animates a value from start to end over a duration
+* @param {number} start - Starting value
+* @param {number} end - Ending value
+* @param {number} duration - Duration in milliseconds
+* @param {Function} callback - Callback function with current value
+*/
 export const animateValue = (start, end, duration, callback) => {
-   // console.log('=============--------animateValue=============--------');
-    const startTime = performance.now();
-    
-    const update = (currentTime) => {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        
-        // Ease in-out cubic
-        const eased = progress < 0.5
-            ? 4 * progress * progress * progress
-            : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-        
-        const current = start + (end - start) * eased;
-        callback(current);
-        
-        if (progress < 1) {
-            requestAnimationFrame(update);
-        }
-    };
-    
-    // Update gameState references
-    const { animation: { frameId: existingId } } = getUIState();
-    if (existingId) {
-        cancelAnimationFrame(existingId);
-    }
-    
-    const newFrameId = requestAnimationFrame(update);
-    updateUIState({
-        animation: {
-            ...getUIState().animation,
-            frameId: newFrameId
-        }
-    });
+ // console.log('=============--------animateValue=============--------');
+  const startTime = performance.now();
+  
+  const update = (currentTime) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Ease in-out cubic
+      const eased = progress < 0.5
+          ? 4 * progress * progress * progress
+          : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+      
+      const current = start + (end - start) * eased;
+      callback(current);
+      
+      if (progress < 1) {
+          requestAnimationFrame(update);
+      }
+  };
+  
+  // Update gameState references
+  const { animation: { frameId: existingId } } = getUIState();
+  if (existingId) {
+      cancelAnimationFrame(existingId);
+  }
+  
+  const newFrameId = requestAnimationFrame(update);
+  updateUIState({
+      animation: {
+          ...getUIState().animation,
+          frameId: newFrameId
+      }
+  });
 };
 
 /**
- * Animates a dice roll
- * @param {HTMLElement} diceElement - Dice element to animate
- * @param {number} finalValue - Final dice value
- * @param {number} duration - Duration in milliseconds
- * @returns {Promise} Resolves when animation completes
- */
+* Animates a dice roll
+* @param {HTMLElement} diceElement - Dice element to animate
+* @param {number} finalValue - Final dice value
+* @param {number} duration - Duration in milliseconds
+* @returns {Promise} Resolves when animation completes
+*/
 export const animateDiceRoll = async (diceElement, finalValue, duration = 1500) => {
-  if (!isActionAllowed('AWAITING_CARD_ACTION', 'AWAITING_PATH_CHOICE', 'PLAYING')) return;
-  console.log('=============animateDiceRoll=============');
+if (!isActionAllowed('AWAITING_CARD_ACTION', 'AWAITING_PATH_CHOICE', 'PLAYING')) return;
+console.log('=============animateDiceRoll=============');
 
-  const player = getCurrentPlayer();
+const player = getCurrentPlayer();
 
-  // If not human, delay 2 seconds before continuing
-  if (!player?.isHuman) {
-      //console.log('CPU player detected – auto-rolling in 2 seconds...');
-      await new Promise(resolve => setTimeout(resolve, 2000));
+// If not human, delay 2 seconds before continuing
+if (!player?.isHuman) {
+    //console.log('CPU player detected – auto-rolling in 2 seconds...');
+    await new Promise(resolve => setTimeout(resolve, 2000));
+}
+
+   const dice = document.getElementById('dice');
+ if (!dice) return;
+ 
+
+// Disable interaction while rolling
+dice.style.pointerEvents = 'none';
+
+// Add rolling class to trigger animation
+dice.classList.add('rolling');
+
+// Use the provided finalValue or generate a random roll if not provided
+ const result = debug_mode ? 6 : Math.ceil(Math.random() * 6);
+
+ 
+ // Store the roll result in state
+ updateGameState({ rollResult: result });
+
+// After animation completes, show the result
+setTimeout(() => {
+    dice.classList.remove('rolling');
+
+    // Position the dice to show the result face
+    let transform = '';
+    switch(result) {
+        case 1: transform = 'rotateX(0deg) rotateY(0deg)'; break;
+        case 2: transform = 'rotateY(90deg) rotateX(0deg)'; break;
+        case 3: transform = 'rotateX(90deg) rotateY(0deg)'; break;
+        case 4: transform = 'rotateX(-90deg) rotateY(0deg)'; break;
+        case 5: transform = 'rotateY(-90deg) rotateX(0deg)'; break;
+        case 6: transform = 'rotateY(180deg) rotateX(0deg)'; break;
+    }
+
+    // Apply final transform and show face
+    dice.style.transform = `${transform} scale(1.2)`;
+
+    // Keep face visible for 1.5s before proceeding
+    setTimeout(() => {
+        // Then enable interaction and trigger game logic
+        dice.style.pointerEvents = 'auto';
+        dice.classList.add('shake');
+        
+        // Set the roll result in state before calling handlePlayerAction
+        updateGameState({ rollResult: result });
+        console.log('***************call handleplayeraction***************')
+        handlePlayerAction();
+    }, 1500);
+
+}, duration); // Match this with the CSS animation duration
+
+return result;
+};
+
+/**
+* Gets the path segments between two points
+* @param {Object} start - Starting coordinates {x, y}
+* @param {Object} end - Ending coordinates {x, y}
+* @param {Object} pathData - Path data containing segments
+* @returns {Array} Array of coordinates representing the path
+*/
+export function getPathSegments(start, end, pathData) {
+ //console.log('=============getPathSegments=============');
+  // Find the closest segment to start
+  let startSegment = null;
+  let minStartDist = Infinity;
+
+  for (const segment of pathData.segments) {
+      const coords = segment.coordinates[0];
+      const dist = Math.hypot(coords[0] - start.x, coords[1] - start.y);
+      if (dist < minStartDist) {
+          minStartDist = dist;
+          startSegment = segment;
+      }
   }
 
-     const dice = document.getElementById('dice');
-   if (!dice) return;
-   
+  // Find the closest segment to end
+  let endSegment = null;
+  let minEndDist = Infinity;
 
-  // Disable interaction while rolling
-  dice.style.pointerEvents = 'none';
-
-  // Add rolling class to trigger animation
-  dice.classList.add('rolling');
-
-  // Use the provided finalValue or generate a random roll if not provided
-   const result = debug_mode ? 6 : Math.ceil(Math.random() * 6);
-
-   
-   // Store the roll result in state
-   updateGameState({ rollResult: result });
-
-  // After animation completes, show the result
-  setTimeout(() => {
-      dice.classList.remove('rolling');
-
-      // Position the dice to show the result face
-      let transform = '';
-      switch(result) {
-          case 1: transform = 'rotateX(0deg) rotateY(0deg)'; break;
-          case 2: transform = 'rotateY(90deg) rotateX(0deg)'; break;
-          case 3: transform = 'rotateX(90deg) rotateY(0deg)'; break;
-          case 4: transform = 'rotateX(-90deg) rotateY(0deg)'; break;
-          case 5: transform = 'rotateY(-90deg) rotateX(0deg)'; break;
-          case 6: transform = 'rotateY(180deg) rotateX(0deg)'; break;
+  for (const segment of pathData.segments) {
+      const coords = segment.coordinates[0];
+      const dist = Math.hypot(coords[0] - end.x, coords[1] - end.y);
+      if (dist < minEndDist) {
+          minEndDist = dist;
+          endSegment = segment;
       }
+  }
 
-      // Apply final transform and show face
-      dice.style.transform = `${transform} scale(1.2)`;
+  if (!startSegment || !endSegment) {
+      // Fallback to a direct path in the same format
+      return [
+          [start.x, start.y],
+          [end.x, end.y]
+      ];
+  }
 
-      // Keep face visible for 1.5s before proceeding
-      setTimeout(() => {
-          // Then enable interaction and trigger game logic
-          dice.style.pointerEvents = 'auto';
-          dice.classList.add('shake');
-          
-          // Set the roll result in state before calling handlePlayerAction
-          updateGameState({ rollResult: result });
-          console.log('***************call handleplayeraction***************')
-          handlePlayerAction();
-      }, 1500);
+  // Build path segments
+  const segments = [];
+  let currentSegment = startSegment;
 
-  }, duration); // Match this with the CSS animation duration
+  while (currentSegment && currentSegment !== endSegment) {
+      segments.push(currentSegment.coordinates[0]);
 
-  return result;
+      // Find next segment
+      if (currentSegment.Next && currentSegment.Next.length > 0) {
+          const nextCoords = currentSegment.Next[0];
+          currentSegment = pathData.segments.find(s =>
+              s.coordinates[0][0] === nextCoords[0] &&
+              s.coordinates[0][1] === nextCoords[1]
+          );
+      } else {
+          break;
+      }
+  }
+
+  if (endSegment) {
+      segments.push(endSegment.coordinates[0]);
+  }
+
+  return segments;
 };
 
-/**
- * Gets the path segments between two points
- * @param {Object} start - Starting coordinates {x, y}
- * @param {Object} end - Ending coordinates {x, y}
- * @param {Object} pathData - Path data containing segments
- * @returns {Array} Array of coordinates representing the path
- */
-export function getPathSegments(start, end, pathData) {
-   //console.log('=============getPathSegments=============');
-    // Find the closest segment to start
-    let startSegment = null;
-    let minStartDist = Infinity;
-  
-    for (const segment of pathData.segments) {
-        const coords = segment.coordinates[0];
-        const dist = Math.hypot(coords[0] - start.x, coords[1] - start.y);
-        if (dist < minStartDist) {
-            minStartDist = dist;
-            startSegment = segment;
-        }
-    }
-  
-    // Find the closest segment to end
-    let endSegment = null;
-    let minEndDist = Infinity;
-  
-    for (const segment of pathData.segments) {
-        const coords = segment.coordinates[0];
-        const dist = Math.hypot(coords[0] - end.x, coords[1] - end.y);
-        if (dist < minEndDist) {
-            minEndDist = dist;
-            endSegment = segment;
-        }
-    }
-  
-    if (!startSegment || !endSegment) {
-        // Fallback to a direct path in the same format
-        return [
-            [start.x, start.y],
-            [end.x, end.y]
-        ];
-    }
-  
-    // Build path segments
-    const segments = [];
-    let currentSegment = startSegment;
-  
-    while (currentSegment && currentSegment !== endSegment) {
-        segments.push(currentSegment.coordinates[0]);
-  
-        // Find next segment
-        if (currentSegment.Next && currentSegment.Next.length > 0) {
-            const nextCoords = currentSegment.Next[0];
-            currentSegment = pathData.segments.find(s =>
-                s.coordinates[0][0] === nextCoords[0] &&
-                s.coordinates[0][1] === nextCoords[1]
-            );
-        } else {
-            break;
-        }
-    }
-  
-    if (endSegment) {
-        segments.push(endSegment.coordinates[0]);
-    }
-  
-    return segments;
-};
-  
 export const ensurePlayerPath = (player) => {
-  //console.log('=============ensurePlayerPath=============');
-    if (!player.currentPath) {
-      player.currentPath = 'ageOfLegacyPath'; // or default based on your game state
-    }
+//console.log('=============ensurePlayerPath=============');
+  if (!player.currentPath) {
+    player.currentPath = 'ageOfLegacyPath'; // or default based on your game state
+  }
 };  
-  
+
 /**
- * Animates the player's token forward based on the dice roll.
- *
- * @param {object} player - The player whose token is moving.
- * @param {object} newPosition - The destination (currently unused).
- * @param {number} duration - Animation duration in ms.
- * @param {boolean} skipSpaceAction - If true, bypass space actions at end.
- * @param {function|null} onComplete - Callback after animation finishes.
- */
+* Animates the player's token forward based on the dice roll.
+*
+* @param {object} player - The player whose token is moving.
+* @param {object} newPosition - The destination (currently unused).
+* @param {number} duration - Animation duration in ms.
+* @param {boolean} skipSpaceAction - If true, bypass space actions at end.
+* @param {function|null} onComplete - Callback after animation finishes.
+*/
 export function animateTokenToPosition(player, newPosition, duration = 1000, skipSpaceAction = false, onComplete = null) {
-  console.log(`=============-animateTokenToPosition=============: ${player.name} moving ${state.rollResult} spaces =============--`);
-  player = getCurrentPlayer();
-  const rollResult = state.rollResult;
-  updateGameState({
-    currentPhase: 'MOVING'
-  });
-  //console.log(`Moving ${rollResult} spaces for ${player.name}`);
+console.log(`=============-animateTokenToPosition=============: ${player.name} moving ${state.rollResult} spaces =============--`);
+player = getCurrentPlayer();
+const rollResult = state.rollResult;
+updateGameState({
+  currentPhase: 'MOVING'
+});
+//console.log(`Moving ${rollResult} spaces for ${player.name}`);
 
-  return new Promise(async (resolve) => {
-    const token = document.querySelector(`[data-player-id="${player.id}"]`);
-    if (!token) {
-      console.warn("Token not found for player:", player);
-      resolve();
-      return;
-    }
+return new Promise(async (resolve) => {
+  const token = document.querySelector(`[data-player-id="${player.id}"]`);
+  if (!token) {
+    console.warn("Token not found for player:", player);
+    resolve();
+    return;
+  }
 
-    const paths = [ageOfExpansionPath, ageOfResistancePath, ageOfReckoningPath, ageOfLegacyPath];
-    let pathData = paths.find(path => path.pathName === player.currentPath);
+  const paths = [ageOfExpansionPath, ageOfResistancePath, ageOfReckoningPath, ageOfLegacyPath];
+  let pathData = paths.find(path => path.pathName === player.currentPath);
 
-      if (!pathData || !pathData.segments) {
-      console.warn("No path data found for player's current path.");
-      resolve();
-      return;
-    }
+    if (!pathData || !pathData.segments) {
+    console.warn("No path data found for player's current path.");
+    resolve();
+    return;
+  }
 
-    let remainingSteps = rollResult;
-    let currentCoords = { ...player.currentCoords };
-    //console.log(`Current coordinates for ${player.name}:`, currentCoords);
-    //console.log(`Remaining steps for ${player.name}:`, remainingSteps);
+  let remainingSteps = rollResult;
+  let currentCoords = { ...player.currentCoords };
+  //console.log(`Current coordinates for ${player.name}:`, currentCoords);
+  //console.log(`Remaining steps for ${player.name}:`, remainingSteps);
 
-    const findSegmentByCoord = (coord, targetPathData = pathData) => {
-      return targetPathData.segments.find(segment => {
+  const findSegmentByCoord = (coord, targetPathData = pathData) => {
+    return targetPathData.segments.find(segment => {
+      const segCoord = segment.coordinates?.[0];
+      return segCoord?.[0] === coord.x && segCoord?.[1] === coord.y;
+    });
+  };
+
+  // Function to search for a coordinate across all paths with tolerance
+  const findPathByChosenCoord = (chosenCoord, tolerance = 5) => {
+    //console.log('=============--------findPathByChosenCoord=============--------');
+    for (const path of paths) {
+      for (const segment of path.segments) {
         const segCoord = segment.coordinates?.[0];
-        return segCoord?.[0] === coord.x && segCoord?.[1] === coord.y;
-      });
-    };
-
-    // Function to search for a coordinate across all paths with tolerance
-    const findPathByChosenCoord = (chosenCoord, tolerance = 5) => {
-      //console.log('=============--------findPathByChosenCoord=============--------');
-      for (const path of paths) {
-        for (const segment of path.segments) {
-          const segCoord = segment.coordinates?.[0];
-          if (segCoord) {
-            const dx = Math.abs(segCoord[0] - chosenCoord.x);
-            const dy = Math.abs(segCoord[1] - chosenCoord.y);
-            if (dx <= tolerance && dy <= tolerance) {
-              //console.log(`Found matching coords in path ${path.pathName} with tolerance ${tolerance}`);
-              return { path, segment, exactCoord: { x: segCoord[0], y: segCoord[1] } };
-            }
+        if (segCoord) {
+          const dx = Math.abs(segCoord[0] - chosenCoord.x);
+          const dy = Math.abs(segCoord[1] - chosenCoord.y);
+          if (dx <= tolerance && dy <= tolerance) {
+            //console.log(`Found matching coords in path ${path.pathName} with tolerance ${tolerance}`);
+            return { path, segment, exactCoord: { x: segCoord[0], y: segCoord[1] } };
           }
         }
       }
-      console.warn("No path found for chosen coordinates:", chosenCoord);
-      return null;
-    };
+    }
+    console.warn("No path found for chosen coordinates:", chosenCoord);
+    return null;
+  };
 
-    const animatePosition = (element, start, end, duration = 1000) => {
-      return new Promise(resolve => {
-        const startTime = performance.now();
-        //console.log('=============--------animatePosition=============--------');
-      
-        const update = (currentTime) => {
-          const elapsed = currentTime - startTime;
-          const progress = Math.min(elapsed / duration, 1);
-      
-          const eased = progress < 0.5
-            ? 4 * progress * progress * progress
-            : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-      
-          const currentX = start.x + (end.x - start.x) * eased;
-          const currentY = start.y + (end.y - start.y) * eased;
-      
-          const [scaledX, scaledY] = scaleCoordinates(currentX, currentY);
-          element.style.transform = `translate(${scaledX}px, ${scaledY}px)`;
-      
-          if (progress < 1) {
-            requestAnimationFrame(update);
-          } else {
-            resolve();
-          }
-        };
-      
-        requestAnimationFrame(update);
-      });
-    };
+  const animatePosition = (element, start, end, duration = 1000) => {
+    return new Promise(resolve => {
+      const startTime = performance.now();
+      //console.log('=============--------animatePosition=============--------');
     
+      const update = (currentTime) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+    
+        const eased = progress < 0.5
+          ? 4 * progress * progress * progress
+          : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+    
+        const currentX = start.x + (end.x - start.x) * eased;
+        const currentY = start.y + (end.y - start.y) * eased;
+    
+        const [scaledX, scaledY] = scaleCoordinates(currentX, currentY);
+        element.style.transform = `translate(${scaledX}px, ${scaledY}px)`;
+    
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        } else {
+          resolve();
+        }
+      };
+    
+      requestAnimationFrame(update);
+    });
+  };
+  
 
-    async function animateNextSegment() {
-      //console.log('=============--------animateNextSegment=============--------')
-      if (remainingSteps <= 0) {
-        // Movement complete
-        //console.log(`[DEBUG] Movement complete. Final position: ${JSON.stringify(currentCoords)}`);
-        token.classList.remove('enlarged');
-        token.classList.add('normal');
-        player.currentCoords = { ...currentCoords };
-        // CRITICAL: Update player coordinates in central game state
-        updateGameState({
-          players: state.players.map(p => 
-            p.id === player.id ? { ...p, currentCoords: { ...player.currentCoords } } : p
-          )
-        });
-        
-        // Check if player finished at the finish space AFTER completing movement
-        let FINISH_SPACE = [1384, 512];
+  async function animateNextSegment() {
+    //console.log('=============--------animateNextSegment=============--------')
+    if (remainingSteps <= 0) {
+      // Movement complete
+      //console.log(`[DEBUG] Movement complete. Final position: ${JSON.stringify(currentCoords)}`);
+      token.classList.remove('enlarged');
+      token.classList.add('normal');
+      player.currentCoords = { ...currentCoords };
+      // CRITICAL: Update player coordinates in central game state
+      updateGameState({
+        players: state.players.map(p => 
+          p.id === player.id ? { ...p, currentCoords: { ...player.currentCoords } } : p
+        )
+      });
+      
+      // Check if player finished at the finish space AFTER completing movement
+      let FINISH_SPACE = [1384, 512];
+      
+      // Helper function to compare coordinates
+      function coordsMatch(coord1, coord2) {
+          // Handle object format {x: number, y: number}
+          if (typeof coord1 === 'object' && coord1.x !== undefined && coord1.y !== undefined) {
+              if (Array.isArray(coord2)) {
+                  return coord1.x === coord2[0] && coord1.y === coord2[1];
+              } else {
+                  return coord1.x === coord2.x && coord1.y === coord2.y;
+              }
+          }
+          // Handle array format [x, y]
+          if (Array.isArray(coord1)) {
+              if (typeof coord2 === 'object' && coord2.x !== undefined && coord2.y !== undefined) {
+                  return coord1[0] === coord2.x && coord1[1] === coord2.y;
+              } else {
+                  return coord1[0] === coord2[0] && coord1[1] === coord2[1];
+              }
+          }
+          return false;
+      }
+      
+      // Handle end of move first (regular space actions)
+      await handleEndOfMove(player.currentCoords);
+      
+      // Then check if player finished at the finish space
+      if (coordsMatch(currentCoords, FINISH_SPACE)) {
+          console.log("Player has reached the finish space!");
+          markPlayerFinished(player);
+      }
+      
+      resolve();
+      return;
+    }
+  
+    const segment = findSegmentByCoord(currentCoords);
+    
+    // Check for invalid segments (but not at finish space)
+    if (!segment) {
+        console.warn("No segment found at", currentCoords);
+        resolve();
+        return;
+    }
+    
+    // Check for end of path (but not at finish space)
+    if (!segment.Next || segment.Next.length === 0) {
+        // Before warning, check if we're at the finish space
+        let FINISH_SPACE_CHECK = [1384, 512];
         
         // Helper function to compare coordinates
         function coordsMatch(coord1, coord2) {
@@ -389,490 +437,442 @@ export function animateTokenToPosition(player, newPosition, duration = 1000, ski
             return false;
         }
         
-        // Handle end of move first (regular space actions)
-        await handleEndOfMove(player.currentCoords);
-        
-        // Then check if player finished at the finish space
-        if (coordsMatch(currentCoords, FINISH_SPACE)) {
-            console.log("Player has reached the finish space!");
+        if (coordsMatch(currentCoords, FINISH_SPACE_CHECK)) {
+            console.log("Player has reached the finish space during animation!");
+            // Complete remaining animation and handle as finished
+            token.classList.remove('enlarged');
+            token.classList.add('normal');
+            player.currentCoords = { ...currentCoords };
+            updateGameState({
+              players: state.players.map(p => 
+                p.id === player.id ? { ...p, currentCoords: { ...player.currentCoords } } : p
+              )
+            });
+            console.log('***************call handleEndOfMove***************');
+            await handleEndOfMove(player.currentCoords);
+            console.log('***************call markPlayerFinished***************');
             markPlayerFinished(player);
+            resolve();
+            return;
         }
         
+        console.warn('Next segment is null/empty and player is not at finish space. Current coords:', currentCoords);
         resolve();
         return;
-      }
-    
-      const segment = findSegmentByCoord(currentCoords);
-      
-      // Check for invalid segments (but not at finish space)
-      if (!segment) {
-          console.warn("No segment found at", currentCoords);
-          resolve();
-          return;
-      }
-      
-      // Check for end of path (but not at finish space)
-      if (!segment.Next || segment.Next.length === 0) {
-          // Before warning, check if we're at the finish space
-          let FINISH_SPACE_CHECK = [1384, 512];
-          
-          // Helper function to compare coordinates
-          function coordsMatch(coord1, coord2) {
-              // Handle object format {x: number, y: number}
-              if (typeof coord1 === 'object' && coord1.x !== undefined && coord1.y !== undefined) {
-                  if (Array.isArray(coord2)) {
-                      return coord1.x === coord2[0] && coord1.y === coord2[1];
-                  } else {
-                      return coord1.x === coord2.x && coord1.y === coord2.y;
-                  }
-              }
-              // Handle array format [x, y]
-              if (Array.isArray(coord1)) {
-                  if (typeof coord2 === 'object' && coord2.x !== undefined && coord2.y !== undefined) {
-                      return coord1[0] === coord2.x && coord1[1] === coord2.y;
-                  } else {
-                      return coord1[0] === coord2[0] && coord1[1] === coord2[1];
-                  }
-              }
-              return false;
-          }
-          
-          if (coordsMatch(currentCoords, FINISH_SPACE_CHECK)) {
-              console.log("Player has reached the finish space during animation!");
-              // Complete remaining animation and handle as finished
-              token.classList.remove('enlarged');
-              token.classList.add('normal');
-              player.currentCoords = { ...currentCoords };
-              updateGameState({
-                players: state.players.map(p => 
-                  p.id === player.id ? { ...p, currentCoords: { ...player.currentCoords } } : p
-                )
-              });
-              console.log('***************call handleEndOfMove***************');
-              await handleEndOfMove(player.currentCoords);
-              console.log('***************call markPlayerFinished***************');
-              markPlayerFinished(player);
-              resolve();
-              return;
-          }
-          
-          console.warn('Next segment is null/empty and player is not at finish space. Current coords:', currentCoords);
-          resolve();
-          return;
-      }
-      
-      // Check if this is a choicepoint (multiple Next coordinates)
-      if (segment.Next.length > 1) {
-          //console.log(`[DEBUG] Choicepoint detected at ${JSON.stringify(currentCoords)} with ${segment.Next.length} options`);
-          
-          // Store interrupted move data
-          state.interruptedMove = {
-              remainingSteps,
-              duration,
-              skipSpaceAction,
-              onComplete
-          };
-          
-          // Ensure game state is set to wait for choice
-          updateGameState({
-              pendingActionData: {
-                  choiceOptions: segment.Next
-              }
-          });
-          
-          //console.log("At choicepoint - using promptForChoicepoint for both human and AI");
-        // Prepare path names for the choice point
-        let pathNames = [];
-        if (Array.isArray(segment.pathNames) && segment.pathNames[0]) {
-          pathNames = segment.pathNames[0].split(',').map(name => name.trim());
-        }
-        
-        const options = segment.Next.map((coords, index) => ({
-          coords,
-          pathName: pathNames[index] || 'UNKNOWN_PATH'
-        }));
-        
-        promptForChoicepoint(options, (chosenOption) => {
-          //console.log("Player chose:", chosenOption);
-          
-          // Search for the chosen coordinates across all paths
-          const match = findPathByChosenCoord({ x: chosenOption.coords[0], y: chosenOption.coords[1] });
-          if (match) {
-            player.currentPath = match.path.pathName;
-            player.currentCoords = match.exactCoord;
-            currentCoords = { ...match.exactCoord };
-            pathData = match.path; // Update pathData to the new path
-            //console.log(`Updated player path to ${player.currentPath} at coords ${JSON.stringify(currentCoords)}`);
-          } else {
-            console.warn("Could not match chosen coords exactly, using provided coords:", chosenOption.coords);
-            player.currentCoords = { x: chosenOption.coords[0], y: chosenOption.coords[1] };
-            currentCoords = { ...player.currentCoords };
-          }
-          
-          remainingSteps--;
-          // Persist updated step count immediately
-          updateGameState({ remainingSteps });
-          
-          // Clear the interrupted move data
-          delete state.interruptedMove;
-          updateGameState({
-            currentPhase: 'MOVING',
-            pendingActionData: null
-          });
-          
-          // Continue movement
-          animateNextSegment();
-        });
-        
-        return; // Wait for choice before continuing
-      }
-    
-      // Regular movement (single Next coordinate)
-      const nextCoord = {
-        x: segment.Next[0][0],
-        y: segment.Next[0][1]
-      };
-
-      // Count step as we leave the currentCoords
-      remainingSteps--;
-            // Persist updated step count immediately
-            updateGameState({ remainingSteps });
-      
-      // Animate visual movement
-      await animatePosition(token, currentCoords, nextCoord, duration);
-      
-      // Update to exact coordinates from the path segment
-      const nextSegment = findSegmentByCoord(nextCoord);
-      if (nextSegment) {
-        const exactCoord = nextSegment.coordinates[0];
-        player.currentCoords = { x: exactCoord[0], y: exactCoord[1] };
-        currentCoords = { ...player.currentCoords };
-      } else {
-        player.currentCoords = nextCoord;
-        currentCoords = nextCoord;
-      }
-    
-      await animateNextSegment();
     }
     
+    // Check if this is a choicepoint (multiple Next coordinates)
+    if (segment.Next.length > 1) {
+        //console.log(`[DEBUG] Choicepoint detected at ${JSON.stringify(currentCoords)} with ${segment.Next.length} options`);
+        
+        // Store interrupted move data
+        state.interruptedMove = {
+            remainingSteps,
+            duration,
+            skipSpaceAction,
+            onComplete
+        };
+        
+        // Ensure game state is set to wait for choice
+        updateGameState({
+            pendingActionData: {
+                choiceOptions: segment.Next
+            }
+        });
+        
+        //console.log("At choicepoint - using promptForChoicepoint for both human and AI");
+      // Prepare path names for the choice point
+      let pathNames = [];
+      if (Array.isArray(segment.pathNames) && segment.pathNames[0]) {
+        pathNames = segment.pathNames[0].split(',').map(name => name.trim());
+      }
+      
+      const options = segment.Next.map((coords, index) => ({
+        coords,
+        pathName: pathNames[index] || 'UNKNOWN_PATH'
+      }));
+      
+      promptForChoicepoint(options, (chosenOption) => {
+        //console.log("Player chose:", chosenOption);
+        
+        // Search for the chosen coordinates across all paths
+        const match = findPathByChosenCoord({ x: chosenOption.coords[0], y: chosenOption.coords[1] });
+        if (match) {
+          player.currentPath = match.path.pathName;
+          player.currentCoords = match.exactCoord;
+          currentCoords = { ...match.exactCoord };
+          pathData = match.path; // Update pathData to the new path
+          //console.log(`Updated player path to ${player.currentPath} at coords ${JSON.stringify(currentCoords)}`);
+        } else {
+          console.warn("Could not match chosen coords exactly, using provided coords:", chosenOption.coords);
+          player.currentCoords = { x: chosenOption.coords[0], y: chosenOption.coords[1] };
+          currentCoords = { ...player.currentCoords };
+        }
+        
+        remainingSteps--;
+        // Persist updated step count immediately
+        updateGameState({ remainingSteps });
+        
+        // Clear the interrupted move data
+        delete state.interruptedMove;
+        updateGameState({
+          currentPhase: 'MOVING',
+          pendingActionData: null
+        });
+        
+        // Continue movement
+        animateNextSegment();
+      });
+      
+      return; // Wait for choice before continuing
+    }
+  
+    // Regular movement (single Next coordinate)
+    const nextCoord = {
+      x: segment.Next[0][0],
+      y: segment.Next[0][1]
+    };
 
-    token.classList.add('animating-token', 'enlarged');
-    token.classList.remove('normal');
-
-
+    // Count step as we leave the currentCoords
+    remainingSteps--;
+          // Persist updated step count immediately
+          updateGameState({ remainingSteps });
+    
+    // Animate visual movement
+    await animatePosition(token, currentCoords, nextCoord, duration);
+    
+    // Update to exact coordinates from the path segment
+    const nextSegment = findSegmentByCoord(nextCoord);
+    if (nextSegment) {
+      const exactCoord = nextSegment.coordinates[0];
+      player.currentCoords = { x: exactCoord[0], y: exactCoord[1] };
+      currentCoords = { ...player.currentCoords };
+    } else {
+      player.currentCoords = nextCoord;
+      currentCoords = nextCoord;
+    }
+  
     await animateNextSegment();
+  }
+  
+
+  token.classList.add('animating-token', 'enlarged');
+  token.classList.remove('normal');
+
+
+  await animateNextSegment();
+});
+};
+
+/**
+* Clears all highlights including deck highlights and move highlights
+*/
+export function clearHighlights() {
+  //console.log('=============clearHighlights=============');
+  // Clear deck highlights
+  clearDeckHighlights();
+  
+  // Clear any existing move highlights from the board
+  const highlightElements = document.querySelectorAll('.highlight');
+  highlightElements.forEach(el => {
+      el.classList.remove('highlight');
+  });
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Initialize any animation-related UI elements
+  const playerCountButtons = document.querySelectorAll('.player-count-Button');
+  playerCountButtons.forEach(button => {
+      pulseAnimation(button);
+  });
+});
+
+/**
+* Starts the dice shake animation
+*/
+export let diceShakeInterval = null;
+
+export function startDiceShake() {
+  //console.log('=============startDiceShake=============');
+  const dice = document.getElementById('dice');
+  if (!dice) return;
+  
+  // Clear any existing shake interval
+  stopDiceShake();
+
+  
+  // Add shake class to start the CSS animation
+  dice.classList.add('shake');
+  
+  // Set up interval to ensure the shake animation keeps running
+  diceShakeInterval = setInterval(() => {
+      // This forces the animation to restart if it gets stuck
+      dice.classList.remove('shake');
+      void dice.offsetWidth; // Trigger reflow
+      dice.classList.add('shake');
+  }, 1200); // Restart animation every second
+};
+
+/**
+* Stops the dice shake animation
+*/
+export function stopDiceShake() {
+  //console.log('=============stopDiceShake=============');
+  const dice = document.getElementById('dice');
+  if (!dice) return;
+  
+  // Clear the interval
+  if (diceShakeInterval) {
+      clearInterval(diceShakeInterval);
+      diceShakeInterval = null;
+  }
+  
+  // Remove shake class
+  dice.classList.remove('shake');
+};
+
+/**
+* Shows a visual effect for card being discarded
+* @param {HTMLElement} cardElement - Card to discard
+* @param {Function} onComplete - Callback when animation completes
+*/
+export function animateCardDiscard(cardElement, onComplete) {
+  updateUIState({
+      animation: {
+          ...getUIState().animation,
+          inProgress: true
+      }
+  });
+  
+  cardElement.style.transition = 'all 0.5s ease-in-out';
+  cardElement.style.transform = 'scale(0.8) translateY(100px) rotate(10deg)';
+  cardElement.style.opacity = '0';
+  
+  cardElement.addEventListener('transitionend', function onEnd() {
+      cardElement.removeEventListener('transitionend', onEnd);
+      cardElement.style.transition = '';
+      cardElement.style.transform = '';
+      cardElement.style.opacity = '';
+      
+      updateUIState({
+          animation: {
+              ...getUIState().animation,
+              inProgress: false
+          }
+      });
+      
+      if (onComplete) onComplete();
   });
 };
 
 /**
- * Clears all highlights including deck highlights and move highlights
- */
-export function clearHighlights() {
-    //console.log('=============clearHighlights=============');
-    // Clear deck highlights
-    clearDeckHighlights();
-    
-    // Clear any existing move highlights from the board
-    const highlightElements = document.querySelectorAll('.highlight');
-    highlightElements.forEach(el => {
-        el.classList.remove('highlight');
-    });
-};
-
-document.addEventListener('DOMContentLoaded', () => {
-    // Initialize any animation-related UI elements
-    const playerCountButtons = document.querySelectorAll('.player-count-Button');
-    playerCountButtons.forEach(button => {
-        pulseAnimation(button);
-    });
-});
-
-/**
- * Starts the dice shake animation
- */
-export let diceShakeInterval = null;
-
-export function startDiceShake() {
-    //console.log('=============startDiceShake=============');
-    const dice = document.getElementById('dice');
-    if (!dice) return;
-    
-    // Clear any existing shake interval
-    stopDiceShake();
-
-    
-    // Add shake class to start the CSS animation
-    dice.classList.add('shake');
-    
-    // Set up interval to ensure the shake animation keeps running
-    diceShakeInterval = setInterval(() => {
-        // This forces the animation to restart if it gets stuck
-        dice.classList.remove('shake');
-        void dice.offsetWidth; // Trigger reflow
-        dice.classList.add('shake');
-    }, 1200); // Restart animation every second
-};
-
-/**
- * Stops the dice shake animation
- */
-export function stopDiceShake() {
-    //console.log('=============stopDiceShake=============');
-    const dice = document.getElementById('dice');
-    if (!dice) return;
-    
-    // Clear the interval
-    if (diceShakeInterval) {
-        clearInterval(diceShakeInterval);
-        diceShakeInterval = null;
-    }
-    
-    // Remove shake class
-    dice.classList.remove('shake');
-};
-
-/**
- * Shows a visual effect for card being discarded
- * @param {HTMLElement} cardElement - Card to discard
- * @param {Function} onComplete - Callback when animation completes
- */
-export function animateCardDiscard(cardElement, onComplete) {
-    updateUIState({
-        animation: {
-            ...getUIState().animation,
-            inProgress: true
-        }
-    });
-    
-    cardElement.style.transition = 'all 0.5s ease-in-out';
-    cardElement.style.transform = 'scale(0.8) translateY(100px) rotate(10deg)';
-    cardElement.style.opacity = '0';
-    
-    cardElement.addEventListener('transitionend', function onEnd() {
-        cardElement.removeEventListener('transitionend', onEnd);
-        cardElement.style.transition = '';
-        cardElement.style.transform = '';
-        cardElement.style.opacity = '';
-        
-        updateUIState({
-            animation: {
-                ...getUIState().animation,
-                inProgress: false
-            }
-        });
-        
-        if (onComplete) onComplete();
-    });
-};
-
-/**
- * Highlight the deck region for a player to draw from
- * 
- * @param {object} player - The player (must include `isHuman` boolean).
- * @param {string} deckType - The deck to highlight (e.g., 'ageOfResistanceDeck').
- * @param {Array} positions - The region(s) to highlight (only used for decks like endOfTurnDeck).
- */
+* Highlight the deck region for a player to draw from
+* 
+* @param {object} player - The player (must include `isHuman` boolean).
+* @param {string} deckType - The deck to highlight (e.g., 'ageOfResistanceDeck').
+* @param {Array} positions - The region(s) to highlight (only used for decks like endOfTurnDeck).
+*/
 export function highlightDeckRegions(player, deckType, positions, duration = 3000) {
-  return new Promise((resolve) => {
-    console.log('=============highlightDeckRegions=============');
-    //console.log('Highlighting deck regions for player:', player.name, 'deckType:', deckType, 'positions:', positions);
+return new Promise((resolve) => {
+  console.log('=============highlightDeckRegions=============');
+  //console.log('Highlighting deck regions for player:', player.name, 'deckType:', deckType, 'positions:', positions);
 
-    const canvas = state.board?.Canvas || state.board?.canvas;
-    if (!canvas || !deckType) {
-      console.error('Missing canvas or deckType for highlightDeckRegions');
+  const canvas = state.board?.Canvas || state.board?.canvas;
+  if (!canvas || !deckType) {
+    console.error('Missing canvas or deckType for highlightDeckRegions');
+    resolve();
+    return;
+  }
+  
+  // CRITICAL: Set currentDeck state so deck click restrictions work
+  updateGameState({ currentDeck: deckType });
+  //console.log(`Set currentDeck to: ${deckType} for deck click restrictions`);
+
+  const ctx = canvas.getContext('2d');
+
+  // Map proper highlight colors by deckType
+  const colorMap = {
+    ageOfExpansionDeck: 'rgba(200, 141, 255, 0.97)',   // purple
+    ageOfResistanceDeck: 'rgba(83, 115, 244, 0.99)',  // blue
+    ageOfReckoningDeck: 'rgba(69, 193, 221, 0.91)',   // cyan
+    ageOfLegacyDeck: 'rgba(255, 132, 247, 0.93)',      // pink
+    endOfTurnDeck: 'rgba(250, 255, 191, 0.97)'         // gold/yellow
+  };
+
+  const highlightColor = colorMap[deckType] || '#FF0000'; // fallback to red
+
+  // Remove any old highlights
+  clearDeckHighlights();
+
+  // Determine what region(s) to highlight
+  let regionsToHighlight = [];
+
+  if (deckType.startsWith('ageOf')) {
+    // Only highlight the matching age deck region
+    const region = Object.values(fullDeckRegionPathMap).find(r => r.deckType === deckType);
+    if (!region || !region.positions) {
+      console.error(`No matching region or position for deckType: ${deckType}`);
       resolve();
       return;
     }
-    
-    // CRITICAL: Set currentDeck state so deck click restrictions work
-    updateGameState({ currentDeck: deckType });
-    //console.log(`Set currentDeck to: ${deckType} for deck click restrictions`);
+    regionsToHighlight = region.positions;
+  } else {
+    // Highlight all given positions (e.g. end-of-turn)
+    if (!positions?.length) {
+      console.error('No positions provided for non-ageOf deckType');
+      resolve();
+      return;
+    }
+    regionsToHighlight = positions;
+  }
 
-    const ctx = canvas.getContext('2d');
+  // Store highlight data for animation
+  if (!state.ui.dynamic) state.ui.dynamic = {};
+  if (!state.ui.dynamic.deckHighlights) state.ui.dynamic.deckHighlights = [];
+  
+  // Clear existing highlights
+  state.ui.dynamic.deckHighlights = [];
 
-    // Map proper highlight colors by deckType
-    const colorMap = {
-      ageOfExpansionDeck: 'rgba(200, 141, 255, 0.97)',   // purple
-      ageOfResistanceDeck: 'rgba(83, 115, 244, 0.99)',  // blue
-      ageOfReckoningDeck: 'rgba(69, 193, 221, 0.91)',   // cyan
-      ageOfLegacyDeck: 'rgba(255, 132, 247, 0.93)',      // pink
-      endOfTurnDeck: 'rgba(250, 255, 191, 0.97)'         // gold/yellow
+  // Create canvas highlight data
+  regionsToHighlight.forEach((pos, index) => {
+    const highlightData = {
+      type: 'canvas',
+      position: pos,
+      color: highlightColor,
+      deckType: deckType,
+      player: player,
+      phase: 0,
+      animationId: null
     };
 
-    const highlightColor = colorMap[deckType] || '#FF0000'; // fallback to red
+    state.ui.dynamic.deckHighlights.push(highlightData);
+  });
 
-    // Remove any old highlights
-    clearDeckHighlights();
-
-    // Determine what region(s) to highlight
-    let regionsToHighlight = [];
-
-    if (deckType.startsWith('ageOf')) {
-      // Only highlight the matching age deck region
-      const region = Object.values(fullDeckRegionPathMap).find(r => r.deckType === deckType);
-      if (!region || !region.positions) {
-        console.error(`No matching region or position for deckType: ${deckType}`);
-        resolve();
-        return;
-      }
-      regionsToHighlight = region.positions;
-    } else {
-      // Highlight all given positions (e.g. end-of-turn)
-      if (!positions?.length) {
-        console.error('No positions provided for non-ageOf deckType');
-        resolve();
-        return;
-      }
-      regionsToHighlight = positions;
+  // Single animation function for all highlights
+  function animateHighlights() {
+    // Redraw the board to clear previous highlights
+    if (typeof drawBoard === 'function') {
+      drawBoard();
     }
-
-    // Store highlight data for animation
-    if (!state.ui.dynamic) state.ui.dynamic = {};
-    if (!state.ui.dynamic.deckHighlights) state.ui.dynamic.deckHighlights = [];
     
-    // Clear existing highlights
-    state.ui.dynamic.deckHighlights = [];
-
-    // Create canvas highlight data
-    regionsToHighlight.forEach((pos, index) => {
-      const highlightData = {
-        type: 'canvas',
-        position: pos,
-        color: highlightColor,
-        deckType: deckType,
-        player: player,
-        phase: 0,
-        animationId: null
-      };
-
-      state.ui.dynamic.deckHighlights.push(highlightData);
+    // Draw all highlights
+    state.ui.dynamic.deckHighlights.forEach(highlight => {
+      highlight.phase = (highlight.phase + 0.02) % 1;
+      
+      // Calculate pulsing alpha (0.4 to 0.8 range)
+      const alpha = 0.4 + 0.4 * Math.sin(highlight.phase * Math.PI);
+      const width = highlight.position.toprightx - highlight.position.topleft;
+      const height = highlight.position.bottomleft - highlight.position.toplefty;
+      ctx.fill();
+      
+      // Extract base color from rgba string (remove the alpha part)
+      const baseColor = highlight.color.replace(/,\s*[\d.]+\s*\)$/, '');
+      
+      ctx.save();
+      ctx.fill();
+      // Draw semi-transparent fill behind the pulsing borders
+      ctx.fillStyle = baseColor + `,${alpha * 0.9})`;
+      ctx.fillRect(highlight.position.topleft, highlight.position.toplefty, width, height);
+      
+      // Draw border with pulsing effect
+      ctx.strokeStyle = baseColor + `,${alpha})`;
+      ctx.fill();
+      ctx.lineWidth = 4; // Slightly thicker border for better visibility
+      ctx.strokeRect(highlight.position.topleft, highlight.position.toplefty, width, height);
+      
+      // Draw a second border with lower opacity for a glow effect
+      ctx.strokeStyle = baseColor + `,${alpha * 0.9})`;
+      ctx.fill();
+      ctx.lineWidth = 8;
+      ctx.strokeRect(highlight.position.topleft, highlight.position.toplefty, width, height);
+      
+      ctx.restore();
     });
-
-    // Single animation function for all highlights
-    function animateHighlights() {
-      // Redraw the board to clear previous highlights
-      if (typeof drawBoard === 'function') {
-        drawBoard();
-      }
-      
-      // Draw all highlights
-      state.ui.dynamic.deckHighlights.forEach(highlight => {
-        highlight.phase = (highlight.phase + 0.02) % 1;
-        
-        // Calculate pulsing alpha (0.4 to 0.8 range)
-        const alpha = 0.4 + 0.4 * Math.sin(highlight.phase * Math.PI);
-        const width = highlight.position.toprightx - highlight.position.topleft;
-        const height = highlight.position.bottomleft - highlight.position.toplefty;
-        ctx.fill();
-        
-        // Extract base color from rgba string (remove the alpha part)
-        const baseColor = highlight.color.replace(/,\s*[\d.]+\s*\)$/, '');
-        
-        ctx.save();
-        ctx.fill();
-        // Draw semi-transparent fill behind the pulsing borders
-        ctx.fillStyle = baseColor + `,${alpha * 0.9})`;
-        ctx.fillRect(highlight.position.topleft, highlight.position.toplefty, width, height);
-        
-        // Draw border with pulsing effect
-        ctx.strokeStyle = baseColor + `,${alpha})`;
-        ctx.fill();
-        ctx.lineWidth = 4; // Slightly thicker border for better visibility
-        ctx.strokeRect(highlight.position.topleft, highlight.position.toplefty, width, height);
-        
-        // Draw a second border with lower opacity for a glow effect
-        ctx.strokeStyle = baseColor + `,${alpha * 0.9})`;
-        ctx.fill();
-        ctx.lineWidth = 8;
-        ctx.strokeRect(highlight.position.topleft, highlight.position.toplefty, width, height);
-        
-        ctx.restore();
-      });
-      
-      // Continue animation only if there are still highlights
-      if (state.ui.dynamic.deckHighlights.length > 0) {
-        requestAnimationFrame(animateHighlights);
-      }
+    
+    // Continue animation only if there are still highlights
+    if (state.ui.dynamic.deckHighlights.length > 0) {
+      requestAnimationFrame(animateHighlights);
     }
+  }
 
-    // Start the animation
-    requestAnimationFrame(animateHighlights);
+  // Start the animation
+  requestAnimationFrame(animateHighlights);
 
-    // Add click handler to canvas for deck interaction
-    const originalClickHandler = canvas.onclick;
-    canvas.onclick = (event) => {
-      const rect = canvas.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
-      
-      // Check if click is within any highlighted region
-      for (const highlight of state.ui.dynamic.deckHighlights) {
-        const pos = highlight.position;
-        if (x >= pos.topleft && x <= pos.toprightx && 
-            y >= pos.toplefty && y <= pos.bottomleft) {
-          clearDeckHighlights();
-          console.log('***************call drawCard***************');
-          drawCard(deckType, player);
-          resolve();
-          return;
-        }
-      }
-      
-      // If not clicking on a highlight, call original handler
-      if (originalClickHandler) {
-        originalClickHandler(event);
-      }
-    };
-
-    // AI auto-draw after 5 seconds
-    if (!player.isHuman) {
-      setTimeout(() => {
+  // Add click handler to canvas for deck interaction
+  const originalClickHandler = canvas.onclick;
+  canvas.onclick = (event) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    
+    // Check if click is within any highlighted region
+    for (const highlight of state.ui.dynamic.deckHighlights) {
+      const pos = highlight.position;
+      if (x >= pos.topleft && x <= pos.toprightx && 
+          y >= pos.toplefty && y <= pos.bottomleft) {
         clearDeckHighlights();
         console.log('***************call drawCard***************');
         drawCard(deckType, player);
         resolve();
-      }, 3000);
-    } else {
-      // For human players, set a timeout to auto-resolve after a longer duration
-      // This ensures the Promise doesn't hang if the player doesn't click
-      setTimeout(() => {
-        resolve();
-      }, 30000); // 30 second timeout for human interaction
+        return;
+      }
     }
-  });
+    
+    // If not clicking on a highlight, call original handler
+    if (originalClickHandler) {
+      originalClickHandler(event);
+    }
+  };
+
+  // AI auto-draw after 5 seconds
+  if (!player.isHuman) {
+    setTimeout(() => {
+      clearDeckHighlights();
+      console.log('***************call drawCard***************');
+      drawCard(deckType, player);
+      resolve();
+    }, 3000);
+  } else {
+    // For human players, set a timeout to auto-resolve after a longer duration
+    // This ensures the Promise doesn't hang if the player doesn't click
+    setTimeout(() => {
+      resolve();
+    }, 30000); // 30 second timeout for human interaction
+  }
+});
 }
 
 /**
- * Clears all active canvas-based deck highlights without affecting tokens.
- */
+* Clears all active canvas-based deck highlights without affecting tokens.
+*/
 export function clearDeckHighlights() {
- // console.log('=============clearDeckHighlights=============');
+// console.log('=============clearDeckHighlights=============');
 
-  // Clear all highlight data
-  if (state.ui.dynamic?.deckHighlights) {
-    state.ui.dynamic.deckHighlights = [];
-  }
+// Clear all highlight data
+if (state.ui.dynamic?.deckHighlights) {
+  state.ui.dynamic.deckHighlights = [];
+}
 
-  // Clear highlight animation interval (e.g. pulsing)
-  if (state.ui.dynamic?.deckHighlightInterval) {
-      clearInterval(state.ui.dynamic.deckHighlightInterval);
-      state.ui.dynamic.deckHighlightInterval = null;
-  }
+// Clear highlight animation interval (e.g. pulsing)
+if (state.ui.dynamic?.deckHighlightInterval) {
+    clearInterval(state.ui.dynamic.deckHighlightInterval);
+    state.ui.dynamic.deckHighlightInterval = null;
+}
 
-  // Redraw the board to clear any highlights drawn on the canvas
-  if (typeof drawBoard === 'function') {
-    drawBoard();
-  }
+// Redraw the board to clear any highlights drawn on the canvas
+if (typeof drawBoard === 'function') {
+  drawBoard();
+}
 
-  // Clear the highlight canvas if it's separate from token canvas
-  if (state.board?.highlightCtx && state.board?.highlightCanvas) {
-    const ctx = state.board.ctx;
-      ctx.clearRect(0, 0, state.board.highlightCanvas.width, state.board.highlightCanvas.height);
-      //console.log('[CANVAS] Cleared highlight canvas');
-  } else if (state.board?.boardCtx && state.board?.boardCanvas) {
-      // If deck highlights were drawn directly on main board canvas
-      const ctx = state.board.boardCtx;
-      ctx.clearRect(0, 0, state.board.boardCanvas.width, state.board.boardCanvas.height);
-      //console.log('[CANVAS] Cleared main canvas highlight layer');
-  } 
+// Clear the highlight canvas if it's separate from token canvas
+if (state.board?.highlightCtx && state.board?.highlightCanvas) {
+  const ctx = state.board.ctx;
+    ctx.clearRect(0, 0, state.board.highlightCanvas.width, state.board.highlightCanvas.height);
+    //console.log('[CANVAS] Cleared highlight canvas');
+} else if (state.board?.boardCtx && state.board?.boardCanvas) {
+    // If deck highlights were drawn directly on main board canvas
+    const ctx = state.board.boardCtx;
+    ctx.clearRect(0, 0, state.board.boardCanvas.width, state.board.boardCanvas.height);
+    //console.log('[CANVAS] Cleared main canvas highlight layer');
+} 
 }

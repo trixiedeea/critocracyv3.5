@@ -1,5 +1,3 @@
-// js/ui.js
-
 // --- Imports ---
 import { getPlayers } from './players.js';
 import { isActionAllowed } from './state.js';
@@ -873,5 +871,4 @@ export function playErrorSound () {
     errorSound.currentTime = 0; // rewind to start so it can replay quickly
     errorSound.play();
 }
-
 

@@ -927,4 +927,4 @@ export async function processCardEffects(card, targetPlayer = null) {
       // This ensures the game doesn't get stuck
       console.log('---------processAgeCardEffects END---------');
       handleEndTurn();
-  }
+}

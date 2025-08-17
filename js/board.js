@@ -979,4 +979,3 @@ export function drawDebugOverlay() {
         console.error('Error importing board data for debug overlay:', error);
     });
 }
-

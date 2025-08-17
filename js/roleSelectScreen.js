@@ -248,9 +248,12 @@ let playerArray = [];
 
         for (let i = 0; i < totalPlayers; i++) {
             const isHuman = i < humanPlayers;
+            const roleButton = document.querySelector(`.role-Select[data-role="${selectedRoles[i]}"]`);
+            const roleCard = roleButton ? roleButton.closest('.role-Card') : null;
+            const fullName = roleCard ? roleCard.querySelector('h2').textContent.trim() : selectedRoles[i];
             playerConfigs.push({
                 id: isHuman ? `player_${i}` : `ai_${i - humanPlayers}`,
-                name: isHuman ? `${selectedRoles[i]} (Human)` : `${selectedRoles[i]} (AI)`,
+                name: fullName,
                 role: selectedRoles[i],
                 isHuman
             });
