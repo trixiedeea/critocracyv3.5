@@ -185,7 +185,7 @@ function setupEventListeners() {
 
     // --- Game Board Buttons ---
     gameBoard.endTurnButton.addEventListener('click', () => {
-        //playClickSound();
+        playClickSound();
         //console.log("End Turn button clicked.");
         gameBoard.endTurnButton.classList.remove('shake');
         console.log('*************CALL advanceToNextPlayer *************');
@@ -193,10 +193,10 @@ function setupEventListeners() {
     });
     // Dice Roll
     gameBoard.dice.addEventListener('click', () => {
-        //rollDiceSound();
+        rollDiceSound();
         if (state.currentPhase !== 'ROLLING') return; // Only act during ROLLING phase
     
-        console.log('🎯========== Dice clicked in ROLLING phase==========');
+        console.log('========== Dice clicked in ROLLING phase==========');
         
         // Disable dice immediately after click to prevent multiple rolls
         gameBoard.dice.style.pointerEvents = 'none';
@@ -204,16 +204,20 @@ function setupEventListeners() {
     
         stopDiceShake?.(); // Optional: stops visual shake
         updateGameState({ currentPhase: 'PLAYING' }); // Phase gating
-        animateDiceRoll(2000); // Your full animation + logic
+        setTimeout(() => {
+            animateDiceRoll(2000); // Your full animation + logic
+        }, 1400);
         
         // Re-enable dice after animation completes (for next turn)
         setTimeout(() => {
             gameBoard.dice.style.pointerEvents = 'auto';
             gameBoard.dice.disabled = false;
+        
         }, 3000);
     });
   
     popovers.showCardDetailsButton?.addEventListener('click', () => {
+        playClickSound();
         //console.log('=============showCardDetailsButton clicked=============');
         if (popovers.cardEffects) {
             const currentDisplay = popovers.cardEffects.style.display;
@@ -226,6 +230,7 @@ function setupEventListeners() {
         
         popovers.closeAgeCardButtons.forEach(button => {
             button.addEventListener('click', () => {
+                playClickSound();
                 // Clear deck highlights
                 clearDeckHighlights();
                 console.log('===========closeAgeCardButtons clicked=============')
@@ -259,27 +264,37 @@ function setupEventListeners() {
 
     // --- End Game Screen Button ---
     endGame.newGameButton.addEventListener('click', () => {
-        //playClickSound();
+        playClickSound();
         //console.log("--------New Game button clicked. Reloading page.--------");
         window.location.reload();
     });
 
     // --- Canvas Click Listener ---
     // --- Canvas Click Listener ---
-    gameBoard.boardCanvas.addEventListener('click', (event) => {
-        console.log('==============Canvas clicked==============');
-        const player = getCurrentPlayer();
-        //console.log('Current player:', player);
-        //console.log('Current phase:', state.currentPhase);
+    gameBoard.boardCanvas.addEventListener('click', (event) => {         
+        playClickSound();         
+        console.log('==============Canvas clicked==============');         
+        const player = getCurrentPlayer();         
         
-        if (state.currentPhase === 'AWAITING_CARD_ACTION' && player?.isHuman) {
-            handleCanvasCardClick(event);
-        } else {
-            //console.log(`Canvas click ignored in phase: ${state.currentPhase}`);
-        }
+        // Only allow clicks if it's a human player's turn AND the right phase
+        if (state.currentPhase === 'AWAITING_CARD_ACTION' && player?.isHuman) {             
+            handleCanvasCardClick(event);         
+        } else {             
+            console.log(`Canvas click ignored - Phase: ${state.currentPhase}, IsHuman: ${player?.isHuman}`);         
+        }     
     });
 
-    gameBoard.boardTokenCanvas.addEventListener('click', (event) => {
+    gameBoard.boardTokenCanvas.addEventListener('click', (event) => {         
+        playClickSound();         
+        console.log('==============Token Canvas clicked==============');         
+        const player = getCurrentPlayer();         
+        
+        // Only allow clicks if it's a human player's turn AND the right phase
+        if (state.currentPhase === 'AWAITING_CARD_ACTION' && player?.isHuman) {             
+            handleCanvasCardClick(event);         
+        } else {             
+            console.log(`Canvas click ignored - Phase: ${state.currentPhase}, IsHuman: ${player?.isHuman}`);         
+        }     
     });
 };
     // --- Option A Button ---
@@ -443,6 +458,7 @@ export function promptForPathChoice(pathOptions, player, aiChosenOption = null) 
                 
                 // Reattach click handler
                 newButton.onclick = () => {
+                    playClickSound();
                     const option = pathOptions.find(opt => opt.pathName === key);
                     if (option) {
                         //console.log(`Path chosen: ${key}`, option);
@@ -518,6 +534,7 @@ export function promptForPathChoice(pathOptions, player, aiChosenOption = null) 
                 if (button) {
                     //console.log(`Setting up button for ${option.pathName}`);
                     button.addEventListener('click', () => {
+                        playClickSound();
                         //console.log(`Path chosen: ${option.pathName}`, option.coords);
                         try {
                             if (typeof popover.close === 'function') {
@@ -604,6 +621,7 @@ export function promptForChoicepoint(options, onChoice, delayMs = 3000) {
         });
 
         button.addEventListener('click', () => {
+            playClickSound();
             popover.close();
             onChoice(option); // Return the chosen option with coords and pathName
         });
@@ -621,14 +639,14 @@ export function promptForChoicepoint(options, onChoice, delayMs = 3000) {
 
         if (button) {
             // Animate scale sequence: 1.0 -> 0.9 -> 0.8 -> 0.9 -> 1.0 with delays
-            const scaleSequence = [0.9, 0.8, 0.7, 0.8, 0.9, 1.0];
+            const scaleSequence = [0.9, 0.8, 0.8, 0.9, 1.0];
             let step = 0;
 
             function animateScale() {
                 if (step < scaleSequence.length) {
                     button.style.transform = `scale(${scaleSequence[step]})`;
                     step++;
-                    setTimeout(animateScale, 500); // 600ms per step approx
+                    setTimeout(animateScale, 100); // 600ms per step approx
                 } else {
                     // After scaling animation finishes, close popover and call onChoice after 2s delay
                     setTimeout(() => {
@@ -861,8 +879,10 @@ export function playClickSound() {
 const diceSound = new Audio('assets/sounds/dice.mp3');
 
 export function rollDiceSound () {
-    diceSound.currentTime = 0; // rewind to start so it can replay quickly
-    diceSound.play();
+    setTimeout(() => {
+        diceSound.currentTime = 0; // rewind to start so it can replay quickly
+        diceSound.play();
+    }, 1500);
 }
 
 const errorSound = new Audio('assets/sounds/error.mp3');

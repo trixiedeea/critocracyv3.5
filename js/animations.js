@@ -157,7 +157,7 @@ setTimeout(() => {
     }
 
     // Apply final transform and show face
-    dice.style.transform = `${transform} scale(1.2)`;
+    dice.style.transform = `${transform} scale(1.0)`;
 
     // Keep face visible for 1.5s before proceeding
     setTimeout(() => {

@@ -36,6 +36,7 @@ import {
     updateGameControls,
     rollDiceSound,
     updatePlayerInfo,
+    playClickSound,
 } from './ui.js';
 import {
     animateDiceRoll,
@@ -49,8 +50,6 @@ import {
     updateGameState, 
     isActionAllowed 
 } from './state.js';
-
-import { updateResourceDisplays } from './resourceManagement.js';
 
 import { endGame } from './endGameScreen.js';
 
@@ -721,7 +720,9 @@ export function handleAITurn(aiPlayer) {
     
     // Debug log
     //console.log(`🔄 AI ${aiPlayer.name}'s turn starting...`);
-    rollDiceSound();
+    setTimeout(() => {
+        rollDiceSound();
+    }, 400);
     
     // 1. Generate a random roll (1-6)
     const rollResult = Math.floor(Math.random() * 6) + 1;
@@ -866,8 +867,11 @@ export function simulateCpuChoicepoint(player) {
             ageOfResistance: 'age-Of-Resistance-Path',
             ageOfReckoning: 'age-Of-Reckoning-Path',
             ageOfLegacy: 'age-Of-Legacy-Path',
-        };
+        }; 
 
+    
+            popover.showModal();
+        
         try {
             popover.showModal();
         } catch (err) {
@@ -884,8 +888,8 @@ export function simulateCpuChoicepoint(player) {
             //console.log(`[AI] Animating button for path choice: ${selectedOption.pathName}`);
             
             // Animate button scaling: 1.0 -> 0.9 -> 0.8 -> 0.7 -> 0.8 -> 0.9 -> 1.0 over 2 seconds
-            const scales = [0.9, 0.8, 0.7, 0.8, 0.9, 1.0];
-            const stepDuration = 2000 / scales.length; // ~333ms per step
+            const scales = [0.9, 0.85, 0.8, 0.85, 0.9, 1.0];
+            const stepDuration = 1500 / scales.length; // ~333ms per step
             
             let currentStep = 0;
             const animateStep = () => {
@@ -901,6 +905,7 @@ export function simulateCpuChoicepoint(player) {
                     
                     // Close the popover
                     try {
+                        playClickSound();
                         popover.close();
                     } catch (err) {
                         console.error('Failed to close popover:', err);
@@ -940,7 +945,7 @@ export function simulateCpuChoicepoint(player) {
             cleanup();
         }
 
-    }, 1000);
+    }, 3000);
 };
 
 /**

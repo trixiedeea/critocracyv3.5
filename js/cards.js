@@ -12,7 +12,8 @@ import {
 } from './state.js';
 
 import { 
-    updatePlayerInfo 
+    updatePlayerInfo,
+    playClickSound,
 } from './ui.js';
 
 import { 
@@ -497,6 +498,7 @@ export async function showCard(card) {
         showDetailsButton.style.display = isAgeDeck ? 'none' : 'block';
         showDetailsButton.disabled = false;
         showDetailsButton.onclick = () => {
+            playClickSound();
             let explanationHTML = '';
             if (isEndOfTurnCard && player?.role) {
                 const allRoles = ['COLONIALIST', 'REVOLUTIONARY', 'HISTORIAN', 'ENTREPRENEUR', 'POLITICIAN', 'ARTIST'];
@@ -541,6 +543,7 @@ export async function showCard(card) {
     
     if (closeCardButton) {
         closeCardButton.onclick = () => {
+            playClickSound();
             dialog.close();
             drawBoard();
             // Apply card effect with the card's deck type
@@ -587,6 +590,7 @@ export async function showCard(card) {
             freshOptionAButton.disabled = false;
             
             freshOptionAButton.onclick = async () => {
+                playClickSound();
                 //console.log('Age Deck Option A selected');
                 freshOptionAButton.style.display = 'none';
                 
@@ -609,7 +613,8 @@ export async function showCard(card) {
                     });
                 }
                 
-                await delay(3000);
+                await delay(5000);
+                playClickSound();
                 dialog.close();
                 state.currentCard = card;
                 applyAgeCardEffect(card, 'optionA');
@@ -624,6 +629,7 @@ export async function showCard(card) {
             freshOptionBButton.disabled = false;
             
             freshOptionBButton.onclick = async () => {
+                playClickSound();
                 //console.log('Age Deck Option B selected');
                 freshOptionBButton.style.display = 'none';
                 
@@ -647,6 +653,7 @@ export async function showCard(card) {
                 }
                 
                 await delay(3000);
+                playClickSound();
                 dialog.close();
                 state.currentCard = card;
                 applyAgeCardEffect(card, 'optionB');
@@ -669,19 +676,23 @@ export async function showCard(card) {
                     if (!dialog.open) return;
                     const optionAButton = dialog.querySelector('.optionAButton');
                     if (optionAButton) {
+                        optionAButton.style.pointerEvents = 'none';
                         optionAButton.click(); // This will show effects for 3 seconds
+                        playClickSound();
                     }
-                }, 3000);
+                }, 5000);
             } else {
                 // For non-choice cards, just close after 3 seconds
                 setTimeout(() => {
                     if (dialog.open) dialog.close();
+                    optionAButton.style.pointerEvents = 'none';
+                    playClickSound
                     state.currentCard = card;
                     if (isEndOfTurnCard) {
                         applyCardEffect(card);
                     }
                     if (typeof onComplete === 'function') onComplete();
-                }, 3000);
+                }, 6000);
             }
         }, 100); // Small delay to ensure dialog is rendered
     }
