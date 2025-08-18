@@ -237,7 +237,8 @@ function drawCardRectangles() {
     ctx.stroke();
     
     // Purple card rectangle
-    ctx.fillStyle = "Purple"; // Purple hex color
+    ctx.fillStyle = '#9C54DE'; // Purple hex color
+    ctx.globalAlpha = 0.3; // Make it more opaque than other cards
     ctx.beginPath();
     ctx.moveTo(567, 475);
     ctx.lineTo(652, 475);
@@ -248,8 +249,8 @@ function drawCardRectangles() {
     ctx.stroke();
     
     // Pink card rectangle
-    ctx.fillStyle = "Pink"; // Pink hex color
-    ctx.globalAlpha = 0.5; // Make it more opaque than other cards
+    ctx.fillStyle = '#FF66FF'; // Pink hex color
+    ctx.globalAlpha = 0.3; // Make it more opaque than other cards
     ctx.beginPath();
     ctx.moveTo(692, 254);
     ctx.lineTo(804, 254);
@@ -260,7 +261,8 @@ function drawCardRectangles() {
     ctx.stroke();
     
     // Blue card rectangle
-    ctx.fillStyle = "Blue"; // Blue hex color
+    ctx.fillStyle = '#1B3DE5'; // Blue hex color
+    ctx.globalAlpha = 0.3; // Make it more opaque than other cards
     ctx.beginPath();
     ctx.moveTo(845, 475);
     ctx.lineTo(939, 475);
@@ -271,7 +273,7 @@ function drawCardRectangles() {
     ctx.stroke();
     
     // Cyan card rectangle
-    ctx.fillStyle = "Cyan";
+    ctx.fillStyle = '#00FFFF'; // Cyan hex color
     ctx.globalAlpha = 0.3; // Make it more opaque than other cards
     ctx.beginPath();
     ctx.moveTo(693, 699);

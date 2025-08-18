@@ -692,10 +692,10 @@ return new Promise((resolve) => {
 
   // Map proper highlight colors by deckType
   const colorMap = {
-    ageOfExpansionDeck: 'rgba(200, 141, 255, 0.97)',   // purple
-    ageOfResistanceDeck: 'rgba(83, 115, 244, 0.99)',  // blue
-    ageOfReckoningDeck: 'rgba(69, 193, 221, 0.91)',   // cyan
-    ageOfLegacyDeck: 'rgba(255, 132, 247, 0.93)',      // pink
+    ageOfExpansionDeck: 'rgba(222, 187, 255, 0.97)',   // purple
+    ageOfResistanceDeck: 'rgba(155, 173, 246, 0.99)',  // blue
+    ageOfReckoningDeck: 'rgba(211, 244, 252, 0.91)',   // cyan
+    ageOfLegacyDeck: 'rgba(251, 210, 248, 0.93)',      // pink
     endOfTurnDeck: 'rgba(250, 255, 191, 0.97)'         // gold/yellow
   };
 
