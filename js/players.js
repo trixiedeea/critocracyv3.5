@@ -144,7 +144,7 @@ export function createPlayer(config) {
  */
 export function getPlayers() {
     // Return a shallow copy to prevent external modification
-    return [...players];
+    return [...state.players];
 }
 
 /**

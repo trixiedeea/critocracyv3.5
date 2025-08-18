@@ -806,7 +806,7 @@ export function updatePlayerInfo(currentPlayer = getCurrentPlayer(), newValues =
         console.log('[UI] Updating UI with resources:', { knowledge, money, influence });
         
         // Update the UI elements
-        playerElement.textContent = `${currentPlayer.name} (${currentPlayer.role || 'No Role'})`;
+        playerElement.textContent = `${currentPlayer.name}`;
         KNOWLEDGE_COUNT.textContent = newValues.knowledge ?? knowledge;
         MONEY_COUNT.textContent = newValues.money ?? money;
         INFLUENCE_COUNT.textContent = newValues.influence ?? influence;
@@ -871,4 +871,3 @@ export function playErrorSound () {
     errorSound.currentTime = 0; // rewind to start so it can replay quickly
     errorSound.play();
 }
-

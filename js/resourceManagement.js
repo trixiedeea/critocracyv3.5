@@ -1432,6 +1432,7 @@ export async function handleCardResourceEffect({
     //console.log('Resource update completed successfully');
     
     // Update the resource displays
+    updatePlayerInfo(player);
     updateResourceDisplays();
     
     console.groupEnd();

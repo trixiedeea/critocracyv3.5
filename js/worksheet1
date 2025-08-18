@@ -122,582 +122,884 @@ Ensuring all resource reads go through the state object
 Would you like me to help implement any of these changes? I can make the updates systematically to ensure everything works correctly with the new state structure.
 */
 
-/**
- * Updates the player information panel with the current player's stats.
- * @param {Object} [newValues] - Optional new resource values to display
- */
-export function updatePlayerInfo(player, changes = {}, gameState = state) {
-    console.log('==============updatePlayerInfo=============');
+/*import { notifySubscribers } from "./state";
+
+// ---- Local helpers to keep this module self-consistent ----
+// Canonical resource types used across this file
+const RESOURCE_TYPES = ['knowledge', 'money', 'influence'];
+
+function isValidResource(type) {
+  return RESOURCE_TYPES.includes(type);
+}
+
+// Safe defaults if external modifiers are not wired yet
+async function getMultiplier(resourceType, isGain = true) {
+  // If a global implementation exists, use it
+  if (typeof window !== 'undefined' && typeof window.getMultiplier === 'function') {
+    return window.getMultiplier(resourceType, isGain);
+  }
+  if (typeof getMultiplierGlobal === 'function') {
+    return getMultiplierGlobal(resourceType, isGain);
+  }
+  return 1; // default: no multiplier
+}
+
+async function getResistanceRate(player, resourceType) {
+  if (typeof window !== 'undefined' && typeof window.getResistanceRate === 'function') {
+    return window.getResistanceRate(player, resourceType);
+  }
+  if (typeof getResistanceRateGlobal === 'function') {
+    return getResistanceRateGlobal(player, resourceType);
+  }
+  return 1; // default: no resistance
+}
+
+export function applyCardEffect(card) {
+  updateGameState({ currentPhase: 'PLAYING' });
+  if (!isActionAllowed('AWAITING_PATH_CHOICE', 'ROLLING', 'TURN_TRANSITION')) return;
+  console.log('=============applyCardEffect=============');
+  //console.log('Full card object received:', JSON.stringify(card, null, 2));
+
+  const player = getCurrentPlayer();
+
+  if (!player) {
+    console.error('No current player found');
+    return;
+}
     
-    try {
-        // Get current player if none provided
-        if (!player) {
-            player = getCurrentPlayer();
-            if (!player) {
-                console.warn('updatePlayerInfo: No current player found');
-                return;
-            }
-        }
-        
-        console.log('[UI] Found player:', {
-            id: player.id,
-            name: player.name,
-            role: player.role,
-            resources: player.resources,
-            isHuman: player.isHuman
-        });
-        
-        // Get UI elements
-        const { currentPlayer: playerElement, KNOWLEDGE_COUNT, MONEY_COUNT, INFLUENCE_COUNT } = state.ui.elements.gameBoard || {};
-        
-        console.log('[UI] UI Elements:', {
-            currentPlayer: !!playerElement,
-            KNOWLEDGE_COUNT: !!KNOWLEDGE_COUNT,
-            MONEY_COUNT: !!MONEY_COUNT,
-            INFLUENCE_COUNT: !!INFLUENCE_COUNT
-        });
-        
-        if (!playerElement || !KNOWLEDGE_COUNT || !MONEY_COUNT || !INFLUENCE_COUNT) {
-            console.error('updatePlayerInfo: Missing required UI elements');
-            // Try to re-initialize UI elements if they're missing
-            if (typeof initializeElementReferences === 'function') {
-                console.log('-----------initializing UI elements-----------');
-                initializeElementReferences();
-            }
-            return;
-        }
+  if (!card || !player) {
+      console.warn(`Cannot apply effects of card "${card.name}" to player ${player.name} card or player is undefined`);
+      return;
+  }
+
+  //console.log(`Applying effects of card "${card.name}" to player ${player.name}...`);
+  
+  // Handle different effect formats
+  if (!card.effects) {
+      console.error(`Card "${card.name}" has no effects property.`);
+      return;
+  }
+  
+  // Case 1: Effects organized by role (object with role keys)
+  if (typeof card.effects === 'object' && !Array.isArray(card.effects)) {
+    //console.log(`Card "${card.name}" has role-based effects structure.`);
     
-        // Ensure resources exist, default to 0 if not
-        const resources = player.resources || {};
-        const knowledge = resources.knowledge ?? 0;
-        const money = resources.money ?? 0;
-        const influence = resources.influence ?? 0;
-        
-        console.log('[UI] Updating UI with resources:', { knowledge, money, influence });
-        
-        // Update the main player info elements
-        playerElement.textContent = `${player.name} (${player.role || 'No Role'})`;
-        KNOWLEDGE_COUNT.textContent = changes.knowledge ?? knowledge;
-        MONEY_COUNT.textContent = changes.money ?? money;
-        INFLUENCE_COUNT.textContent = changes.influence ?? influence;
-        
-        // Get all players for display logic
-        const players = getPlayers();
-        if (!players || !players.length) {
-            console.warn('No players found in game state');
-            return;
-        }
-
-        // Get the display containers from the HTML
-        const resourceDisplayContainer = document.getElementById('resource-Display-Container');
-        const playerScoreDisplay = document.querySelector('.player-Score-Display');
-
-        // Safety check to ensure the containers exist in your HTML
-        if (!resourceDisplayContainer || !playerScoreDisplay) {
-            console.warn("Resource display containers not found. Please check the IDs in your index.html.");
-            return;
-        }
-
-        const humanPlayers = players.filter(p => p.isHuman);
-        const aiPlayers = players.filter(p => !p.isHuman);
-
-        let playerForBottomDisplay = null;
-
-        // --- Logic for the Bottom Display Container ---
-        // If there's only one human player, always show them.
-        if (humanPlayers.length === 1) {
-            playerForBottomDisplay = humanPlayers[0];
-        } 
-        // If there are multiple human players, show the one whose turn it is.
-        else if (humanPlayers.length > 1) {
-            if (player?.isHuman) {
-                playerForBottomDisplay = player;
-            }
-        }
-
-        // Populate the bottom display if a player has been selected
-        if (playerForBottomDisplay) {
-            // Update existing DOM elements directly
-            const currentPlayerSpan = document.getElementById('currentPlayer');
-            const knowledgeCount = document.getElementById('KNOWLEDGE_COUNT');
-            const moneyCount = document.getElementById('MONEY_COUNT');
-            const influenceCount = document.getElementById('INFLUENCE_COUNT');
+    // REPLACE THIS ENTIRE SECTION WITH OPTION 2:
+    // Try different case formats to match card data
+    const rolesToTry = [
+        player.role.toUpperCase(),           // HISTORIAN
+        player.role.charAt(0).toUpperCase() + player.role.slice(1).toLowerCase(), // Historian
+        player.role.toLowerCase()            // historian
+    ];
     
-            if (currentPlayerSpan) {
-                currentPlayerSpan.textContent = playerForBottomDisplay.role || 'Player';
-            }
-            if (knowledgeCount) {
-                knowledgeCount.textContent = changes.knowledge ?? (playerForBottomDisplay.resources?.knowledge || 0);
-            }
-            if (moneyCount) {
-                moneyCount.textContent = changes.money ?? (playerForBottomDisplay.resources?.money || 0);
-            }
-            if (influenceCount) {
-                influenceCount.textContent = changes.influence ?? (playerForBottomDisplay.resources?.influence || 0);
-            }
-        }
-
-        // --- Logic for the Top Score Display ---
-        const playersForTopDisplay = [];
-
-        // Add all AI players who are active in the game
-        aiPlayers.forEach(aiPlayer => {
-            if (players.includes(aiPlayer)) {
-                playersForTopDisplay.push(aiPlayer);
-            }
-        });
-
-        // Add any human players who are NOT being shown in the bottom display
-        humanPlayers.forEach(humanPlayer => {
-            if (humanPlayer !== playerForBottomDisplay && players.includes(humanPlayer)) {
-                playersForTopDisplay.push(humanPlayer);
-            }
-        });
-
-        // Get existing player score elements
-        const playerScoreElements = playerScoreDisplay.querySelectorAll('h5');
-
-        // Update existing player score elements
-        playerScoreElements.forEach((element, index) => {
-            const roleNameSpan = element.querySelector('.role-Name');
-            const resourceParagraph = element.querySelector('p');
+    let roleEffects = null;
+    let matchedRole = null;
     
-            if (index < playersForTopDisplay.length) {
-                const displayPlayer = playersForTopDisplay[index];
-                const roleName = displayPlayer.role || `Player ${displayPlayer.id?.slice(0, 4) || '?'}`;
-                const displayResources = displayPlayer.resources || {};
-                
-                if (roleNameSpan) {
-                    roleNameSpan.textContent = roleName;
-                }
-                if (resourceParagraph) {
-                    resourceParagraph.textContent = `${displayResources.money || 0} 💰, ${displayResources.knowledge || 0} 🧠, ${displayResources.influence || 0} ⚡`;
-                }
-                
-                // Make sure the element is visible
-                element.style.display = '';
+    for (const roleFormat of rolesToTry) {
+        if (card.effects[roleFormat]) {
+            roleEffects = card.effects[roleFormat];
+            matchedRole = roleFormat;
+            break;
+        }
+    }
+    
+    if (roleEffects) {
+        console.log(`Applying ${player.role}-specific effects (matched as "${matchedRole}"):`, roleEffects);
+        
+        // Process the effect
+        if (Array.isArray(roleEffects)) {
+            roleEffects.forEach(effect => processCardEffects(effect, player));
+        } else if (typeof roleEffects === 'object') {
+            processCardEffects(roleEffects, player, player);
+        }
+    } else {
+        console.warn(`No effects found for role "${player.role}" on card "${card.name}"`);
+        //console.log('Available roles:', Object.keys(card.effects));
+        
+        // Check if there's a generic "ALL" key for effects that apply to all roles
+        if (card.effects.ALL) {
+            const allEffects = card.effects.ALL;
+            if (Array.isArray(allEffects)) {
+                allEffects.forEach(effect => processCardEffects(effect, player));
             } else {
-                // Hide unused elements
-                element.style.display = 'none';
+                processCardEffects(allEffects, player);
             }
-        });
+        }
+    }
+    updateGameState({
+        currentPhase: 'PLAYING',
+    });
+    console.warn('game phase updated to PLAYING');
+      // Call processEndPlayerTurn after applying effects
+      console.log('=============applyCardEffect END=============');
+      processEndPlayerTurn();
+      return;
+  }
+  
+  // Case 2: Effects as an array (original format)
+  if (Array.isArray(card.effects)) {
+      card.effects.forEach(effect => processCardEffects(effect, player));
+      
+      // Call processEndPlayerTurn after applying effects
+      console.log('=============applyCardEffect END=============');
+      processEndPlayerTurn();
+      return;
+  }
+  
+  // If we get here, the effects property has an unexpected format
+  //console.log(`Card "${card.name}" effects has an unexpected format:`, card.effects);
+  
+  // Call processEndPlayerTurn even if effects format is unexpected
+  console.log('=============applyCardEffect END=============');
+  processEndPlayerTurn();
+};
+
+export async function applyAgeCardEffect(card, optionName = null, playerId) {
+  if (!isActionAllowed('AWAITING_PATH_CHOICE', 'ROLLING', 'TURN_TRANSITION')) return;
+  updateGameState({ currentPhase: 'PLAYING' });
+  console.log('=============applyAgeCardEffect=============')
+  //console.log('Card:', card.name);
+  //console.log('Option:', optionName);
+  
+  const player = getCurrentPlayer();
+  if (!player) {
+    console.error('No current player found');
+    return;
+  }
+  
+  let effects;
+  
+  if (optionName) {
+    effects = card.choice?.[optionName]?.effects;
+    if (!effects || !Array.isArray(effects)) {
+      console.warn(`No effects array found for option ${optionName}:`, card.choice?.[optionName]);
+      console.log('=============applyAgeCardEffect END=============')
+      await processAgeCardEffects(card, []);
+      return;
+    }
+  } else {
+    effects = card.effects;
+    if (!effects || !Array.isArray(effects)) {
+      console.warn('No effects array found on card:', card);
+      console.log('=============applyAgeCardEffect END=============')
+      await processAgeCardEffects(card, []);
+      return;
+    }
+  }
+  
+  //console.log(`Starting sequential processing of ${effects.length} effects`);
+  
+  // Process all effects sequentially with proper async/await chains
+  for (const effect of effects) {
+    try {
+      //console.log('Processing effect:', effect);
+      
+      // Handle different effect types with proper async chains
+      switch (effect.type) {
+        case 'RESOURCE_CHANGE': {
+          const player = getCurrentPlayer();
+          if (!player) {
+            console.error('No current player found during RESOURCE_CHANGE');
+            break;
+          }
         
-        // Force a reflow to ensure the UI updates
-        void playerElement.offsetHeight;
-        
-        console.log('=============updatePlayerInfo END=============');
-        
+          if (effect.changes && typeof effect.changes === 'object') {
+            for (const [resourceType, amount] of Object.entries(effect.changes)) {
+              if (typeof amount === 'number') {
+                await applyResourceChange(resourceType, amount, 'cardEffect', player.id);
+              }
+            }
+          } else if (effect.resource && typeof effect.amount === 'number') {
+            await applyResourceChange(effect.resource, effect.amount, 'cardEffect', player.id);
+          } else {
+            console.warn('Invalid RESOURCE_CHANGE effect:', effect);
+          }
+          break;
+      }
+        case 'MOVEMENT':
+        case 'MOVE_TO':
+          await handleCardMovement(effect);
+          break;
+          
+        case 'SKIP_TURN':
+          // Handle both old format (effect.turns) and age card format (effect.target)
+          const skipEffect = {
+            turns: effect.turns || 1, // Default to 1 turn if not specified
+            target: effect.target || 'SELF'
+          };
+          await applySkipTurn(skipEffect, player);
+          break;
+          
+        case 'STEAL':
+          // Normalize age card STEAL effect format to work with existing functions
+          const normalizedStealEffect = {
+            type: 'STEAL',
+            resource: effect.resource ? effect.resource.toLowerCase() : 'money', // Convert MONEY → money
+            amount: effect.amount || 1,
+            target: effect.target || 'OTHER'
+          };
+          // Start proper steal chain: applyStealEffect → getValidStealTargets → showStealPopover → handleStealEffect
+          await applyStealEffect(normalizedStealEffect, player);
+          break;
+
+        case 'STEAL_FROM_ALL':
+          await handleStealFromAll(effect, player, getPlayers());
+          break;
+          
+        default:
+          // For any other effect type, use processCardEffects
+          await processCardEffects(effect, player);
+      }
     } catch (error) {
-        console.error('Error in updatePlayerInfo:', error);
-        // Try a full UI refresh on error
-        try {
-            if (typeof initializeUI === 'function') initializeUI();
-            if (typeof updateGameControls === 'function') updateGameControls();
-        } catch (e) {
-            console.error('Failed to refresh UI:', e);
-        }
+      console.error('Error processing effect:', effect, error);
     }
-};
+  }
 
-/**
- * Update a player's resources in global state by applying changes (deltas)
- * @param {string|Object} player - The player ID, player object, or changes object if using current player
- * @param {Object} [changes] - The resource changes to apply (can be positive or negative)
- * @returns {boolean} - True if update succeeded, false otherwise
- */
-export function updatePlayerResources(player, changes) {
-    console.log('=============updatePlayerResources=============');
-    
-    let targetPlayer;
-    let resourceChanges;
-    
-    // Handle single parameter call (just changes object for current player)
-    if (arguments.length === 1 && typeof player === 'object' && !Array.isArray(player)) {
-        const currentPlayer = getCurrentPlayer();
-        if (!currentPlayer) {
-            console.error('No current player found');
-            return false;
-        }
-        targetPlayer = currentPlayer;
-        resourceChanges = player;
-    } else if (!changes) {
-        // If changes is not provided, treat the first param as changes for current player
-        const currentPlayer = getCurrentPlayer();
-        if (!currentPlayer) {
-            console.error('No current player found');
-            return false;
-        }
-        targetPlayer = currentPlayer;
-        resourceChanges = player;
-    } else {
-        // Two parameters provided
-        // If player is a string, treat it as playerId
-        if (typeof player === 'string') {
-            if (!_state.game.players[player]) {
-                console.error(`Player with ID ${player} not found`);
-                return false;
-            }
-            targetPlayer = _state.game.players[player];
-        } else {
-            // Player object provided
-            targetPlayer = player;
-        }
-        resourceChanges = changes;
-    }
-    
-    if (!targetPlayer || !resourceChanges) {
-        console.error('Invalid parameters for updatePlayerResources:', { 
-            player: targetPlayer?.id || 'undefined', 
-            changes: resourceChanges 
-        });
-        return false;
-    }
-    
-    // Validate player has resources object
-    if (!targetPlayer.resources) {
-        console.error('Player missing resources object:', targetPlayer);
-        return false;
-    }
-    
-    // Define valid resources
-    const VALID_RESOURCES = ['money', 'knowledge', 'influence'];
-    
-    // Validate and normalize changes
-    const normalizedChanges = {};
-    let isValid = true;
-    for (const resource in resourceChanges) {
-        if (!VALID_RESOURCES.includes(resource)) {
-            console.warn(`Invalid resource type '${resource}' ignored`);
-            continue;
-        }
-        
-        const change = Number(resourceChanges[resource]);
-        if (isNaN(change)) {
-            console.error(`Invalid change value for ${resource}:`, resourceChanges[resource]);
-            isValid = false;
-            break;
-        }
-        
-        normalizedChanges[resource] = change;
-    }
-    
-    if (!isValid) return false;
-    
-    // Calculate new values first to ensure all changes are valid
-    const newValues = { ...targetPlayer.resources };
-    for (const [resource, change] of Object.entries(normalizedChanges)) {
-        const currentValue = newValues[resource] || 0;
-        const newValue = currentValue + change;
-        
-        // Prevent negative resources
-        if (newValue < 0) {
-            console.error(`Cannot update ${resource}: would result in negative value (${newValue})`);
-            return false;
-        }
-        
-        newValues[resource] = newValue;
-    }
-    
-    // Apply validated changes to the global state
-    _state.game.players[targetPlayer.id].resources = { ...newValues };
-    
-    // Notify subscribers of state changes
-    if (typeof notifySubscribers === 'function') {
-        notifySubscribers();
-    }
-    
-    console.log(`[Resources] Updated resources for ${targetPlayer.name || targetPlayer.id}:`, newValues);
-    
-    return true;
+  //console.log('All effects completed - calling processAgeCardEffects');
+  // Validate and finalize all effects
+  await processAgeCardEffects(card, effects);
 }
 
-/**
- * Initialize player resources in the player object
- * @param {string} playerId - The ID of the player
- * @param {Object} initialResources - Initial resource values
- */
-export function initPlayerResources(playerId, initialResources) {
-    if (!playerId || !initialResources) {
-        console.warn('initPlayerResources: Missing playerId or initialResources');
-        return;
+export async function applyResourceChange(resourceType, amount, source, playerId, callback = null) {
+  console.log('=============applyResourceChange=============');
+  
+  // Get the target player
+  const player = playerId ? getPlayerById(playerId) : getCurrentPlayer();
+  if (!player) {
+    console.error('applyResourceChange: No player found');
+    return null;
+  }
+  
+  //console.log(`[RESOURCE] Starting resource change for ${player.name} (${player.role})`);
+  console.log('Parameters:', { 
+    resourceType, 
+    amount, 
+    source,
+    playerId: player.id,
+    playerName: player.name
+  });
+
+  // Input validation
+  if (!resourceType || typeof amount !== 'number' || typeof source !== 'string') {
+    console.error('Invalid parameters for applyResourceChange:', { resourceType, amount, source });
+    return null;
+  }
+
+  if (!RESOURCE_TYPES.includes(resourceType)) {
+    console.error(`Unknown resource type: ${resourceType}. Valid types are:`, RESOURCE_TYPES);
+    return null;
+  }
+
+  if (amount === 0) {
+    //console.log('No change needed: amount is 0');
+    return { success: true, amount: 0 };
+  }
+
+  try {
+    // Get current resource value before any changes
+    const currentValue = player.resources?.[resourceType] || 0;
+    const isGain = amount > 0;
+    
+    console.group(`[RESOURCE] ${player.name} - Processing ${resourceType} ${isGain ? 'gain' : 'loss'}`);
+    console.log('Initial Value:', currentValue);
+    console.log('Requested Change:', amount);
+    
+    // Apply multipliers and resistances
+    let adjustedAmount = amount;
+    
+    if (isGain) {
+      // Apply gain multipliers
+      const multiplier = await getMultiplier(resourceType, true);
+      if (multiplier !== 1) {
+        adjustedAmount = Math.round(amount * multiplier);
+        //console.log(`Applied gain multiplier: ${multiplier}x`);
+      }
+    } else {
+      // Apply resistance for losses
+      const resistance = await getResistanceRate(player, resourceType);
+      if (resistance !== 1) {
+        adjustedAmount = Math.round(amount * resistance);
+        //console.log(`Applied resistance: ${resistance}x`);
+      }
     }
     
-    const player = getPlayerById(playerId);
-    if (!player) {
-        console.warn(`initPlayerResources: Player ${playerId} not found`);
-        return;
+    // Ensure we don't go below zero
+    if (!isGain && Math.abs(adjustedAmount) > currentValue) {
+      //console.log(`Adjusting loss to not go below zero (was: ${adjustedAmount}, max: ${currentValue})`);
+      adjustedAmount = -currentValue;
     }
     
-    // Initialize resources directly in the player object
-    player.resources = {
-        knowledge: Number(initialResources.knowledge) || 0,
-        money: Number(initialResources.money) || 0,
-        influence: Number(initialResources.influence) || 0
+    console.log('Final Change After Adjustments:', adjustedAmount);
+    
+    // Apply the resource change through the single source of truth
+    let newValue;
+    if (callback) {
+      const result = await callback({
+        currentPlayer: player,
+        resourceType,
+        amount: adjustedAmount,
+        source,
+        fromPlayer: source === 'steal' ? getCurrentPlayer() : null
+      });
+      // Ensure state is updated via unified updater
+      await updatePlayerResources(player, { [resourceType]: adjustedAmount });
+      newValue = (player.resources?.[resourceType] || 0) + adjustedAmount;
+    } else {
+      await updatePlayerResources(player, { [resourceType]: adjustedAmount });
+      newValue = (player.resources?.[resourceType] || 0) + adjustedAmount;
+    }
+    
+    // Log the complete transaction
+    const logEntry = {
+      timestamp: new Date().toISOString(),
+      playerId: player.id,
+      playerName: player.name,
+      playerRole: player.role,
+      resourceType,
+      originalAmount: amount,
+      adjustedAmount,
+      previousValue: currentValue,
+      newValue: newValue !== undefined ? newValue : (currentValue + adjustedAmount),
+      source,
+      isGain
     };
     
-    console.log(`[Resources] Initialized resources for player ${playerId}:`, player.resources);
+    resourceLog.push(logEntry);
+    
+    console.log('Resource Update Summary:');
+    console.log('Previous Value:', currentValue);
+    console.log('Change:', adjustedAmount);
+    console.log('New Value:', logEntry.newValue);
+    console.groupEnd();
+    
+    console.log(`[RESOURCE] ${player.name} ${isGain ? 'gained' : 'lost'} ${Math.abs(adjustedAmount)} ${resourceType}`);
+    
+    // UI updates are driven by subscribers; do not update UI directly here
+    
+    console.log('=============applyResourceChange END=============');
+    
+    return {
+      success: true,
+      amount: adjustedAmount,
+      previousValue: currentValue,
+      newValue: logEntry.newValue,
+      logEntry
+    };
+    
+  } catch (error) {
+    console.error('Error in applyResourceChange:', error);
+    console.groupEnd();
+    
+    return {
+      success: false,
+      error: error.message,
+      resourceType,
+      amount,
+      source
+    };
+  }
 }
 
-/**
-* Get a player's resources
-* @param {string} playerId - The ID of the player
-* @returns {Object} Player's resources or null if not found
+export async function processCardEffects(card, targetPlayer = null) {
+    console.log('================processCardEffects================')
+    // Use provided player or get current player
+    const currentPlayer = targetPlayer || getCurrentPlayer();
+    
+    if (!currentPlayer) {
+        console.error('No current player found');
+        processEndPlayerTurn(card);
+        return;
+    }
+    
+    //console.log(`Processing card effects for player ${currentPlayer.name} with role ${currentPlayer.role || 'N/A'}`);
+    
+    // If the card parameter is already an effect (not a card object with effects property)
+    if (card && (card.type || card.changes || card.effect)) {
+        //console.log('Processing direct effect:', card);
+        // Handle the effect directly
+        if (card.type === 'RESOURCE_CHANGE') {
+            //console.log(`Applying resource change effect to ${currentPlayer.name}:`, card.changes);
+            // Apply each resource change individually
+            if (card.changes.money !== undefined) {
+                await applyResourceChange('money', card.changes.money, 'cardEffect', currentPlayer.id);
+            }
+            if (card.changes.knowledge !== undefined) {
+                await applyResourceChange('knowledge', card.changes.knowledge, 'cardEffect', currentPlayer.id);
+            }
+            if (card.changes.influence !== undefined) {
+                await applyResourceChange('influence', card.changes.influence, 'cardEffect', currentPlayer.id);
+            }
+        } else if (card.type === 'MOVEMENT') {
+            //console.log(`Applying movement effect to ${currentPlayer.name}:`, card);
+            handleCardMovement(currentPlayer, card);
+        } else if (card.type === 'SKIP_TURN') {
+            //console.log(`Skipping turn for ${currentPlayer.name}`);
+            skipPlayerTurn(currentPlayer, card.turns || 1);
+        } else {
+            console.warn(`Unknown effect type: ${card.type}`, card);
+        }
+        return;
+    }
+    
+    // Handle case where we have a card object with effects
+    if (!card.effects) {
+        console.error('Card has no effects property');
+        processEndPlayerTurn(card);
+        return;
+    }
+    
+    // If effects is an array, process each effect
+    if (Array.isArray(card.effects)) {
+        card.effects.forEach(effect => {
+            if (effect.type === 'RESOURCE_CHANGE') {
+                //console.log(`Applying resource change effect to ${currentPlayer.name}:`, effect.changes);
+                applyResourceChange({
+                    player: currentPlayer,
+                    changes: effect.changes,
+                    source: 'card',
+                    cardId: card?.id,
+                    explanation: effect.explanation
+                });
+            } else if (effect.type === 'MOVEMENT') {
+                //console.log(`Applying movement effect to ${currentPlayer.name}:`, effect);
+                handleCardMovement(currentPlayer, effect);
+            } else if (effect.type === 'SKIP_TURN') {
+                //console.log(`Skipping turn for ${currentPlayer.name}`);
+                skipPlayerTurn(currentPlayer, effect.turns || 1);
+            } else {
+                console.warn(`Unknown effect type: ${effect.type}`, effect);
+            }
+        });
+        return;
+    }
+    
+    // Handle role-based effects
+    if (typeof card.effects === 'object') {
+        const playerRole = currentPlayer.role;
+        if (!playerRole) {
+            console.error('Player has no role assigned');
+            processEndPlayerTurn(card);
+            return;
+        }
+        
+        // Try different case variants of the role name
+        const roleVariants = [
+            playerRole,
+            playerRole.toUpperCase(),
+            playerRole.toLowerCase(),
+            playerRole.charAt(0).toUpperCase() + playerRole.slice(1).toLowerCase()
+        ];
+        
+        let roleEffect = null;
+        let matchedRole = null;
+        
+        for (const roleVariant of roleVariants) {
+            if (card.effects[roleVariant]) {
+                roleEffect = card.effects[roleVariant];
+                matchedRole = roleVariant;
+                break;
+            }
+        }
+        
+        if (roleEffect) {
+            //console.log(`Found effects for role variant: ${matchedRole}`);
+            if (Array.isArray(roleEffect)) {
+                roleEffect.forEach(effect => handleEffect(effect, currentPlayer, card));
+            } else {
+                handleEffect(roleEffect, currentPlayer, card);
+            }
+        } else {
+            //console.log(`No effects found for role: ${playerRole} (tried variants: ${roleVariants.join(', ')})`);
+            //console.log('Available roles in card effects:', Object.keys(card.effects));
+            processEndPlayerTurn(card);
+        }
+    }
+    
+    //console.log(`Found effects for role variant: ${matchedRole}`);
+    //console.log(`Processing effect: ${roleEffect.type}`);
+    
+    if (roleEffect.explanation) {
+        //console.log(`Effect explanation: ${roleEffect.explanation}`);
+    }
+    
+    // Verify this is a resource change effect
+    if (roleEffect.type !== 'RESOURCE_CHANGE' || !roleEffect.changes) {
+        console.warn(`Effect for ${matchedRole} is not a resource change or has no changes`);
+        //console.log('Available effect:', roleEffect);
+        console.log('------------processCardEffects END------------')
+        console.log('*****************call updateResourceDisplays*****************');
+        updateResourceDisplays();
+        processEndPlayerTurn(card);
+        return;
+    }
+    
+    // Apply the resource changes using your existing applyResourceChange function
+    const changes = roleEffect.changes;
+    
+    //console.log(`Applying resource changes:`, changes);
+    
+    // Apply each resource change individually using your existing function
+    if (changes.money !== undefined) {
+        //console.log(`Applying money change: ${changes.money}`);
+        await applyResourceChange('money', changes.money, 'cardEffect', currentPlayer.id);
+    }
+    
+    if (changes.knowledge !== undefined) {
+        //console.log(`Applying knowledge change: ${changes.knowledge}`);
+        await applyResourceChange('knowledge', changes.knowledge, 'cardEffect', currentPlayer.id);
+    }
+    
+    if (changes.influence !== undefined) {
+        //console.log(`Applying influence change: ${changes.influence}`);
+        await applyResourceChange('influence', changes.influence, 'cardEffect', currentPlayer.id);
+    }
+    
+    // Log the changes for debugging/feedback
+    //console.log(`Applied effects for ${matchedRole}:`);
+    //console.log(`- Money: ${changes.money || 0}`);
+    //console.log(`- Knowledge: ${changes.knowledge || 0}`);
+    //console.log(`- influence: ${changes.influence || 0}`);
+    //console.log(`- Explanation: ${roleEffect.explanation}`);
+    
+    console.log('---------processCardEffects END---------');
+    // Call processEndPlayerTurn when complete, passing the card
+    updatePlayerInfo(currentPlayer);
+    processEndPlayerTurn(card);
+}
+  
+  /*
+   * Validates and finalizes all age card effects, then calls handleEndTurn
+   * This is the guard function that ensures all effects were properly applied
+   * @param {Object} card - The original card object
+   * @param {Array} effects - Array of effects that were processed
+   */
+  /*
+  export async function processAgeCardEffects(card, effects) {
+    console.log('================processAgeCardEffects================');
+    //console.log('Validating effects for card:', card.name);
+      
+      // Validate that all effects were processed
+      let allEffectsApplied = true;
+      const validationErrors = [];
+      
+      if (effects.length === 0) {
+        console.warn('No effects were found on this card');
+        validationErrors.push('No effects found');
+        allEffectsApplied = false;
+      }
+      
+      // Check each effect type was handled appropriately
+      effects.forEach((effect, index) => {
+        if (!effect || !effect.type) {
+          validationErrors.push(`Effect ${index + 1}: Missing or invalid effect type`);
+          allEffectsApplied = false;
+        }
+      });
+      
+      // Log validation results
+      if (!allEffectsApplied) {
+        console.warn('Some age card effects may not have been properly applied:', validationErrors);
+      } else {
+        //console.log('All age card effects have been successfully processed');
+      }
+      
+      // Update player resources and UI (this ensures all changes are reflected)
+      const currentPlayer = getCurrentPlayer();
+      if (currentPlayer) {
+        // Force update of resource panel
+        const resourceEvent = new CustomEvent('resourcesUpdated', {
+          detail: { playerId: currentPlayer.id }
+        });
+        document.dispatchEvent(resourceEvent);
+      }
+      
+      // Reset game state flags
+      state.preventCardDraw = false;
+      
+      //console.log('processAgeCardEffects validation complete - calling handleEndTurn');
+      
+      // Always call handleEndTurn regardless of validation results
+      updatePlayerInfo(currentPlayer);
+      // This ensures the game doesn't get stuck
+      console.log('---------processAgeCardEffects END---------');
+      handleEndTurn();
+}
 */
-export function getPlayerResources(playerId) {
-    if (!playerId) {
-        console.warn('getPlayerResources: No player ID provided');
-        return null;
+/**
+ * 
+ * Updates the player information panel with the current player's stats.
+ * @param {string|Object} playerId - The ID of the player to display, or a player object.
+ */
+/*
+export function updatePlayerInfo(currentPlayer = getCurrentPlayer(), newValues = {}) {
+    console.log('==============updatePlayerInfo (state sync helper)=============')
+    try {
+        // Normalize to player object
+        if (!currentPlayer) currentPlayer = getCurrentPlayer();
+        if (typeof currentPlayer === 'string') currentPlayer = getPlayerById(currentPlayer);
+        if (!currentPlayer) {
+            console.warn('updatePlayerInfo: No current player found');
+            return;
+        }
+
+        // Ensure mirrors exist
+        state.playerResources = state.playerResources || {};
+
+        // Compute canonical resources from player.resources merged with newValues
+        const base = currentPlayer.resources || { knowledge: 0, money: 0, influence: 0 };
+        const merged = { ...base, ...newValues };
+
+        // Mirror to state.playerResources
+        state.playerResources[currentPlayer.id] = { ...merged };
+
+        // Optionally mirror to legacy _state if present (uses state.game.resources)
+        if (typeof _state !== 'undefined' && _state?.game) {
+            _state.game.resources = _state.game.resources || {};
+            _state.game.resources[currentPlayer.id] = JSON.parse(JSON.stringify(merged));
+        }
+
+        // Optionally mirror a flat state.game.resources if your app uses one
+        if (state.game) {
+            state.game.resources = state.game.resources || {};
+            state.game.resources[currentPlayer.id] = { ...merged };
+        }
+
+        console.log('[StateSync] Mirrors updated for', currentPlayer.name, merged);
+    } catch (error) {
+        console.error('Error in updatePlayerInfo (state sync):', error);
     }
-    
-    const player = getPlayerById(playerId);
-    if (!player) {
-        console.warn(`getPlayerResources: Player ${playerId} not found`);
-        return { knowledge: 0, money: 0, influence: 0 };
-    }
-    
-    // Ensure player has resources object
-    if (!player.resources) {
-        player.resources = { knowledge: 0, money: 0, influence: 0 };
-    }
-    
-    return { ...player.resources };
-}
+}; 
+*/
+// Legacy updatePlayerResources(playerId, resources) removed.
+// Use the unified updatePlayerResources(currentPlayer, changes) below.
 
 /**
- * Update a player's resources in global state by applying changes (deltas)
- * @param {string|Object} player - The player ID, player object, or changes object if using current player
- * @param {Object} [changes] - The resource changes to apply (can be positive or negative)
- * @returns {boolean} - True if update succeeded, false otherwise
+ * Updates the resource displays based on the current game state
+ * @param {Object} gameState - The current game state (optional, will use global state if not provided)
  */
-export function updatePlayerResources(player, changes) {
-    console.log('=============updatePlayerResources=============');
+/*
+export function updateResourceDisplays(gameState = state) {
+  console.log('=============updateResourceDisplays=============');
     
-    let targetPlayer;
-    let resourceChanges;
+    const players = gameState.players || [];
+    const currentPlayerIndex = gameState.currentPlayerIndex || 0;
     
-    // Handle single parameter call (just changes object for current player)
-    if (arguments.length === 1 && typeof player === 'object' && !Array.isArray(player)) {
-        const currentPlayer = getCurrentPlayer();
-        if (!currentPlayer) {
-            console.error('No current player found');
-            return false;
+    if (!players.length) {
+      console.warn('No players found in game state');
+      return;
+    }
+  
+    // Get the display containers from the HTML
+    const resourceDisplayContainer = document.getElementById('resource-Display-Container');
+    const playerScoreDisplay = document.querySelector('.player-Score-Display');
+  
+    // Safety check to ensure the containers exist in your HTML
+    if (!resourceDisplayContainer || !playerScoreDisplay) {
+      console.warn("Resource display containers not found. Please check the IDs in your index.html.");
+      return;
+    }
+  
+    // No need to clear anything - just update existing elements
+    // Get existing player score elements
+    const playerScoreElements = playerScoreDisplay.querySelectorAll('h5');
+  
+    const currentPlayer = players[currentPlayerIndex];
+    const humanPlayers = players.filter(p => p.isHuman);
+    const aiPlayers = players.filter(p => !p.isHuman);
+  
+    let playerForBottomDisplay = null;
+  
+    // --- Logic for the Bottom Display Container ---
+    // If there's only one human player, always show them.
+    if (humanPlayers.length === 1) {
+      playerForBottomDisplay = humanPlayers[0];
+    } 
+    // If there are multiple human players, show the one whose turn it is.
+    else if (humanPlayers.length > 1) {
+      if (currentPlayer?.isHuman) {
+        playerForBottomDisplay = currentPlayer;
+      }
+    }
+  
+    // Populate the bottom display if a player has been selected
+    if (playerForBottomDisplay) {
+      // Update existing DOM elements directly
+      const currentPlayerSpan = document.getElementById('currentPlayer');
+      const knowledgeCount = document.getElementById('KNOWLEDGE_COUNT');
+      const moneyCount = document.getElementById('MONEY_COUNT');
+      const influenceCount = document.getElementById('INFLUENCE_COUNT');
+        
+      if (currentPlayerSpan) {
+        currentPlayerSpan.textContent = playerForBottomDisplay.role || 'Player';
+      }
+      if (knowledgeCount) {
+        knowledgeCount.textContent = playerForBottomDisplay.resources?.knowledge || 0;
+      }
+      if (moneyCount) {
+        moneyCount.textContent = playerForBottomDisplay.resources?.money || 0;
+      }
+      if (influenceCount) {
+        influenceCount.textContent = playerForBottomDisplay.resources?.influence || 0;
+      }
+    }
+  
+    // --- Logic for the Top Score Display ---
+    const playersForTopDisplay = [];
+    
+    // Add all AI players who are active in the game
+    aiPlayers.forEach(player => {
+      if (players.includes(player)) {
+        playersForTopDisplay.push(player);
+      }
+    });
+    
+    // Add any human players who are NOT being shown in the bottom display
+    humanPlayers.forEach(player => {
+      if (player !== playerForBottomDisplay && players.includes(player)) {
+        playersForTopDisplay.push(player);
+      }
+    });
+  
+    // Update existing player score elements
+    playerScoreElements.forEach((element, index) => {
+      const roleNameSpan = element.querySelector('.role-Name');
+      const resourceParagraph = element.querySelector('p');
+        
+      if (index < playersForTopDisplay.length) {
+        const player = playersForTopDisplay[index];
+        const roleName = player.role || `Player ${player.id?.slice(0, 4) || '?'}`;
+        const resources = player.resources || {};
+            
+        if (roleNameSpan) {
+          roleNameSpan.textContent = roleName;
         }
-        targetPlayer = currentPlayer;
-        resourceChanges = player;
+        if (resourceParagraph) {
+          resourceParagraph.textContent = `${resources.money || 0} 💰, ${resources.knowledge || 0} 🧠, ${resources.influence || 0} ⚡`;
+        }
+            
+        // Make sure the element is visible
+        element.style.display = '';
+      } else {
+        // Hide unused elements
+        element.style.display = 'none';
+      }
+    });
+    
+    console.log('=============updateResourceDisplays END=============');
+}
+*/
+
+/**
+   * Update a player's resources in global state
+   * @param {string} playerId - The ID of the player
+   * @param {Object} resources - The new resource values
+   */
+/*
+export function updatePlayerResources(currentPlayer, changes) {
+  console.log('=============updatePlayerResources=============');
+    
+    // Handle single parameter call (just changes object)
+    if (arguments.length === 1 && currentPlayer && typeof currentPlayer === 'object' && !Array.isArray(currentPlayer)) {
+      changes = currentPlayer;
+      currentPlayer = getCurrentPlayer();
     } else if (!changes) {
-        // If changes is not provided, treat the first param as changes for current player
-        const currentPlayer = getCurrentPlayer();
-        if (!currentPlayer) {
-            console.error('No current player found');
-            return false;
-        }
-        targetPlayer = currentPlayer;
-        resourceChanges = player;
-    } else {
-        // Two parameters provided
-        // If player is a string, treat it as playerId
-        if (typeof player === 'string') {
-            if (!_state.game.players[player]) {
-                console.error(`Player with ID ${player} not found`);
-                return false;
-            }
-            targetPlayer = _state.game.players[player];
-        } else {
-            // Player object provided
-            targetPlayer = player;
-        }
-        resourceChanges = changes;
+      // If changes is not provided, treat the first param as changes
+      changes = currentPlayer;
+      currentPlayer = getCurrentPlayer();
     }
     
-    if (!targetPlayer || !resourceChanges) {
-        console.error('Invalid parameters for updatePlayerResources:', { 
-            player: targetPlayer?.id || 'undefined', 
-            changes: resourceChanges 
-        });
-        return false;
+    // If currentPlayer is a string, treat it as playerId
+    if (typeof currentPlayer === 'string') {
+      currentPlayer = getPlayerById(currentPlayer);
+    } else if (!currentPlayer) {
+      // Fallback to current player if not provided
+      currentPlayer = getCurrentPlayer();
     }
     
+    // Find the player in the global state
+    const players = getPlayers ? getPlayers() : []; // Safety check
+    
+    if (!currentPlayer || !changes) {
+      console.error('Invalid parameters for updatePlayerResources:', { 
+        currentPlayer: currentPlayer?.id || 'undefined', 
+        changes 
+      });
+      return false;
+    }
+  
     // Validate player has resources object
-    if (!targetPlayer.resources) {
-        console.error('Player missing resources object:', targetPlayer);
+    if (!currentPlayer.resources) {
+        console.error('Player missing resources object:', currentPlayer);
         return false;
     }
-    
+  
     // Define valid resources
-    const VALID_RESOURCES = ['money', 'knowledge', 'influence'];
-    
+    const RESOURCES = ['knowledge', 'money', 'influence'];
+  
     // Validate and normalize changes
     const normalizedChanges = {};
     let isValid = true;
-    for (const resource in resourceChanges) {
-        if (!VALID_RESOURCES.includes(resource)) {
+    for (const resource in changes) {
+        if (!RESOURCES.includes(resource)) {
             console.warn(`Invalid resource type '${resource}' ignored`);
             continue;
         }
-        
-        const change = Number(resourceChanges[resource]);
+  
+        const change = Number(changes[resource]);
         if (isNaN(change)) {
-            console.error(`Invalid change value for ${resource}:`, resourceChanges[resource]);
+            console.error(`Invalid change value for ${resource}:`, changes[resource]);
             isValid = false;
             break;
         }
-        
+  
         normalizedChanges[resource] = change;
     }
-    
+  
     if (!isValid) return false;
-    
+  
     // Calculate new values first to ensure all changes are valid
-    const newValues = { ...targetPlayer.resources };
+    const newValues = { ...currentPlayer.resources };
     for (const [resource, change] of Object.entries(normalizedChanges)) {
         const currentValue = newValues[resource] || 0;
         const newValue = currentValue + change;
-        
+  
         // Prevent negative resources
         if (newValue < 0) {
             console.error(`Cannot update ${resource}: would result in negative value (${newValue})`);
             return false;
         }
-        
+  
         newValues[resource] = newValue;
     }
+  
+    // Apply validated changes to the player object (single source of truth)
+  currentPlayer.resources = { ...newValues };
+
+  // Update the global state with the modified player
+  const updatedPlayers = players.map(p =>
+    p.id === currentPlayer.id ? { ...p, resources: { ...newValues } } : p
+  );
+
+  // Sync other state mirrors via helper (no DOM here)
+  if (typeof updatePlayerInfo === 'function') {
+    updatePlayerInfo(currentPlayer, newValues);
+  }
+
+  // Push updated players to state
+  if (typeof updateGameState === 'function') {
+    updateGameState({ players: updatedPlayers });
+  }
+
+  // Notify subscribers to trigger UI updates
+  if (typeof notifySubscribers === 'function') {
+    notifySubscribers();
+  }
     
-    // Apply validated changes to the global state
-    _state.game.players[targetPlayer.id].resources = { ...newValues };
-    
-    // Notify subscribers of state changes
-    if (typeof notifySubscribers === 'function') {
-        notifySubscribers();
-    }
-    
-    console.log(`[Resources] Updated resources for ${targetPlayer.name || targetPlayer.id}:`, newValues);
+    console.log(`[Resources] Updated resources for ${currentPlayer.name}:`, newValues);
     
     return true;
 }
+*/
 
-// ===== State Setters =====
 
-const subscribers = new Set();
 
-/**
- * Subscribe to state changes
- * @param {Function} callback - Function to call when state changes
- * @returns {Function} Unsubscribe function
- */
-export function subscribe(callback) {
-   // console.log('=============subscribe=============');
-    subscribers.add(callback);
-    return () => subscribers.delete(callback);
-}
-
-export function notifySubscribers() {
-   // console.log('=============notifySubscribers=============');
-    const state = {
-        game: getGameState(),
-        ui: getUIState()
-    };
-    subscribers.forEach(callback => callback(state));
-}
-
-export const _state = {
-    
-    // UI State
-    ui: {
-        currentScreen: 'start',
-        selectedDeck: null,
-        highlightedSpace: null,
-        isAnimating: false,
-        showEndTurnButton: false,
-        currentMessage: {
-            text: '',
-            type: 'info',
-            visible: false
-        },
-        dice: {
-            isRolling: false,
-            value: 1
-        },
-        animation: {
-            inProgress: false,
-            current: null,
-            queue: [],
-            lastFrameTime: 0,
-            frameId: null,
-            screenTransition: {
-                from: null,
-                to: null,
-                progress: 0,
-                direction: 'right'
-            }
-        },
-        gameboard: {}
-    },
-    
-    // Game State
-    game: {
-        started: false,
-        ended: false,
-        currentPhase: 'SETUP',
-        currentCard: null,      // Currently active card
-        currentDeck: null,      // Current deck type (ageOfExpansion, endOfTurn, etc.)
-        players: [],
-        aiPlayerCount: 0,
-        totalPlayerCount: 0,
-        humanPlayerCount: 0,
-        debugMode: false,
-        currentPlayerIndex: -1,
-        turnOrder: [],
-        currentPath: null,
-        currentCoords: null,
-        previousCoords: null,
-        remainingSteps: 0,
-        pendingActionData: null,
-        rollResult: 0,
-        pathChoiceLock: false,
-        lastRoll: 0,
-        turnNumber: 0,
-        hasRolled: false,
-        drawnCard: false,
-        deckType: null,
-        phase: 'setup',
-        gameStarted: false,
-        gameOver: false,
-        winners: null,
-        playerFinishPosition: 0,
-        round: 1,
-        maxRounds: 50,
-        playerRoles: {},
-        playerFinalScore: 0,
-        playerFinalResourceTotal: 0,
-        playerFinalRanking: 0,
-        playerPositions: {},
-        abilityUsed: false,
-        board: {},
-        settings: {
-            maxPlayers: 6,
-            minPlayers: 4,
-            enableSpecialAbilities: true
-        },
-        resources: {
-            knowledge: 0,
-            money: 0,
-            influence: 0,
-        },
-        spaceType: { ...SPACE_TYPE }, // Add spaceType to global state.
-    },
-    
-};
-
-// Create proxy for reactivity
-export const state = new Proxy(_state.game, {
-    set(target, property, value) {
-        const oldValue = target[property];
-        target[property] = value;
-        
-        // Only notify subscribers when explicitly requested via a flag
-        if (subscribers.size > 0 && oldValue !== value && target._notifyOnChange) {
-            notifySubscribers();
-        }
-        return true;
-    }
-});

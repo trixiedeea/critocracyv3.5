@@ -351,10 +351,10 @@ return new Promise(async (resolve) => {
   
 
   async function animateNextSegment() {
-    //console.log('=============--------animateNextSegment=============--------')
+    console.log('=============--------animateNextSegment=============--------')
     if (remainingSteps <= 0) {
       // Movement complete
-      //console.log(`[DEBUG] Movement complete. Final position: ${JSON.stringify(currentCoords)}`);
+      console.log(`[DEBUG] Movement complete. Final position: ${JSON.stringify(currentCoords)}`);
       token.classList.remove('enlarged');
       token.classList.add('normal');
       player.currentCoords = { ...currentCoords };
