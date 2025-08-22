@@ -327,13 +327,19 @@ function showEndGameWithVictory(winners) {{
       
 function createConfetti(container) {
     const colors = [
-      'rgb(240, 59, 59)',
-      'rgb(0, 64, 241)',
-      'rgb(10, 196, 237)',
-      'rgb(101, 35, 176)',
-      'rgb(216, 0, 244)',
-      'rgb(226, 133, 214)',
-      'rgb(33, 133, 145)'
+        'rgb(66, 93, 168)',
+        'rgb(10, 196, 237)',
+        'rgb(101, 35, 176)',
+        'rgb(216, 0, 244)',
+        'rgb(226, 133, 214)',
+        'rgb(33, 133, 145)',
+        'rgb(0, 255, 255)',
+        'rgb(0, 17, 255)',
+        'rgb(74, 207, 132)',
+        'rgb(12, 65, 66)',
+        'rgb(111, 0, 255)',
+
+
     ];
     const count = 800; // 400 pieces
 
