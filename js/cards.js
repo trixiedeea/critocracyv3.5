@@ -676,17 +676,13 @@ export async function showCard(card) {
                     if (!dialog.open) return;
                     const optionAButton = dialog.querySelector('.optionAButton');
                     if (optionAButton) {
-                        optionAButton.style.pointerEvents = 'none';
                         optionAButton.click(); // This will show effects for 3 seconds
-                        playClickSound();
                     }
                 }, 5000);
             } else {
                 // For non-choice cards, just close after 3 seconds
                 setTimeout(() => {
                     if (dialog.open) dialog.close();
-                    optionAButton.style.pointerEvents = 'none';
-                    playClickSound
                     state.currentCard = card;
                     if (isEndOfTurnCard) {
                         applyCardEffect(card);

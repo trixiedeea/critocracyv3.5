@@ -11,12 +11,35 @@
 <body>
     <!-- Screens for different phases of the game --->
     <div id="start-Screen" class="screen active">
-        <div class="start-content">
-            <h1>Critical Thinking By Traci Dirom</h1>
-            <button id="start-Button" class="animate-fadeIn">Start</button>
+        <h1>Critical Thinking By Traci Dirom</h1>
+        <button id="start-Button" class="animate-fadeIn">Start</button>
+        <button id="rules-Button" class="animate-fadeIn">Rules</button>
+            <div id="rules-Modal" class="modal hidden">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button class="close-button" id="close-Rules-Button">close</button>
+                        <div class="card-indicator" id="card-Indicator">1 of 5</div>
+                    </div>
+                    <div class="rules-card">
+                        <div class="rules-card-content" id="rules-Card-Content">
+                            <div class="rules-card-item active" data-card="0">
+                                <h2>Game Overview</h2>
+                                <h3>Welcome to Critocracy!</h3>
+                                <p><strong>Gameplay:</strong>In this game you pick one of six roles. Each role has a specific ability. If the ability is immunity that role will lose a resource at a 0.15:1 rate. If the role gains a resource faster they gain that resource at a 1.85:1 rate. Furthermore each role opposes one other role. Opposing roles cannot steal from one another, form alliances or sabatoge each other.</p>
+                                <p><strong>Cards:</strong>End of turn cards are drawn at the end of each turn and each end of turn card affects each role differently. Players may also land of special event spaces earning the right to draw a special event card from the deck that matches the path they are on with various effects. Special event cards offer the player a choice of outcomes but you don't get to see the effects until after you choose!</p>
+                                <p><strong>Board:</strong>The board is made up of 4 paths for the player to move from. A different path may be more beneficial to one role then another! Players can switch paths periodically throught the game</p>
+                                <p><strong>Winning:</strong>The game ends when all players are finished. The player with the most resources at the end wins!</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="previous-Card-Button">←</button>
+                        <button class="next-Card-Button">→</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-
     <div id="player-Count-Screen" class="screen" style="display: none;">
         <h2>Select Players</h2>
         <div>
